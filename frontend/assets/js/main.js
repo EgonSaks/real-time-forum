@@ -51,10 +51,9 @@ function createPost() {
 }
 
 function renderPost(post) {
-  console.log("post:", post);
   console.log("renderPost called from main.js");
   posts.innerHTML += `
-        <div>
+        <div id="${post.id}">
             <h4>${post.title}</h4>
             <p>${post.content}</p>
             <span class="options">
@@ -82,28 +81,19 @@ function getPosts() {
     .then((fetchedPosts) => {
       console.log("Success:", fetchedPosts);
       posts.innerHTML = "";
-      // renderPosts(fetchedPosts);
-      return fetchedPosts;
+      renderPosts(fetchedPosts);
+      // return fetchedPosts;
     });
 }
 
-// getPosts();
+getPosts();
 
-async function controlFlow() {
-  let fetchedData = await getPosts();
-  console.log("fetchedData:", fetchedData);
-  renderPosts(fetchedData);
-}
-
-controlFlow();
-
-
-
-
-
-
-
-
+// async function controlFlow() {
+//   let fetchedData = await getPosts();
+//   console.log("fetchedData:", fetchedData);
+//   renderPosts(fetchedData);
+// }
+// controlFlow();
 
 function updatePost() {
   console.log("updatePost called from main.js");
