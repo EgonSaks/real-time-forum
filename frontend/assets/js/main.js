@@ -53,12 +53,12 @@ function createPost() {
 function renderPost(post) {
   console.log("renderPost called from main.js");
   posts.innerHTML += `
-        <div id="${post.id}">
+        <div id="post-${post.id}">
             <h4>${post.title}</h4>
             <p>${post.content}</p>
             <span class="options">
-                <a href="#" onClick="updatePost(this)">📝</a>
-                <a href="#" onClick="deletePost(this)">🗑️</a>       
+                <a onClick="updatePost('${post.id}')">📝</a>
+                <a onClick="deletePost(this)">🗑️</a>       
             </span>
         </div>
     `;
@@ -95,8 +95,9 @@ getPosts();
 // }
 // controlFlow();
 
-function updatePost() {
+function updatePost(postID) {
   console.log("updatePost called from main.js");
+  console.log("id:" + postID);
 }
 
 function deletePost() {

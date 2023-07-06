@@ -65,3 +65,23 @@ func GetAllPosts(db *sql.DB) ([]Post, error) {
 
 	return posts, nil
 }
+
+func UpdatePost(db *sql.DB, post Post) error {
+	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := "UPDATE posts SET title = ?, content = ?, updated_at = ? WHERE id = ?"
+	statement, err := db.PrepareContext(context, query)
+	if err != nil {
+		fmt.Printf("failed to prepare update post statement: %v", err)
+		return fmt.Errorf("failed to prepare update post statement: %v", err)
+	}
+
+	_, err = statement.ExecContext(context, &post.Title, &post.Content, time.Now(), &post.ID)
+	if err != nil {
+		fmt.Printf("failed to update post: %v", err)
+		return fmt.Errorf("failed to update post: %v", err)
+	}
+
+	return nil
+}
