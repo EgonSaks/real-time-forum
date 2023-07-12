@@ -95,8 +95,7 @@ function createPostElement(formData) {
 
   // Add event listener to the post title
   postTitle.addEventListener("click", () => {
-    console.log("Clicked on post title", formData.id)
-    postTitle.style.color = "red";
+    showSinglePost(formData);
   });
 
   // Create the postContent
@@ -298,6 +297,52 @@ function deletePost(postId) {
     })
     .catch((error) => console.error("Error deleting post:", error));
 }
+
+// Show a single post
+function showSinglePost(formData) {
+  // Clear the existing posts
+  const root = document.getElementById("app");
+  root.innerHTML = "";
+
+  // Create the postContainer
+  const postContainer = document.createElement("div");
+  postContainer.classList.add("postContainer");
+  postContainer.setAttribute("id", "post-" + formData.id);
+
+  // Create the postTitle
+  const postTitle = document.createElement("h2");
+  postTitle.classList.add("postTitle");
+  postTitle.textContent = formData.title;
+
+  // Create the postContent
+  const postContent = document.createElement("p");
+  postContent.classList.add("postContent");
+  postContent.textContent = formData.content;
+
+  // Create the edit and delete buttons
+  const editButton = document.createElement("button");
+  editButton.classList.add("editButton");
+  editButton.textContent = "Edit";
+  editButton.addEventListener("click", () => {
+    editPost(formData.id);
+  });
+
+  const deleteButton = document.createElement("button");
+  deleteButton.classList.add("deleteButton");
+  deleteButton.textContent = "Delete";
+  deleteButton.addEventListener("click", () => {
+    deletePost(formData.id);
+  });
+
+  postContainer.append(postTitle, postContent, editButton, deleteButton);
+  root.append(postContainer);
+
+  // Update the URL
+  const url = window.location.href.split("#")[0]; // Get the base URL
+  const postUrl = `${url}#post-${formData.id}`; // Append the post ID to the URL
+  window.history.pushState({ postId: formData.id }, formData.title, postUrl);
+}
+
 // Create the base view
 function createBaseView() {
   const root = document.getElementById("app");
@@ -316,7 +361,23 @@ function createBaseView() {
 }
 // Render the page
 function renderPage() {
+  const root = document.getElementById("app");
+
+  // Clear the existing posts
+  root.innerHTML = "";
   createBaseView();
+
+  // Handle browser history navigation
+  window.addEventListener("popstate", (event) => {
+    if (event.state && event.state.postId) {
+      // Show the single post based on the stored post ID
+      const postId = event.state.postId;
+      showSinglePost({ id: postId }); // Replace this with your actual logic to fetch the post data
+    } else {
+      // Show the main view
+      createBaseView();
+    }
+  });
 }
 
 renderPage();

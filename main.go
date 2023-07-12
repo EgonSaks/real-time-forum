@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"rt-forum/backend/routes"
-	"rt-forum/database/sqlite"
+
+	"github.com/real-time-forum/backend/routes"
+	"github.com/real-time-forum/database/sqlite"
 )
 
 type Application struct {

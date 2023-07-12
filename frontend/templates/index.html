@@ -1,39 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/frontend/assets/css/styles.css">
-    <title>Real-Time Forum</title>
-</head>
-<body>
-
-    <h1>Real-Time Forum</h1>
-    <div class="container">
-
-        <div>
-            <form id="form">
-             <label for="inputTitle">Title:</label>
-             <br><br>
-             <input type="text" id="inputTitle">
-             <br><br>
-             <label for="inputContent">Content:</label>
-             <br><br>
-             <textarea id="inputContent" cols="30" rows="10"></textarea>
-             <br><br>
-             <div id="msg"></div>
-             <p></p>
-             <button type="submit">Post</button>
-            </form>
-        </div>
-  
-        <div id="list">  
-             <h3>Posts list</h3>
-             <div id="posts"></div>
-        </div>
-
-    </div>
-    
-    <script src="/frontend/assets/js/main.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/frontend/assets/css/styles.css" />
+    <title>Public Room v1.0</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="/frontend/assets/js/index.js"></script>
+  </body>
 </html>

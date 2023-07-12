@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"rt-forum/database/models"
-	"rt-forum/database/sqlite"
+
+	"github.com/real-time-forum/database/models"
+	"github.com/real-time-forum/database/sqlite"
 
 	"github.com/google/uuid"
 )
@@ -26,9 +27,7 @@ func Posts(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("create Post from postsHandler")
 	var post models.Post
-
 	post.ID = uuid.New().String()
 
 	err := json.NewDecoder(r.Body).Decode(&post)
@@ -64,8 +63,6 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func getPosts(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("get all posts from postsHandler")
-
 	database, err := sqlite.OpenDatabase()
 	if err != nil {
 		log.Fatal(err)
@@ -79,8 +76,6 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("getPosts handler", posts)
-
 	data, err := json.Marshal(posts)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -93,9 +88,73 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func updatePost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("update post from postsHandler")
+	var post models.Post
+
+	err := json.NewDecoder(r.Body).Decode(&post)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	// Open the database connection
+	database, err := sqlite.OpenDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.DB.Close()
+
+	fmt.Println("update handler for post", post)
+
+	// Update the post in the database
+	err = models.UpdatePost(database.DB, post)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	data, err := json.Marshal(post)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Println(string(data))
+	w.Write(data)
 }
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("delete post from postsHandler")
+	var data struct {
+		PostID string `json:"postId"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Println(err)
+		return
+	}
+
+	postID := data.PostID
+
+	// Open the database connection
+	database, err := sqlite.OpenDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.DB.Close()
+
+	// Delete the post from the database
+	err = models.DeletePost(database.DB, postID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Post deleted successfully")
 }

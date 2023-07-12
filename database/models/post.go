@@ -67,6 +67,8 @@ func GetAllPosts(db *sql.DB) ([]Post, error) {
 }
 
 func UpdatePost(db *sql.DB, post Post) error {
+	fmt.Println("Database insertion called, data for update", post)
+
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -81,6 +83,26 @@ func UpdatePost(db *sql.DB, post Post) error {
 	if err != nil {
 		fmt.Printf("failed to update post: %v", err)
 		return fmt.Errorf("failed to update post: %v", err)
+	}
+
+	return nil
+}
+
+func DeletePost(db *sql.DB, postID string) error {
+	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := "DELETE FROM posts WHERE id = ?"
+	statement, err := db.PrepareContext(context, query)
+	if err != nil {
+		fmt.Printf("failed to prepare delete post statement: %v", err)
+		return fmt.Errorf("failed to prepare delete post statement: %v", err)
+	}
+
+	_, err = statement.ExecContext(context, &postID)
+	if err != nil {
+		fmt.Printf("failed to delete post: %v", err)
+		return fmt.Errorf("failed to delete post: %v", err)
 	}
 
 	return nil

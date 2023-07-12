@@ -100,56 +100,84 @@ body {
   margin: 3rem 3rem;
 }
 
-/* Custom elements*/
+/* Custom styles */
 
-.container {
-  display: flex;
-  flex-direction: column;
+/* Form design */
+* {
+  box-sizing: border-box;
 }
 
-h1 {
-  font-size: 2rem;
-  margin: 0.67rem 0;
+.pageTitle {
+  text-align: center; 
+  margin-bottom: 1.25rem; 
+  font-size: 2.3rem;
 }
 
-h3 {
-  font-size: 1.5rem;
-  margin: 0.83rem 0;
+.form {
+  display: flex; 
+  flex-direction: column; 
 }
 
-.container {
-  display: flex;
-  gap: 3rem;
+.formContainer {
+  border: 0.0625rem solid black; 
+  padding: 0.625rem; 
+  width: 50%; 
+  margin: 0 auto; 
+  overflow: auto; 
 }
 
-span {
-  font-size: 0.75rem;
+.inputContent {
+  white-space: pre-wrap;
 }
 
-p {
-  margin: 0.5rem 0;
+.inputTitle,
+.inputContent {
+  margin-bottom: 0.625rem; 
 }
 
-#posts {
-  width: 15rem;
+.errorMsg {
+  color: red; 
+  margin-bottom: 0.625rem;
 }
 
-#posts div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* Post design */
+
+.postContainer {
+  border: 0.0625rem solid black; 
+  padding: 0.625rem; 
+  width: 50%; 
+  margin: 1rem auto; 
+  overflow: auto; 
 }
 
-a {
-  text-decoration: none;
+.postTitle {
+  font-size: 1.2rem; 
+  font-weight: bold;
+  margin-bottom: 0.625rem; 
+}
+
+.postContent {
+  margin-bottom: 0.625rem; 
+  white-space: pre-wrap;
+}
+
+.postButton,
+.editButton,
+.deleteButton,
+.updateButton,
+.discardButton {
+  margin-right: 0.6rem;
+  float: right;
   cursor: pointer;
 }
 
-.options {
-  display: flex;
-  gap: 1rem; 
+.postTitle {
+  cursor: pointer;
 }
 
-#msg {
-  color: red; 
+/* General styles */
+
+h1 {
+  font-size: 2rem; 
+  margin: 0.67rem 0; 
 }

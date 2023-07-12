@@ -1,4 +1,4 @@
-module rt-forum
+module github.com/real-time-forum
 
 go 1.20
 
