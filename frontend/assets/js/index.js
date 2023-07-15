@@ -1,5 +1,6 @@
 import { createFormComponent } from "./components/form.js";
 import { readPostsFromDatabase } from "./api/api.js";
+import { router } from "./router/router.js";
 import { createPostComponent } from "./components/posts.js";
 import { showSinglePost } from "./components/singlePost.js";
 
@@ -46,6 +47,6 @@ function handleHistoryNavigation() {
 
 window.addEventListener("popstate", handleHistoryNavigation);
 
-renderPosts();
+router.start();
 
 export { renderPosts };
