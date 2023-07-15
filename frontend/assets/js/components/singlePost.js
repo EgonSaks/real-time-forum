@@ -42,8 +42,8 @@ function showSinglePost(formData) {
   contentContainer.append(postContainer);
 
   // Update the URL
-  const url = window.location.href.split("#")[0]; // Get the base URL
-  const postUrl = `${url}#post-${formData.id}`; // Append the post ID to the URL
+  const url = window.location.href.split("#")[0];
+  const postUrl = `${url}post-${formData.id}`;
   window.history.pushState({ postId: formData.id }, formData.title, postUrl);
 }
 

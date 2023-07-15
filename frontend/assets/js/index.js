@@ -3,10 +3,12 @@ import { readPostsFromDatabase } from "./api/api.js";
 import { createPostComponent } from "./components/posts.js";
 import { showSinglePost } from "./components/singlePost.js";
 
+// Render the posts on the page
 async function renderPosts() {
   const root = document.getElementById("app");
   root.innerHTML = "";
 
+  //   Create the pageTitle
   const pageTitle = document.createElement("h1");
   pageTitle.classList.add("pageTitle");
   pageTitle.textContent = "Public room v1.0";
@@ -28,20 +30,22 @@ async function renderPosts() {
     formAndPostsContainer.append(postComponent);
   });
 
-  window.addEventListener("popstate", (e) => {
-    if (e.state && e.state.postId) {
-      const postId = e.state.postId;
-      showSinglePost({ id: postId });
-    } else {
-      renderPosts();
-    }
-  });
-
   contentContainer.append(formAndPostsContainer);
   root.append(pageTitle, contentContainer);
 }
 
-// Call the renderPosts function to initialize the page
+function handleHistoryNavigation() {
+  const postId = window.location.hash;
+
+  if (postId) {
+    showSinglePost({ id: postId });
+  } else {
+    renderPosts();
+  }
+}
+
+window.addEventListener("popstate", handleHistoryNavigation);
+
 renderPosts();
 
 export { renderPosts };
