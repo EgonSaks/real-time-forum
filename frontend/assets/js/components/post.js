@@ -1,44 +1,43 @@
-import { deletePostFromDatabase, updatePostInDatabase } from "../api/api.js";
-import { showSinglePost } from "./singlePost.js";
+import { deletePostFromDatabase, updatePostData } from "../api/api.js";
+import { navigateTo } from "../router/router.js";
 
 // Create the post component
-function createPostComponent(formData) {
+export function createPostComponent(postData) {
   // Create the post container
   const postContainer = document.createElement("div");
-  postContainer.classList.add("postContainer");
-  postContainer.setAttribute("id", "post-" + formData.id);
+  postContainer.classList.add("post-container");
+  postContainer.setAttribute("id", postData.id);
 
   // Create the post title
   const postTitle = document.createElement("h2");
-  postTitle.classList.add("postTitle");
-  postTitle.textContent = formData.title;
-
-  postTitle.addEventListener("click", function () {
-    postTitle.style.color = "red";
-    showSinglePost(formData);
+  postTitle.classList.add("post-title");
+  postTitle.textContent = postData.title;
+  postTitle.addEventListener("click", () => {
+    navigateTo("/post/" + postData.id);
   });
 
   // Create the post content
   const postContent = document.createElement("p");
-  postContent.classList.add("postContent");
-  postContent.textContent = formData.content;
+  postContent.classList.add("post-content");
+  postContent.textContent = postData.content;
 
   // Create the edit button
   const editButton = document.createElement("button");
-  editButton.classList.add("editButton");
+  editButton.classList.add("edit-button");
   editButton.textContent = "Edit";
   editButton.addEventListener("click", () => {
-    const postId = formData.id;
+    const postId = postData.id;
     editPost(postId);
   });
 
   // Create the delete button
   const deleteButton = document.createElement("button");
-  deleteButton.classList.add("deleteButton");
+  deleteButton.classList.add("delete-button");
   deleteButton.textContent = "Delete";
   deleteButton.addEventListener("click", () => {
-    const postId = formData.id;
+    const postId = postData.id;
     deletePostFromDatabase(postId);
+    postContainer.remove();
   });
 
   postContainer.append(postTitle, postContent, editButton, deleteButton);
@@ -46,18 +45,18 @@ function createPostComponent(formData) {
 }
 
 // Edit the post
-function editPost(postId) {
+export function editPost(postId) {
   // Retrieve the existing post data
-  const postContainer = document.getElementById("post-" + postId);
-  const postTitle = postContainer.querySelector(".postTitle");
-  const postContent = postContainer.querySelector(".postContent");
+  const postContainer = document.getElementById(postId);
+  const postTitle = postContainer.querySelector(".post-title");
+  const postContent = postContainer.querySelector(".post-content");
 
   const title = postTitle.textContent;
   const content = postContent.textContent;
 
   // Remove the existing edit button
-  const editButton = postContainer.querySelector(".editButton");
-  const deleteButton = postContainer.querySelector(".deleteButton");
+  const editButton = postContainer.querySelector(".edit-button");
+  const deleteButton = postContainer.querySelector(".delete-button");
   editButton.remove();
   deleteButton.remove();
   postTitle.remove();
@@ -69,24 +68,24 @@ function editPost(postId) {
 
   // Create the input fields
   const inputTitle = document.createElement("input");
-  inputTitle.classList.add("inputTitle");
+  inputTitle.classList.add("input-title");
   inputTitle.setAttribute("type", "text");
   inputTitle.setAttribute("value", title);
 
   // Create the content field
   const inputContent = document.createElement("textarea");
-  inputContent.classList.add("inputContent");
+  inputContent.classList.add("input-content");
   inputContent.setAttribute("type", "text");
   inputContent.setAttribute("rows", "3");
   inputContent.textContent = content;
 
   const errorMsg = document.createElement("p");
-  errorMsg.classList.add("errorMsg");
+  errorMsg.classList.add("error-msg");
   errorMsg.style.display = "none";
 
   // Create the update button
   const updateButton = document.createElement("button");
-  updateButton.classList.add("updateButton");
+  updateButton.classList.add("update-button");
   updateButton.textContent = "Update";
   updateButton.addEventListener("click", (e) => {
     e.preventDefault;
@@ -95,7 +94,7 @@ function editPost(postId) {
 
   // Create the discard button
   const discardButton = document.createElement("button");
-  discardButton.classList.add("discardButton");
+  discardButton.classList.add("discard-button");
   discardButton.textContent = "Discard";
   discardButton.addEventListener("click", () => {
     // Reload the original post content
@@ -109,15 +108,15 @@ function editPost(postId) {
 }
 
 // Update the post element
-function updatePostElement(data, postContainer) {
+export function updatePostElement(data, postContainer) {
   // Update the post element with the new data
   const postTitle = document.createElement("h2");
-  postTitle.classList.add("postTitle");
+  postTitle.classList.add("post-title");
   postTitle.textContent = data.title;
 
   // Create the post content
   const postContent = document.createElement("p");
-  postContent.classList.add("postContent");
+  postContent.classList.add("post-content");
   postContent.textContent = data.content;
 
   postContainer.innerHTML = "";
@@ -125,7 +124,7 @@ function updatePostElement(data, postContainer) {
 
   // Create the edit and delete buttons
   const editButton = document.createElement("button");
-  editButton.classList.add("editButton");
+  editButton.classList.add("edit-button");
   editButton.textContent = "Edit";
   editButton.addEventListener("click", () => {
     const postId = data.id;
@@ -134,7 +133,7 @@ function updatePostElement(data, postContainer) {
 
   // Create the delete button
   const deleteButton = document.createElement("button");
-  deleteButton.classList.add("deleteButton");
+  deleteButton.classList.add("delete-button");
   deleteButton.textContent = "Delete";
   deleteButton.addEventListener("click", () => {
     const postId = data.id;
@@ -144,4 +143,42 @@ function updatePostElement(data, postContainer) {
   postContainer.append(editButton, deleteButton);
 }
 
-export { createPostComponent, editPost, updatePostElement };
+// Update the post in the database
+export async function updatePostInDatabase(postId) {
+  const postContainer = document.getElementById(postId);
+
+  // Retrieve the updated data from the form
+  const inputTitle = postContainer.querySelector(".input-title");
+  const inputContent = postContainer.querySelector(".input-content");
+
+  // Retrieve the post data
+  const id = postContainer.id;
+  const title = inputTitle.value.trim();
+  const content = inputContent.value.trim();
+
+  // Validate the updated data
+  if (title === "") {
+    const errorMsg = postContainer.querySelector(".error-msg");
+    errorMsg.innerHTML = "Title cannot be empty";
+    errorMsg.style.display = "block";
+  } else if (content === "") {
+    const errorMsg = postContainer.querySelector(".error-msg");
+    errorMsg.innerHTML = "Content cannot be empty";
+    errorMsg.style.display = "block";
+  } else {
+    // Clear the error message
+    const errorMsg = postContainer.querySelector(".error-msg");
+    errorMsg.innerHTML = "";
+    errorMsg.style.display = "none";
+
+    // Prepare the updated data
+    const updatedData = {
+      id: id,
+      title: title,
+      content: content,
+    };
+
+    const updateData = await updatePostData(updatedData, postContainer);
+    updatePostElement(updateData, postContainer);
+  }
+}

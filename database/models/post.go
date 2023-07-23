@@ -67,8 +67,6 @@ func GetAllPosts(db *sql.DB) ([]Post, error) {
 }
 
 func UpdatePost(db *sql.DB, post Post) error {
-	fmt.Println("Database insertion called, data for update", post)
-
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -106,4 +104,25 @@ func DeletePost(db *sql.DB, postID string) error {
 	}
 
 	return nil
+}
+
+// GetPostByID retrieves a single post by its ID from the database
+func GetPostByID(db *sql.DB, postID string) (*Post, error) {
+	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := "SELECT id, title, content, created_at, updated_at FROM posts WHERE id = ?"
+	row := db.QueryRowContext(context, query, postID)
+
+	var post Post
+	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("post not found")
+		}
+		fmt.Printf("failed to scan row: %v", err)
+		return nil, fmt.Errorf("failed to scan row: %v", err)
+	}
+
+	return &post, nil
 }

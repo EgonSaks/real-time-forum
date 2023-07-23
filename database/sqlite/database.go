@@ -12,13 +12,15 @@ type Database struct {
 }
 
 func OpenDatabase() (*Database, error) {
-	dbPath := "./database/sqlite/database.db"
+	dbPath := "../database/sqlite/database.db"
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return nil, err
 	}
 
-	schema, err := os.ReadFile("./database/sqlite/schema.sql")
+	// Print out the schema file path
+	schemaFilePath := "../database/sqlite/schema.sql"
+	schema, err := os.ReadFile(schemaFilePath)
 	if err != nil {
 		return nil, err
 	}

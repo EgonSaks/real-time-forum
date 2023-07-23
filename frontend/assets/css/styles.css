@@ -67,6 +67,7 @@ td {
   font-size: 100%;
   font-weight: normal;
   vertical-align: baseline;
+  font-family: sans-serif;
 }
 
 /* Remove list styles */
@@ -101,83 +102,213 @@ body {
 }
 
 /* Custom styles */
-
 /* Form design */
-* {
+
+*{
   box-sizing: border-box;
 }
-
-.pageTitle {
-  text-align: center; 
-  margin-bottom: 1.25rem; 
+.page-title {
+  text-align: center;
+  margin-bottom: 1.25rem;
   font-size: 2.3rem;
 }
 
 .form {
-  display: flex; 
-  flex-direction: column; 
+  display: flex;
+  flex-direction: column;
 }
 
-.formContainer {
-  border: 0.0625rem solid black; 
-  padding: 0.625rem; 
-  width: 50%; 
-  margin: 0 auto; 
-  overflow: auto; 
+.form-container {
+  border: 0.0625rem solid black;
+  padding: 0.625rem;
+  width: 50%;
+  margin: 0 auto;
+  overflow: auto;
 }
 
-.inputContent {
+.input-content {
   white-space: pre-wrap;
 }
 
-.inputTitle,
-.inputContent {
-  margin-bottom: 0.625rem; 
+.input-title,
+.input-content {
+  margin-bottom: 0.625rem;
 }
 
-.errorMsg {
-  color: red; 
+.error-msg {
+  color: red;
   margin-bottom: 0.625rem;
 }
 
 /* Post design */
 
-.postContainer {
-  border: 0.0625rem solid black; 
-  padding: 0.625rem; 
-  width: 50%; 
-  margin: 1rem auto; 
-  overflow: auto; 
+.post-container {
+  border: 0.0625rem solid black;
+  padding: 0.625rem;
+  width: 50%;
+  margin: 1rem auto;
+  overflow: auto;
 }
 
-.postTitle {
-  font-size: 1.2rem; 
+.post-title {
+  font-size: 1.2rem;
   font-weight: bold;
-  margin-bottom: 0.625rem; 
+  margin-bottom: 0.625rem;
 }
 
-.postContent {
-  margin-bottom: 0.625rem; 
+.post-content {
+  margin-bottom: 0.625rem;
   white-space: pre-wrap;
 }
 
-.postButton,
-.editButton,
-.deleteButton,
-.updateButton,
-.discardButton {
+.post-button,
+.edit-button,
+.delete-button,
+.update-button,
+.discard-button {
   margin-right: 0.6rem;
   float: right;
   cursor: pointer;
 }
 
-.postTitle {
+.post-title {
   cursor: pointer;
 }
 
 /* General styles */
 
 h1 {
-  font-size: 2rem; 
-  margin: 0.67rem 0; 
+  font-size: 2rem;
+  margin: 0.67rem 0;
+}
+
+/* Register */
+
+.register {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh; 
+}
+
+.register-form {
+  width: 100%;
+  max-width: 300px;
+  border: 1px solid black;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.register-form input {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 1px solid black;
+}
+
+.register-button {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+/* Terms and Privacy Policy*/
+.terms-text {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+a.terms-link,
+a.privacy-link {
+  font-weight: 400;
+  text-decoration: underline; 
+  color: #1e90ff; 
+}
+
+.separator {
+  border-top: 1px solid #d1d7dc;
+  margin: 0.6rem 0;
+}
+
+/* Register page Login */
+.login-text {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+a.login-link{
+  font-weight: 800;
+  text-decoration: underline; 
+  color: #1e90ff; 
+  cursor: pointer;
+}
+
+/* Login */
+
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 300px;
+  border: 1px solid black;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.login-form input {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 1px solid black;
+}
+
+.login-button {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+/* Terms and Privacy Policy */
+.terms-text {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+a.terms-link,
+a.privacy-link {
+  font-weight: 400;
+  text-decoration: underline;
+  color: #1e90ff;
+}
+
+.separator {
+  border-top: 1px solid #d1d7dc;
+  margin: 0.6rem 0;
+}
+
+/* Login page Login */
+.register-text {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+a.register-link {
+  font-weight: 800;
+  text-decoration: underline;
+  color: #1e90ff;
 }
