@@ -15,7 +15,7 @@ export function loginFormElement() {
 
   const nickname = document.createElement("input");
   nickname.classList.add("login-nickname");
-  nickname.setAttribute("placeholder", "Enter your nickname or e-mail");
+  nickname.setAttribute("placeholder", "E-mail or nickname");
 
   const password = document.createElement("input");
   password.classList.add("login-password");

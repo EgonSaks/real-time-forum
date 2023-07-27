@@ -6,7 +6,7 @@ On this project you will have to focus on a few points:
 
 - Registration and Login
 - Creation of posts
-  - Commenting posts
+- Commenting posts
 - Private Messages
 
 As you already did the first forum you can use part of the code, but not all of it. Your new forum will have five different parts:
@@ -92,4 +92,5 @@ This project will help you learn about:
 - SQL language
   - Manipulation of databases
 
-> run forum: go run backend/server/*
+> run frontend: cd frontend/ -> go run frontend.go
+> run backend: cd backend/ -> go run backend.go

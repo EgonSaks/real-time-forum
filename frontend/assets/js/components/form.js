@@ -1,5 +1,6 @@
-import { createPostToDatabase, fetchPosts } from "../api/api.js";
-import { createPostComponent } from "./post.js"; // Import the createPostComponent function
+import { countCharacters } from "../utils/characterCount.js";
+import { validateFormInput } from "../validators/inputValidations.js";
+import { createPostComponent } from "./post.js";
 
 // Create the form component and add it to the DOM
 function createFormComponent() {
@@ -21,6 +22,12 @@ function createFormComponent() {
   inputContent.classList.add("input-content");
   inputContent.setAttribute("rows", "5");
   inputContent.setAttribute("placeholder", "What is happening?!");
+  inputContent.addEventListener("input", countCharacters);
+
+  // Create the character count element
+  const charCountSpan = document.createElement("span");
+  charCountSpan.classList.add("character-count");
+  charCountSpan.textContent = "";
 
   // Create the error message
   const errorMsg = document.createElement("p");
@@ -36,53 +43,20 @@ function createFormComponent() {
   postButton.addEventListener("click", function (e) {
     e.preventDefault();
     validateFormInput(inputTitle, inputContent, errorMsg);
+    charCountSpan.textContent = "";
   });
 
   form.append(inputTitle, inputContent, errorMsg);
-  formContainer.append(form, postButton);
+  formContainer.append(form, postButton, charCountSpan);
 
   return formContainer;
 }
 
-// Validate form input
-async function validateFormInput(titleInput, contentInput, errorMsg) {
-  const title = titleInput.value.trim();
-  const content = contentInput.value.trim();
-
-  // Validate the data
-  if (title === "") {
-    errorMsg.innerHTML = "Title cannot be empty";
-    errorMsg.style.display = "block";
-  } else if (content === "") {
-    errorMsg.innerHTML = "Content cannot be empty";
-    errorMsg.style.display = "block";
-  } else {
-    errorMsg.innerHTML = "";
-    errorMsg.style.display = "none";
-
-    // Prepare the data
-    const data = {
-      title: title,
-      content: content,
-    };
-
-    const createdPostData = await createPostToDatabase(data);
-
-    if (createdPostData) {
-      const updatedPosts = await fetchPosts();
-      updatePostsView(updatedPosts);
-    } else {
-      console.error("Failed to create the post.");
-    }
-
-    titleInput.value = "";
-    contentInput.value = "";
-  }
-}
-
 // Update the posts view
 export function updatePostsView(posts) {
-  const formAndPostContainer = document.getElementById("form-and-post-container");
+  const formAndPostContainer = document.getElementById(
+    "form-and-post-container"
+  );
 
   // Get the first post component (if any)
   const firstPostComponent = formAndPostContainer.querySelector(

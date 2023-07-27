@@ -26,7 +26,7 @@ func CreatePost(db *sql.DB, post Post) (string, error) {
 		return post.ID, fmt.Errorf("failed to prepare create post statement: %v", err)
 	}
 
-	_, err = statement.ExecContext(context, &post.ID, &post.Title, &post.Content, time.Now(), time.Now())
+	_, err = statement.ExecContext(context, &post.ID, &post.Title, &post.Content, time.Now().UTC(), time.Now().UTC())
 	if err != nil {
 		fmt.Printf("failed to create post: %v", err)
 		return post.ID, fmt.Errorf("failed to create post: %v", err)
@@ -77,7 +77,7 @@ func UpdatePost(db *sql.DB, post Post) error {
 		return fmt.Errorf("failed to prepare update post statement: %v", err)
 	}
 
-	_, err = statement.ExecContext(context, &post.Title, &post.Content, time.Now(), &post.ID)
+	_, err = statement.ExecContext(context, &post.Title, &post.Content, time.Now().UTC(), &post.ID)
 	if err != nil {
 		fmt.Printf("failed to update post: %v", err)
 		return fmt.Errorf("failed to update post: %v", err)
