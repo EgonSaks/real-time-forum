@@ -429,23 +429,33 @@ a.register-link {
   margin-left: 1rem;
   float: left;
   width: 50%;
-  /* min-height: 5vh; */
   bottom : 0rem;
   cursor: pointer;
 }
 
 .messenger-header {
-  display: flex;
-  align-items: flex-start;
   padding: 0.625rem;
   height: 5vh;
   font-size: 1.2rem;
   font-weight: bold;
 }
 
+.messenger-name-with-last-seen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .messenger-name {
   font-weight: bold;
   font-size: 1rem;
+}
+
+.messenger-last-seen {
+  font-size: 1rem;
+  font-weight: lighter;
+  color: rgb(101, 103, 107);
+  margin-left: 0.5rem;
 }
 
 .messenger-status {
@@ -532,8 +542,21 @@ a.register-link {
   margin: 0.3rem 0.3rem;
 }
 
+.chat-name-with-last-seen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .chat-name {
   font-size: 1rem;
+}
+
+.chat-last-seen {
+  font-size: 1rem;
+  font-weight: lighter;
+  color: rgb(101, 103, 107);
+  margin-left: 0.5rem;
 }
 
 .chat-status {

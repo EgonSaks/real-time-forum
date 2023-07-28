@@ -3,6 +3,7 @@ let currentUser = null;
 let messengerVisible = false;
 
 export function createChats(users) {
+  // Create the chats container
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats-container");
 
@@ -33,17 +34,23 @@ export function createChats(users) {
       chat.classList.add("chat");
 
       const userDiv = document.createElement("div");
+      userDiv.classList.add("chat-name-with-last-seen");
 
       const name = document.createElement("h4");
       name.classList.add("chat-name");
       name.textContent = users[user].name;
 
+      const lastSeen = document.createElement("p");
+      lastSeen.classList.add("chat-last-seen");
+      lastSeen.textContent = users[user].last_seen;
+
       const status = document.createElement("p");
       status.classList.add("chat-status", users[user].status.toLowerCase());
       status.textContent = users[user].status;
 
-      userDiv.append(name, status);
-      chat.append(userDiv);
+      userDiv.append(name, lastSeen);
+      chat.append(userDiv, status);
+
       chatsContainer.append(chat);
 
       // Add a click event listener to the chat element
@@ -67,10 +74,12 @@ function showMessenger(user) {
   const messenger = document.querySelector(".messenger");
   const messengerHeader = messenger.querySelector(".messenger-header");
   const nameElement = messengerHeader.querySelector(".messenger-name");
+  const lastSeenElement = messengerHeader.querySelector(".messenger-last-seen");
   const statusElement = messengerHeader.querySelector(".messenger-status");
 
   // Update messenger header with user's information
   nameElement.textContent = user.name;
+  lastSeenElement.textContent = user.last_seen;
   statusElement.textContent = user.status;
   statusElement.classList.remove("offline", "online");
   statusElement.classList.add(user.status.toLowerCase());
@@ -175,7 +184,7 @@ function sendMessage() {
   showMessenger(currentUser);
 }
 
-export function createMessenger() {
+export function createMessenger(user) {
   // Create the messenger
   const messenger = document.createElement("div");
   messenger.classList.add("messenger", "messenger-hidden");
@@ -184,22 +193,26 @@ export function createMessenger() {
   const messengerHeader = document.createElement("div");
   messengerHeader.classList.add("messenger-header");
 
-  // Create the header div
-  const headerDiv = document.createElement("div");
+  // Create the name and last_seen elements
+  const nameWithLastSeen = document.createElement("div");
+  nameWithLastSeen.classList.add("messenger-name-with-last-seen");
 
-  // Create the name and status elements
   const name = document.createElement("h4");
   name.classList.add("messenger-name");
   name.textContent = "John Doe";
+
+  const lastSeen = document.createElement("p");
+  lastSeen.classList.add("messenger-last-seen");
+  lastSeen.textContent = "";
+
+  nameWithLastSeen.append(name, lastSeen);
 
   // Create the status element
   const status = document.createElement("p");
   status.classList.add("messenger-status", "online");
   status.textContent = "online";
 
-  headerDiv.append(name, status);
-
-  messengerHeader.append(headerDiv);
+  messengerHeader.append(nameWithLastSeen, status);
 
   // Create the messenger body
   const messengerBody = document.createElement("div");
@@ -252,13 +265,13 @@ export function createChatContainer() {
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats");
 
-  const messengerDiv = createMessenger();
-
   const users = data();
 
-  const chatsDiv = createChats(users);
+  const chats = createChats(users);
 
-  chatsContainer.append(messengerDiv, chatsDiv);
+  const messenger = createMessenger();
+
+  chatsContainer.append(messenger, chats);
 
   return chatsContainer;
 }

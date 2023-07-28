@@ -15,6 +15,8 @@ type Post struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// The function `CreatePost` inserts a new post into a database table and returns the ID of the created
+// post.
 func CreatePost(db *sql.DB, post Post) (string, error) {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -35,6 +37,8 @@ func CreatePost(db *sql.DB, post Post) (string, error) {
 	return post.ID, nil
 }
 
+// The function GetAllPosts retrieves all posts from a database and returns them as a slice of Post
+// structs.
 func GetAllPosts(db *sql.DB) ([]Post, error) {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -66,6 +70,8 @@ func GetAllPosts(db *sql.DB) ([]Post, error) {
 	return posts, nil
 }
 
+// The function `UpdatePost` updates a post in a database with the provided title, content, and
+// updated_at timestamp.
 func UpdatePost(db *sql.DB, post Post) error {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -86,6 +92,7 @@ func UpdatePost(db *sql.DB, post Post) error {
 	return nil
 }
 
+// The DeletePost function deletes a post from a database using the provided post ID.
 func DeletePost(db *sql.DB, postID string) error {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

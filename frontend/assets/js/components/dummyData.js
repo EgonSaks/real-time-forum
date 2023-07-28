@@ -5,6 +5,7 @@ export function data() {
       status: "online",
     },
     "Bill Gates": {
+      last_seen: "10 min",
       name: "Bill Gates",
       status: "offline",
     },
@@ -13,6 +14,7 @@ export function data() {
       status: "online",
     },
     "Mark Zuckerberg": {
+      last_seen: "1h",
       name: "Mark Zuckerberg",
       status: "offline",
     },
@@ -21,6 +23,7 @@ export function data() {
       status: "online",
     },
     "Sergey Brin": {
+      last_seen: "2h",
       name: "Sergey Brin",
       status: "offline",
     },
@@ -29,6 +32,7 @@ export function data() {
       status: "online",
     },
     "Tim Cook": {
+      last_seen: "3h",
       name: "Tim Cook",
       status: "offline",
     },
@@ -37,6 +41,7 @@ export function data() {
       status: "online",
     },
     "Satya Nadella": {
+      last_seen: "4h",
       name: "Satya Nadella",
       status: "offline",
     },
@@ -45,6 +50,7 @@ export function data() {
       status: "online",
     },
     "Susan Wojcicki": {
+      last_seen: "5h",
       name: "Susan Wojcicki",
       status: "offline",
     },
@@ -53,6 +59,7 @@ export function data() {
       status: "online",
     },
     "Sheryl Sandberg": {
+      last_seen: "6h",
       name: "Sheryl Sandberg",
       status: "offline",
     },
@@ -61,6 +68,7 @@ export function data() {
       status: "online",
     },
     "Brian Chesky": {
+      last_seen: "7h",
       name: "Brian Chesky",
       status: "offline",
     },
@@ -69,6 +77,7 @@ export function data() {
       status: "online",
     },
     "Dara Khosrowshahi": {
+      last_seen: "8h",
       name: "Dara Khosrowshahi",
       status: "offline",
     },
@@ -77,6 +86,7 @@ export function data() {
       status: "online",
     },
     "Evan Spiegel": {
+      last_seen: "9h",
       name: "Evan Spiegel",
       status: "offline",
     },

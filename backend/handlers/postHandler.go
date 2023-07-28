@@ -13,6 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// The function `Posts` handles different HTTP methods for creating, updating, deleting, and retrieving
+// posts.
 func Posts(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		createPost(w, r)
@@ -27,6 +29,8 @@ func Posts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// The createPost function creates a new post, saves it to a database, and returns the created post as
+// JSON.
 func createPost(w http.ResponseWriter, r *http.Request) {
 	var post models.Post
 	post.ID = uuid.New().String()
@@ -62,6 +66,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// The function retrieves all posts from a database and returns them as a JSON response.
 func getPosts(w http.ResponseWriter, r *http.Request) {
 	database, err := sqlite.OpenDatabase()
 	if err != nil {
@@ -123,6 +128,9 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// The deletePost function receives a HTTP request, extracts the post ID from the request body, deletes
+// the corresponding post from a SQLite database, and sends a response indicating the success or
+// failure of the deletion.
 func deletePost(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		PostID string `json:"postId"`
