@@ -6,7 +6,7 @@ export function createChats(users) {
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats-container");
 
-  // Create the header element for Messenger
+  // Create the header element for the chats
   const header = document.createElement("div");
   header.classList.add("chats-header");
   header.textContent = "Messenger";
@@ -17,6 +17,7 @@ export function createChats(users) {
   onlineOfflineHeader.classList.add("chats-header");
   chatsContainer.append(onlineOfflineHeader);
 
+  // Create the Online/Offline users header
   if (Object.keys(users).length === 0) {
     const noUsersText = document.createElement("p");
     noUsersText.classList.add("no-users-text");
@@ -25,6 +26,7 @@ export function createChats(users) {
     return chatsContainer;
   }
 
+  // Create the Online/Offline users header
   for (const user in users) {
     if (users.hasOwnProperty(user)) {
       const chat = document.createElement("div");
@@ -53,12 +55,15 @@ export function createChats(users) {
 }
 
 function showMessenger(user) {
+  // If the messenger is already visible and the user is the same, do nothing
   if (currentUser === user) {
     return;
   }
 
+  // If the messenger is already visible and the user is different, hide the messenger
   currentUser = user;
 
+  // Get the messenger and its header
   const messenger = document.querySelector(".messenger");
   const messengerHeader = messenger.querySelector(".messenger-header");
   const nameElement = messengerHeader.querySelector(".messenger-name");
@@ -75,6 +80,7 @@ function showMessenger(user) {
   messenger.classList.remove("messenger-hidden");
   messenger.style.height = "30vh";
 
+  // Get the messenger body and input-container
   const messengerBody = messenger.querySelector(".messenger-body");
   const inputContainer = messenger.querySelector(".input-container");
   messengerBody.style.display = "block";
@@ -89,9 +95,11 @@ function showMessenger(user) {
   const contentContainer = document.getElementById("content-container");
   contentContainer.style.width = "60%";
 
+  // Adjust the chats width to accommodate the messenger
   const chats = document.querySelector(".chats");
   chats.style.width = "40%";
 
+  // Adjust the chats-container width to accommodate the messenger
   const chatsContainer = document.querySelector(".chats-container");
   chatsContainer.style.width = "45%";
 
@@ -107,6 +115,7 @@ function hideMessenger() {
   const messenger = document.querySelector(".messenger");
   messenger.style.height = "";
 
+  // Get the messenger body and input-container
   const messengerHeader = messenger.querySelector(".messenger-header");
   const messengerBody = messenger.querySelector(".messenger-body");
   const inputContainer = messenger.querySelector(".input-container");
@@ -128,53 +137,62 @@ function hideMessenger() {
   const contentContainer = document.getElementById("content-container");
   contentContainer.style.width = "80%";
 
+  // Adjust the chats width to remove the messenger
   const chats = document.querySelector(".chats");
   chats.style.width = "20%";
 
+  // Adjust the chats-container width to remove the messenger
   const chatsContainer = document.querySelector(".chats-container");
   chatsContainer.style.width = "90%";
 }
 
 function sendMessage() {
-    const messageInput = document.querySelector(".messenger-input");
-    const message = messageInput.value.trim();
-    if (message !== "") {
-      const chatMessages = document.querySelector(".chat-messages");
-  
-      // Create a container for the message
-      const messageContainer = document.createElement("div");
-      messageContainer.classList.add("message-container");
-  
-      // Create the message element
-      const messageElement = document.createElement("p");
-      messageElement.classList.add("message");
-      messageElement.textContent = message;
-  
-      // Append the message to the container and the container to the chat messages
-      messageContainer.appendChild(messageElement);
-      chatMessages.appendChild(messageContainer);
-  
-      console.log("Sending message:", message);
-      messageInput.value = "";
-    }
-  
-    showMessenger(currentUser);
+  // Get the message from the input
+  const messageInput = document.querySelector(".messenger-input");
+  const message = messageInput.value.trim();
+  if (message !== "") {
+    // Get the chat messages container
+    const chatMessages = document.querySelector(".chat-messages");
+
+    // Create a container for the message
+    const messageContainer = document.createElement("div");
+    messageContainer.classList.add("message-container");
+
+    // Create the message element
+    const messageElement = document.createElement("p");
+    messageElement.classList.add("message");
+    messageElement.textContent = message;
+
+    // Append the message to the container and the container to the chat messages
+    messageContainer.appendChild(messageElement);
+    chatMessages.appendChild(messageContainer);
+
+    console.log("Sending message:", message);
+    // Clear the input
+    messageInput.value = "";
   }
-  
+
+  showMessenger(currentUser);
+}
 
 export function createMessenger() {
+  // Create the messenger
   const messenger = document.createElement("div");
   messenger.classList.add("messenger", "messenger-hidden");
 
+  // Create the messenger header
   const messengerHeader = document.createElement("div");
   messengerHeader.classList.add("messenger-header");
 
+  // Create the header div
   const headerDiv = document.createElement("div");
 
+  // Create the name and status elements
   const name = document.createElement("h4");
   name.classList.add("messenger-name");
   name.textContent = "John Doe";
 
+  // Create the status element
   const status = document.createElement("p");
   status.classList.add("messenger-status", "online");
   status.textContent = "online";
@@ -183,20 +201,26 @@ export function createMessenger() {
 
   messengerHeader.append(headerDiv);
 
+  // Create the messenger body
   const messengerBody = document.createElement("div");
   messengerBody.classList.add("messenger-body");
 
+  // Create the chat messages container
   const chatMessages = document.createElement("p");
   chatMessages.classList.add("chat-messages");
   messengerBody.append(chatMessages);
 
+  // Create the input container
   const inputContainer = document.createElement("div");
   inputContainer.classList.add("input-container");
 
+  // Create the messenger input
   const messengerInput = document.createElement("textarea");
   messengerInput.setAttribute("rows", "3");
   messengerInput.setAttribute("placeholder", "Type a message...");
   messengerInput.classList.add("messenger-input");
+
+  // Add a keydown event listener to the messenger input
   messengerInput.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && e.shiftKey) {
       messengerInput.value += "\n";
@@ -207,6 +231,7 @@ export function createMessenger() {
     }
   });
 
+  // Create the send button
   const sendButton = document.createElement("button");
   sendButton.classList.add("message-send-button");
   sendButton.textContent = "Send";
@@ -223,6 +248,7 @@ export function createMessenger() {
 }
 
 export function createChatContainer() {
+  // Create the chats container
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats");
 
