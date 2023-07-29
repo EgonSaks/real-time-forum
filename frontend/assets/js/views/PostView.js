@@ -7,7 +7,8 @@ import {
 import { createPostComponent } from "../components/post.js";
 import { navigateTo } from "../router/router.js";
 
-export async function PostView() {
+// PostView function with messengerVisible parameter
+export async function PostView(_, messengerVisible) {
   const urlParts = window.location.href.split("/");
   const id = urlParts[urlParts.length - 1];
 
@@ -29,19 +30,11 @@ export async function PostView() {
     contentContainer = document.createElement("div");
     contentContainer.setAttribute("id", "content-container");
 
-    // Append contentContainer to #app element along with the pageTitle
-    const pageTitle = document.createElement("h1");
-    pageTitle.classList.add("page-title");
-    pageTitle.textContent = "Public room v1.0";
-
-    postViewContainer.append(pageTitle, contentContainer);
-
-    // Create the chat container
-    const chatContainer = createChatContainer();
+    postViewContainer.append(contentContainer);
 
     // Append pageTitle and contentContainer to #app element
     const root = document.querySelector("#app");
-    root.append(postViewContainer, chatContainer);
+    root.append(postViewContainer);
   }
 
   // Clear the existing posts
@@ -100,9 +93,6 @@ export async function PostView() {
 
     const commentForm = createCommentInputComponent();
 
-    // Use the comments associated with the singlePost
-    // const comments = singlePost.comments || [];
-
     // Append the postComponent and commentForm after adding all the comments
     contentContainer.append(postComponent, commentForm);
 
@@ -116,4 +106,7 @@ export async function PostView() {
     errorMessage.textContent = "No post found.";
     contentContainer.append(errorMessage);
   }
+
+  // Adjust the content-container width based on the messenger visibility state
+  contentContainer.style.width = messengerVisible ? "60%" : "80%";
 }

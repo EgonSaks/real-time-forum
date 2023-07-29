@@ -98,7 +98,6 @@ table {
 
 body {
   font-family: sans-serif;
-  margin: 2rem 3rem;
 }
 
 input:focus,
@@ -108,16 +107,37 @@ button:focus {
     outline: none;
 }
 
+/* Media query for screens with a maximum width of 768px */
+@media screen and (max-width: 768px) {
+  html {
+    font-size: 0.6rem;
+  }
+}
+
+/* Media query for screens with a minimum width of 769px and a maximum width of 1024px */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  html {
+    font-size: 0.8rem;
+  }
+}
+
+/* Media query for screens with a minimum width of 1025px */
+@media screen and (min-width: 1025px) {
+  html {
+    font-size: 1rem;
+  }
+}
+
 /* Custom styles */
 /* Form design */
 
 * {
   box-sizing: border-box;
 }
-.page-title {
-  text-align: center;
-  margin-bottom: 1.25rem;
-  font-size: 2.3rem;
+
+#app{
+  height: 80vh;
+  margin: 4rem 4rem 0rem 4rem;
 }
 
 .form {
@@ -130,7 +150,7 @@ button:focus {
   border-radius: 0.3rem;
   padding: 0.625rem;
   width: 80%;
-  margin: 0 auto;
+  margin: 0 auto 1rem;
   overflow: auto;
 }
 
@@ -140,6 +160,7 @@ button:focus {
 
 .input-title,
 .input-content {
+  font-size: 1.2rem;
   margin-bottom: 0.625rem;
   padding: 0.4rem;
   resize: none;
@@ -172,7 +193,7 @@ button:focus {
   border-radius: 0.3rem;
   padding: 0.625rem;
   width: 80%;
-  margin: 1rem auto;
+  margin: 0 auto 1rem;
   overflow: auto;
 }
 
@@ -192,6 +213,7 @@ button:focus {
 .delete-button,
 .update-button,
 .discard-button {
+  font-size: 0.8rem;
   margin-right: 0.5rem;
   float: right;
   cursor: pointer;
@@ -219,27 +241,27 @@ h1 {
 
 .register-form {
   width: 100%;
-  max-width: 300px;
-  border: 1px solid black;
+  max-width: 18.75rem;
+  border: 0.0625rem solid black;
   border-radius: 0.3rem;
-  padding: 20px;
+  padding: 1.25rem;
   text-align: center;
   position: relative;
 }
 
 .register-form input {
   width: 100%;
-  max-width: 300px;
-  margin-bottom: 10px;
-  padding: 5px;
-  border: 1px solid black;
+  max-width: 18.75rem;
+  margin-bottom: 0.625rem;
+  padding: 0.3125rem;
+  border: 0.0625rem solid black;
 }
 
 .register-button {
   width: 100%;
-  max-width: 300px;
-  margin-bottom: 10px;
-  padding: 5px;
+  max-width: 18.75rem;
+  margin-bottom: 0.625rem;
+  padding: 0.3125rem;
 }
 
 /* Terms and Privacy Policy*/
@@ -257,7 +279,7 @@ a.privacy-link {
 }
 
 .separator {
-  border-top: 1px solid #d1d7dc;
+  border-top: 0.0625rem solid #d1d7dc;
   margin: 0.6rem 0;
 }
 
@@ -286,27 +308,27 @@ a.login-link{
 
 .login-form {
   width: 100%;
-  max-width: 300px;
-  border: 1px solid black;
+  max-width: 18.75rem;
+  border: 0.0625rem solid black;
   border-radius: 0.3rem;
-  padding: 20px;
+  padding: 1.25rem;
   text-align: center;
   position: relative;
 }
 
 .login-form input {
   width: 100%;
-  max-width: 300px;
-  margin-bottom: 10px;
-  padding: 5px;
-  border: 1px solid black;
+  max-width: 18.75rem;
+  margin-bottom: 0.625rem;
+  padding: 0.3125rem;
+  border: 0.0625rem solid black;
 }
 
 .login-button {
   width: 100%;
-  max-width: 300px;
-  margin-bottom: 10px;
-  padding: 5px;
+  max-width: 18.75rem;
+  margin-bottom: 0.625rem;
+  padding: 0.3125rem;
 }
 
 /* Terms and Privacy Policy */
@@ -324,7 +346,7 @@ a.privacy-link {
 }
 
 .separator {
-  border-top: 1px solid #d1d7dc;
+  border-top: 0.0625rem solid #d1d7dc;
   margin: 0.6rem 0;
 }
 
@@ -346,7 +368,6 @@ a.register-link {
 .comment-input-container {
   margin: 1rem auto;
   width: 80%;
-  /* margin: -0.7rem auto; */
   overflow: auto;
 }
 
@@ -359,6 +380,7 @@ a.register-link {
 }
 
 .comment-button {
+  font-size: 0.8rem;
   margin: 0.4rem 1rem 0.4rem 1rem;
   float: right;
   cursor: pointer;
@@ -393,8 +415,6 @@ a.register-link {
   float: left;
   width: 80%;
   height: 80vh;
-  margin-bottom: 0.625rem;
-  padding: 0.625rem;
   overflow: auto;
 }
 
@@ -419,14 +439,12 @@ a.register-link {
   bottom : 0rem;
   right: 0rem;
   overflow-y: auto;
-  padding: 5px;
 }
 
 .messenger {
   border: 0.0625rem solid black;
   border-radius: 0.3rem;
   position: absolute;
-  margin-left: 1rem;
   float: left;
   width: 50%;
   bottom : 0rem;
@@ -527,9 +545,10 @@ a.register-link {
 
 /* Chat header */
 .chats-header {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
   text-align: center;
+  margin: 0.3rem 0rem 0rem 0rem;
 }
 
 /* Chat list */ 
@@ -581,5 +600,5 @@ a.register-link {
   text-align: center;
   font-size: 0.8rem;
   color: rgb(255, 85, 85); 
-  padding: 0.3rem;
+  margin: 0rem 0rem 0.3rem 0rem;
 }

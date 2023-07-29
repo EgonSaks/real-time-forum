@@ -1,5 +1,15 @@
-// Import the list of routes from another file (not shown here)
+import {
+  createChatContainer,
+  getMessengerVisibility,
+} from "../components/chat.js";
+import { HomeView } from "../views/HomeView.js";
+import { Login } from "../views/Login.js";
+import { PostView } from "../views/PostView.js";
+import { Register } from "../views/Register.js";
 import { routes } from "./routes.js";
+
+const chatContainer = createChatContainer();
+const appContainer = document.querySelector("#app");
 
 // Function to convert a route path into a regular expression for matching URLs
 const pathToRegex = (path) =>
@@ -47,9 +57,6 @@ export const router = async () => {
     (potentialMatch) => potentialMatch.result !== null
   );
 
-  // Get the element with the ID "app" from the HTML (the container for our views)
-  const appContainer = document.querySelector("#app");
-
   // If no matching route is found, show a "404 Page Not Found" message
   if (!matchedRoute) {
     appContainer.innerHTML = "404 Page Not Found";
@@ -61,8 +68,21 @@ export const router = async () => {
   const matchedView = matchedRoute.route.view;
   const params = await getParams(matchedRoute);
 
-  // Call the matched view function with the extracted parameters
-  matchedView(params);
+  // Get the messenger visibility
+  const messengerVisible = getMessengerVisibility();
+
+  // Call the view function with the parameters
+  if (matchedView === HomeView) {
+    matchedView(params, messengerVisible);
+    appContainer.append(chatContainer);
+  } else if (matchedView === PostView) {
+    matchedView(params, messengerVisible);
+    appContainer.append(chatContainer);
+  } else if (matchedView === Register) {
+    matchedView();
+  } else if (matchedView === Login) {
+    matchedView();
+  }
 };
 
 window.addEventListener("popstate", () => {

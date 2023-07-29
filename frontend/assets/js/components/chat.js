@@ -2,6 +2,10 @@ import { data } from "./dummyData.js";
 let currentUser = null;
 let messengerVisible = false;
 
+export function getMessengerVisibility() {
+  return messengerVisible;
+}
+
 export function createChats(users) {
   // Create the chats container
   const chatsContainer = document.createElement("div");
@@ -12,11 +16,6 @@ export function createChats(users) {
   header.classList.add("chats-header");
   header.textContent = "Messenger";
   chatsContainer.append(header);
-
-  // Create the header element for Online/Offline users
-  const onlineOfflineHeader = document.createElement("div");
-  onlineOfflineHeader.classList.add("chats-header");
-  chatsContainer.append(onlineOfflineHeader);
 
   // Create the Online/Offline users header
   if (Object.keys(users).length === 0) {
