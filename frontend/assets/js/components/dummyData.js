@@ -93,3 +93,21 @@ export function data() {
   };
   return users;
 }
+
+export function comments() {
+  const comments = [
+    {
+      content: "Hello, World!",
+      createdAt: "2021-05-01T12:00:00.000Z",
+    },
+    {
+      content: "Hello there!",
+      createdAt: "2021-05-01T12:00:00.000Z",
+    },
+    {
+      content: "Hello, you!",
+      createdAt: "2021-05-01T12:00:00.000Z",
+    },
+  ];
+  return comments;
+}

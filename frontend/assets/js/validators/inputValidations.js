@@ -1,8 +1,10 @@
-import { createPostToDatabase, fetchPosts } from "../api/api.js";
-import { updatePostsView } from "../components/form.js";
+import { createPostToDatabase, fetchPosts } from "../api/postAPI.js";
+import { updateCommentsView } from "../components/comment.js";
+import { updatePostsView } from "../components/post.js";
+import { createCommentToDatabase } from "../api/commentAPI.js";
 
 // Validate form input
-export async function validateFormInput(titleInput, contentInput, errorMsg) {
+export async function validatePostInput(titleInput, contentInput, errorMsg) {
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
 
@@ -24,12 +26,12 @@ export async function validateFormInput(titleInput, contentInput, errorMsg) {
     errorMsg.style.display = "none";
 
     // Prepare the data
-    const data = {
+    const post = {
       title: title,
       content: content,
     };
 
-    const createdPostData = await createPostToDatabase(data);
+    const createdPostData = await createPostToDatabase(post);
 
     if (createdPostData) {
       const updatedPosts = await fetchPosts();
@@ -70,5 +72,42 @@ export function validateUpdatedData(title, content, postContainer) {
     errorMsg.innerHTML = "";
     errorMsg.style.display = "none";
     return true;
+  }
+}
+
+export async function validateCommentInput(
+  commentContentInput,
+  errorMsg,
+  postId
+) {
+  const commentContent = commentContentInput.value.trim();
+
+  // Validate the data
+  if (commentContent === "") {
+    errorMsg.innerHTML = "Comment cannot be empty";
+    errorMsg.style.display = "block";
+    errorMsg.style.marginTop = "0.625rem";
+    errorMsg.style.marginLeft = "0.625rem";
+  } else if (commentContent.length > 200) {
+    errorMsg.innerHTML = "Comment cannot exceed 200 characters";
+    errorMsg.style.display = "block";
+    errorMsg.style.marginTop = "0.625rem";
+    errorMsg.style.marginLeft = "0.625rem";
+  } else {
+    errorMsg.innerHTML = "";
+    errorMsg.style.display = "none";
+
+    // Prepare the data
+    const comment = {
+      post_id: postId,
+      content: commentContent,
+    };
+
+    console.log("data from validation", comment);
+    updateCommentsView(comment);
+
+    // await createCommentToDatabase(comment);
+
+    commentContentInput.value = "";
   }
 }

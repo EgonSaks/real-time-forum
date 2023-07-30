@@ -1,6 +1,6 @@
-import { convertTime } from "../utils/timeConverter.js";
+import { validateCommentInput } from "../validators/inputValidations.js";
 
-export function createCommentInputComponent() {
+export function createCommentFormComponent(postId) {
   const commentContainer = document.createElement("div");
   commentContainer.classList.add("comment-input-container");
 
@@ -24,7 +24,7 @@ export function createCommentInputComponent() {
   commentButton.textContent = "Comment";
   commentButton.addEventListener("click", (e) => {
     e.preventDefault;
-    // console.log("Comment button clicked");
+    validateCommentInput(commentContent, errorMsg, postId);
   });
 
   form.append(commentContent, errorMsg);
@@ -59,8 +59,35 @@ export function createCommentComponent(comment) {
   // Displaying the comment creation date and time
   const createdAt = document.createElement("p");
   createdAt.classList.add("created-at");
-  createdAt.textContent = convertTime(comment.createdAt);
+  // createdAt.textContent = convertTime(comment.created_at);
   commentComponent.append(createdAt);
 
   return commentComponent;
+}
+
+export function updateCommentsView(comments) {
+  const contentContainer = document.getElementById("content-container");
+
+  const commentComponent = createCommentComponent(comments);
+
+  contentContainer.append(commentComponent);
+
+  // Get the first comment component (if any)
+  // const firstCommentComponent = contentContainer.querySelector(
+  //   ".comment-container:first-child"
+  // );
+
+  // if (comments) {
+  //   comments.forEach((comment) => {
+  //     const commentComponent = createCommentComponent(comment);
+
+  //     if (firstCommentComponent) {
+  //       // If there are existing comments, insert the new comment before the first comment
+  //       contentContainer.insertBefore(commentComponent, firstCommentComponent);
+  //     } else {
+  //       // If there are no existing comments, simply append the new comment
+  //       contentContainer.append(commentComponent);
+  //     }
+  //   });
+  // }
 }

@@ -1,21 +1,74 @@
-import { deletePostFromDatabase, updatePostData } from "../api/api.js";
+import { deletePostFromDatabase, updatePostData } from "../api/postAPI.js";
 import { navigateTo } from "../router/router.js";
+import { countCharacters } from "../utils/characterCount.js";
 import { convertTime } from "../utils/timeConverter.js";
-import { validateUpdatedData } from "../validators/inputValidations.js";
+import {
+  validatePostInput,
+  validateUpdatedData,
+} from "../validators/inputValidations.js";
+// Create the form component and add it to the DOM
+export function createPostFormComponent() {
+  const formContainer = document.createElement("div");
+  formContainer.classList.add("form-container");
+
+  // Create the form
+  const form = document.createElement("form");
+  form.classList.add("form");
+
+  // Create the title field
+  const inputTitle = document.createElement("input");
+  inputTitle.classList.add("input-title");
+  inputTitle.setAttribute("type", "text");
+  inputTitle.setAttribute("placeholder", "Title:");
+
+  // Create the content field
+  const inputContent = document.createElement("textarea");
+  inputContent.classList.add("input-content");
+  inputContent.setAttribute("rows", "5");
+  inputContent.setAttribute("placeholder", "What is happening?!");
+  inputContent.addEventListener("input", countCharacters);
+
+  // Create the character count element
+  const charCountSpan = document.createElement("span");
+  charCountSpan.classList.add("character-count");
+  charCountSpan.textContent = "";
+
+  // Create the error message
+  const errorMsg = document.createElement("p");
+  errorMsg.classList.add("error-msg");
+  errorMsg.style.display = "none";
+
+  // Create the post button
+  const postButton = document.createElement("button");
+  postButton.classList.add("post-button");
+  postButton.setAttribute("type", "submit");
+  postButton.textContent = "Post";
+
+  postButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    validatePostInput(inputTitle, inputContent, errorMsg);
+    charCountSpan.textContent = "";
+  });
+
+  form.append(inputTitle, inputContent, errorMsg);
+  formContainer.append(form, postButton, charCountSpan);
+
+  return formContainer;
+}
 
 // Create the post component
-export function createPostComponent(data) {
+export function createPostComponent(post) {
   // Create the post container
   const postContainer = document.createElement("div");
   postContainer.classList.add("post-container");
-  postContainer.setAttribute("id", data.id);
+  postContainer.setAttribute("id", post.id);
 
   // Create the post title
   const postTitle = document.createElement("h2");
   postTitle.classList.add("post-title");
-  postTitle.textContent = data.title;
+  postTitle.textContent = post.title;
   postTitle.addEventListener("click", () => {
-    navigateTo("/post/" + data.id);
+    navigateTo("/post/" + post.id); 
   });
 
   // Displaying the author's name
@@ -26,19 +79,19 @@ export function createPostComponent(data) {
   // Create the post content
   const postContent = document.createElement("p");
   postContent.classList.add("post-content");
-  postContent.textContent = data.content;
+  postContent.textContent = post.content;
 
-  // Displaying the comment creation date and time
+  // Displaying the post creation date and time
   const createdAt = document.createElement("p");
   createdAt.classList.add("created-at");
-  createdAt.textContent = convertTime(data.created_at);
+  createdAt.textContent = convertTime(post.created_at);
 
   // Create the edit button
   const editButton = document.createElement("button");
   editButton.classList.add("edit-button");
   editButton.textContent = "Edit";
   editButton.addEventListener("click", () => {
-    const postId = data.id;
+    const postId = post.id;
     editPost(postId);
   });
 
@@ -47,7 +100,7 @@ export function createPostComponent(data) {
   deleteButton.classList.add("delete-button");
   deleteButton.textContent = "Delete";
   deleteButton.addEventListener("click", () => {
-    const postId = data.id;
+    const postId = post.id;
     deletePostFromDatabase(postId);
     postContainer.remove();
   });
@@ -137,22 +190,22 @@ export function editPost(postId) {
 }
 
 // Update the post element
-export function updatePostElement(data, postContainer) {
+export function updatePostElement(post, postContainer) {
   const author = postContainer.querySelector(".author");
   const createdAt = postContainer.querySelector(".created-at");
 
   // Update the post element with the new data
   const postTitle = document.createElement("h2");
   postTitle.classList.add("post-title");
-  postTitle.textContent = data.title;
+  postTitle.textContent = post.title;
   postTitle.addEventListener("click", () => {
-    navigateTo("/post/" + data.id);
+    navigateTo("/post/" + post.id);
   });
 
   // Create the post content
   const postContent = document.createElement("p");
   postContent.classList.add("post-content");
-  postContent.textContent = data.content;
+  postContent.textContent = post.content;
 
   postContainer.innerHTML = "";
   postContainer.append(author, postTitle, postContent, createdAt);
@@ -162,7 +215,7 @@ export function updatePostElement(data, postContainer) {
   editButton.classList.add("edit-button");
   editButton.textContent = "Edit";
   editButton.addEventListener("click", () => {
-    const postId = data.id;
+    const postId = post.id;
     editPost(postId);
   });
 
@@ -171,7 +224,7 @@ export function updatePostElement(data, postContainer) {
   deleteButton.classList.add("delete-button");
   deleteButton.textContent = "Delete";
   deleteButton.addEventListener("click", () => {
-    const postId = data.id;
+    const postId = post.id;
     deletePostFromDatabase(postId);
   });
 
@@ -204,5 +257,29 @@ export async function updatePostInDatabase(postId) {
 
     const updateData = await updatePostData(updatedData, postContainer);
     updatePostElement(updateData, postContainer);
+  }
+}
+
+// Update the posts view
+export function updatePostsView(posts) {
+  const formAndPostContainer = document.getElementById(
+    "form-and-post-container"
+  );
+
+  // Get the first post component (if any)
+  const firstPostComponent = formAndPostContainer.querySelector(
+    ".post-container:first-child"
+  );
+
+  // Create the post component for the latest post
+  const latestPost = posts[posts.length - 1]; // Get the latest post
+  const latestPostComponent = createPostComponent(latestPost);
+
+  if (firstPostComponent) {
+    // If there are existing posts, insert the new post before the first post
+    formAndPostContainer.insertBefore(latestPostComponent, firstPostComponent);
+  } else {
+    // If there are no existing posts, simply append the new post
+    formAndPostContainer.append(latestPostComponent);
   }
 }

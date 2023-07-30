@@ -1,9 +1,5 @@
-import { deletePostFromDatabase, fetchPosts } from "../api/api.js";
-import { createChatContainer } from "../components/chat.js";
-import {
-  createCommentComponent,
-  createCommentInputComponent,
-} from "../components/comment.js";
+import { deletePostFromDatabase, fetchPosts } from "../api/postAPI.js";
+import { createCommentFormComponent } from "../components/comment.js";
 import { createPostComponent } from "../components/post.js";
 import { navigateTo } from "../router/router.js";
 
@@ -37,6 +33,16 @@ export async function PostView(_, messengerVisible) {
     root.append(postViewContainer);
   }
 
+  // const comments = await fetchComments();
+  // console.log("comments from single post", comments);
+
+  // if (comments) {
+  //   const contentContainer = document.getElementById("content-container");
+  //   const commentComponent = updateCommentsView(comments);
+
+  //   contentContainer.append(commentComponent);
+  // }
+
   // Clear the existing posts
   contentContainer.innerHTML = "";
 
@@ -56,51 +62,9 @@ export async function PostView(_, messengerVisible) {
     const postTitle = postComponent.querySelector(".post-title");
     postTitle.style.cursor = "default";
 
-    const comments = [
-      {
-        id: "1",
-        content:
-          "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor",
-        postId: singlePost.id,
-        author: "John Doe",
-        createdAt: new Date(),
-      },
-      {
-        id: "2",
-        content:
-          "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor",
-        postId: singlePost.id,
-        author: "Elon Musk",
-        createdAt: new Date(),
-      },
-      {
-        id: "3",
-        content:
-          "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor",
-        postId: singlePost.id,
-        author: "Bill Gates",
-        createdAt: new Date(),
-      },
-      {
-        id: "4",
-        content:
-          "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor",
-        postId: singlePost.id,
-        author: "Steve Jobs",
-        createdAt: new Date(),
-      },
-    ];
+    const commentForm = createCommentFormComponent(singlePost.id);
 
-    const commentForm = createCommentInputComponent();
-
-    // Append the postComponent and commentForm after adding all the comments
     contentContainer.append(postComponent, commentForm);
-
-    // Loop through comments and create the comment components
-    comments.forEach((comment) => {
-      const commentComponent = createCommentComponent(comment);
-      contentContainer.append(commentComponent);
-    });
   } else {
     const errorMessage = document.createElement("p");
     errorMessage.textContent = "No post found.";

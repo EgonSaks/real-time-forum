@@ -303,7 +303,6 @@ a.login-link {
     border: 0.0625rem solid var(--text-color);
     border-radius: 0.3rem;
     position: absolute;
-    margin-left: 1rem;
     width: 50%;
     bottom: 0;
     cursor: pointer;
