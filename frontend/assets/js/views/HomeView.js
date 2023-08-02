@@ -1,14 +1,10 @@
-import { fetchPosts } from "../api/postAPI.js";
-import {
-  createPostComponent,
-  createPostFormComponent,
-} from "../components/post.js";
+import { createPostFormComponent, getPosts } from "../components/post.js";
 
 // HomeView function with messengerVisible parameter
 export async function HomeView(_, messengerVisible) {
-  console.log("home view");
   // Get the element with the ID "app" from the HTML (the container for our views)
   const root = document.querySelector("#app");
+
   // Clear the app container to remove any previous content
   root.innerHTML = "";
 
@@ -24,16 +20,9 @@ export async function HomeView(_, messengerVisible) {
   const formComponent = createPostFormComponent();
   formAndPostContainer.append(formComponent);
 
-  // Get the data using fetchPosts function
-  const data = await fetchPosts();
+  await getPosts(formAndPostContainer);
 
-  // Create the post components
-  data.forEach((post) => {
-    const postComponent = createPostComponent(post);
-    formAndPostContainer.append(postComponent);
-  });
-
-  // // Append the form and post container to the content container
+  // Append the form and post container to the content container
   contentContainer.append(formAndPostContainer);
 
   // Adjust the content-container width based on the messenger visibility state

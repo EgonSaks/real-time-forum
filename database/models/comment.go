@@ -130,3 +130,36 @@ func GetCommentByID(db *sql.DB, commentID string) (*Comment, error) {
 
 	return &comment, nil
 }
+
+// GetCommentsByPostID retrieves all comments for a post from the database
+// GetCommentsByPostID retrieves all comments for a post from the database
+func GetCommentsByPostID(db *sql.DB, postID string) ([]Comment, error) {
+	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := "SELECT id, post_id, content, created_at, updated_at FROM comments WHERE post_id = ?"
+	rows, err := db.QueryContext(context, query, postID)
+	if err != nil {
+		fmt.Printf("failed to execute query: %v", err)
+		return nil, fmt.Errorf("failed to execute query: %v", err)
+	}
+	defer rows.Close()
+
+	comments := make([]Comment, 0)
+	for rows.Next() {
+		var comment Comment
+		err := rows.Scan(&comment.ID, &comment.PostID, &comment.Content, &comment.CreatedAt, &comment.UpdatedAt)
+		if err != nil {
+			fmt.Printf("failed to scan row: %v", err)
+			return nil, fmt.Errorf("failed to scan row: %v", err)
+		}
+		comments = append(comments, comment)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Printf("failed to retrieve rows: %v", err)
+		return nil, fmt.Errorf("failed to retrieve rows: %v", err)
+	}
+
+	return comments, nil
+}

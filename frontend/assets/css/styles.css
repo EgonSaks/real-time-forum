@@ -140,6 +140,28 @@ button:focus {
   margin: 4rem 4rem 0rem 4rem;
 }
 
+/* CSS for the navbar container */
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-radius: 0.3rem;
+  margin-bottom: 0.625rem;
+}
+
+.logged-in-label {
+  margin-right: 1.5rem; 
+  font-weight: bolder;
+}
+
+.logout-button {
+  font-size: 0.8rem;
+  border-radius: 0.3rem;
+  margin-right: 0.625rem;
+  background-color: white;
+  cursor: pointer;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -254,6 +276,51 @@ h1 {
   margin-bottom: 0.625rem;
   padding: 0.3125rem;
   border: 0.0625rem solid black;
+}
+
+.gender-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.625rem;
+}
+
+.gender-container input[type="checkbox"] {
+  appearance: none;
+  border-radius: 50%;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 1px solid #818486;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Style the custom checkbox when checked */
+.gender-container input[type="checkbox"]:checked {
+  background-color: #818486;
+}
+
+.gender-container label {
+  margin: 0;
+  padding-left: 0.3rem;
+  color: #818486;
+  font-family: sans-serif;
+  font-weight: lighter;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* Hide the default checkbox appearance */
+.gender-container input[type="checkbox"]::-webkit-inner-spin-button,
+.gender-container input[type="checkbox"]::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.gender-container input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .register-button {

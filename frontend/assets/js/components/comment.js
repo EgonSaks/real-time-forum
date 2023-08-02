@@ -1,3 +1,4 @@
+import { convertTime } from "../utils/timeConverter.js";
 import { validateCommentInput } from "../validators/inputValidations.js";
 
 export function createCommentFormComponent(postId) {
@@ -39,7 +40,7 @@ export function createCommentComponent(comment) {
   commentComponent.classList.add("comment-component");
 
   // Set the post ID as a data attribute
-  commentComponent.setAttribute("data-post-id", comment.postId);
+  commentComponent.setAttribute("data-post-id", comment.post_id);
 
   // Set the comment ID as a data attribute
   commentComponent.setAttribute("data-comment-id", comment.id);
@@ -59,35 +60,29 @@ export function createCommentComponent(comment) {
   // Displaying the comment creation date and time
   const createdAt = document.createElement("p");
   createdAt.classList.add("created-at");
-  // createdAt.textContent = convertTime(comment.created_at);
+  createdAt.textContent = convertTime(comment.created_at);
   commentComponent.append(createdAt);
 
   return commentComponent;
 }
 
-export function updateCommentsView(comments) {
-  const contentContainer = document.getElementById("content-container");
-
-  const commentComponent = createCommentComponent(comments);
-
-  contentContainer.append(commentComponent);
-
+export function updateCommentsView(comments, contentContainer) {
   // Get the first comment component (if any)
-  // const firstCommentComponent = contentContainer.querySelector(
-  //   ".comment-container:first-child"
-  // );
+  const firstCommentComponent = contentContainer.querySelector(
+    ".comment-container:first-child"
+  );
 
-  // if (comments) {
-  //   comments.forEach((comment) => {
-  //     const commentComponent = createCommentComponent(comment);
+  if (comments) {
+    comments.forEach((comment) => {
+      const commentComponent = createCommentComponent(comment);
 
-  //     if (firstCommentComponent) {
-  //       // If there are existing comments, insert the new comment before the first comment
-  //       contentContainer.insertBefore(commentComponent, firstCommentComponent);
-  //     } else {
-  //       // If there are no existing comments, simply append the new comment
-  //       contentContainer.append(commentComponent);
-  //     }
-  //   });
-  // }
+      if (firstCommentComponent) {
+        // If there are existing comments, insert the new comment before the first comment
+        contentContainer.insertBefore(commentComponent, firstCommentComponent);
+      } else {
+        // If there are no existing comments, simply append the new comment
+        contentContainer.append(commentComponent);
+      }
+    });
+  }
 }

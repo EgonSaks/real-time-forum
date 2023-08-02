@@ -1,4 +1,3 @@
-// Function to count characters
 export function countCharacters() {
   const maxCharCount = 1000;
 

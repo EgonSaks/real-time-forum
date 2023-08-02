@@ -1,4 +1,5 @@
 import { navigateTo } from "../router/router.js";
+import { validateLoginFormInput } from "../validators/inputValidations.js";
 
 export function loginFormElement() {
   const root = document.querySelector("#app");
@@ -13,23 +14,29 @@ export function loginFormElement() {
   title.classList.add("login-title");
   title.textContent = "Login";
 
-  const nickname = document.createElement("input");
-  nickname.classList.add("login-nickname");
-  nickname.setAttribute("placeholder", "E-mail or nickname");
+  const username = document.createElement("input");
+  username.classList.add("login-username");
+  username.setAttribute("placeholder", "E-mail or username");
 
   const password = document.createElement("input");
   password.classList.add("login-password");
   password.setAttribute("placeholder", "Password");
   password.setAttribute("type", "password");
+  password.setAttribute("autocomplete", "current-password");
+
+  // Create the error message
+  const errorMsg = document.createElement("p");
+  errorMsg.classList.add("error-msg");
+  errorMsg.style.display = "none";
 
   const loginButton = document.createElement("button");
   loginButton.classList.add("login-button");
   loginButton.setAttribute("type", "submit");
-  loginButton.textContent = "login";
+  loginButton.textContent = "Login";
 
   loginButton.addEventListener("click", function (e) {
     e.preventDefault();
-    // validateFormInput(nickname, firstName, lastName, email, age, password);
+    validateLoginFormInput(username, password);
   });
 
   const container = document.createElement("div");
@@ -58,7 +65,7 @@ export function loginFormElement() {
 
   container.append(separator, register);
 
-  form.append(title, nickname, password, loginButton, container);
+  form.append(title, username, password, errorMsg, loginButton, container);
 
   login.append(form);
 

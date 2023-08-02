@@ -1,7 +1,7 @@
 import { navigateTo } from "../router/router.js";
+import { validateRegisterFormData } from "../validators/inputValidations.js";
 
 export function registerFormElement() {
-  console.log("registerFormElement");
   const root = document.querySelector("#app");
 
   const register = document.createElement("div");
@@ -14,9 +14,9 @@ export function registerFormElement() {
   title.classList.add("register-title");
   title.textContent = "Register";
 
-  const nickname = document.createElement("input");
-  nickname.classList.add("register-nickname");
-  nickname.setAttribute("placeholder", "Nickname");
+  const username = document.createElement("input");
+  username.classList.add("register-username");
+  username.setAttribute("placeholder", "Username");
 
   const firstName = document.createElement("input");
   firstName.classList.add("register-firstName");
@@ -34,9 +34,38 @@ export function registerFormElement() {
   age.classList.add("register-age");
   age.setAttribute("placeholder", "Age");
 
-  const gender = document.createElement("input");
-  gender.classList.add("register-gender");
-  gender.setAttribute("placeholder", "Gender");
+  const genderContainer = document.createElement("div");
+  genderContainer.classList.add("gender-container");
+
+  const maleCheckbox = document.createElement("input");
+  maleCheckbox.setAttribute("type", "checkbox");
+  maleCheckbox.setAttribute("id", "male");
+  maleCheckbox.setAttribute("name", "gender");
+  const maleLabel = document.createElement("label");
+  maleLabel.setAttribute("for", "male");
+  maleLabel.textContent = "Male";
+
+  maleCheckbox.addEventListener("change", function () {
+    if (maleCheckbox.checked) {
+      femaleCheckbox.checked = false;
+    }
+  });
+
+  const femaleCheckbox = document.createElement("input");
+  femaleCheckbox.setAttribute("type", "checkbox");
+  femaleCheckbox.setAttribute("id", "female");
+  femaleCheckbox.setAttribute("name", "gender");
+  const femaleLabel = document.createElement("label");
+  femaleLabel.setAttribute("for", "female");
+  femaleLabel.textContent = "Female";
+
+  femaleCheckbox.addEventListener("change", function () {
+    if (femaleCheckbox.checked) {
+      maleCheckbox.checked = false;
+    }
+  });
+
+  genderContainer.append(maleLabel, maleCheckbox, femaleLabel, femaleCheckbox);
 
   const password = document.createElement("input");
   password.classList.add("register-password");
@@ -48,9 +77,28 @@ export function registerFormElement() {
   registerButton.setAttribute("type", "submit");
   registerButton.textContent = "Register";
 
-  registerButton.addEventListener("click", function (e) {
+  // Create the error message
+  const errorMsg = document.createElement("p");
+  errorMsg.classList.add("error-msg");
+  errorMsg.style.display = "none";
+
+  registerButton.addEventListener("click", async function (e) {
     e.preventDefault();
-    // validateFormInput(nickname, firstName, lastName, email, age, password);
+    const success = await validateRegisterFormData(
+      username,
+      firstName,
+      lastName,
+      email,
+      age,
+      maleCheckbox,
+      femaleCheckbox,
+      password,
+      errorMsg
+    );
+
+    if (success) {
+      navigateTo("/login");
+    }
   });
 
   const container = document.createElement("div");
@@ -106,13 +154,14 @@ export function registerFormElement() {
 
   form.append(
     title,
-    nickname,
+    username,
     firstName,
     lastName,
     email,
     age,
-    gender,
+    genderContainer,
     password,
+    errorMsg,
     registerButton,
     container
   );

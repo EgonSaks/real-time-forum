@@ -7,9 +7,11 @@ import { Login } from "../views/Login.js";
 import { PostView } from "../views/PostView.js";
 import { Register } from "../views/Register.js";
 import { routes } from "./routes.js";
+import { createNavbar } from "../components/navbar.js";
 
 const chatContainer = createChatContainer();
 const appContainer = document.querySelector("#app");
+const navbar = createNavbar();
 
 // Function to convert a route path into a regular expression for matching URLs
 const pathToRegex = (path) =>
@@ -74,10 +76,10 @@ export const router = async () => {
   // Call the view function with the parameters
   if (matchedView === HomeView) {
     matchedView(params, messengerVisible);
-    appContainer.append(chatContainer);
+    appContainer.append(navbar, chatContainer);
   } else if (matchedView === PostView) {
     matchedView(params, messengerVisible);
-    appContainer.append(chatContainer);
+    appContainer.append(navbar, chatContainer);
   } else if (matchedView === Register) {
     matchedView();
   } else if (matchedView === Login) {

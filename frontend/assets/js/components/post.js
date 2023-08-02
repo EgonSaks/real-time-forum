@@ -1,4 +1,8 @@
-import { deletePostFromDatabase, updatePostData } from "../api/postAPI.js";
+import {
+  deletePostFromDatabase,
+  fetchPosts,
+  updatePostData,
+} from "../api/postAPI.js";
 import { navigateTo } from "../router/router.js";
 import { countCharacters } from "../utils/characterCount.js";
 import { convertTime } from "../utils/timeConverter.js";
@@ -6,6 +10,7 @@ import {
   validatePostInput,
   validateUpdatedData,
 } from "../validators/inputValidations.js";
+
 // Create the form component and add it to the DOM
 export function createPostFormComponent() {
   const formContainer = document.createElement("div");
@@ -57,6 +62,66 @@ export function createPostFormComponent() {
 }
 
 // Create the post component
+export function createSinglePostComponent(data) {
+  // Create the post container
+  const postContainer = document.createElement("div");
+  postContainer.classList.add("post-container");
+  postContainer.setAttribute("id", data.post.id);
+
+  // Create the post title
+  const postTitle = document.createElement("h2");
+  postTitle.classList.add("post-title");
+  postTitle.textContent = data.post.title;
+  postTitle.addEventListener("click", () => {
+    navigateTo("/post/" + data.post.id);
+  });
+
+  // Displaying the author's name
+  const author = document.createElement("p");
+  author.classList.add("author");
+  author.textContent = "John Doe";
+
+  // Create the post content
+  const postContent = document.createElement("p");
+  postContent.classList.add("post-content");
+  postContent.textContent = data.post.content;
+
+  // Displaying the post creation date and time
+  const createdAt = document.createElement("p");
+  createdAt.classList.add("created-at");
+  createdAt.textContent = convertTime(data.post.created_at);
+
+  // Create the edit button
+  const editButton = document.createElement("button");
+  editButton.classList.add("edit-button");
+  editButton.textContent = "Edit";
+  editButton.addEventListener("click", () => {
+    const postId = data.post.id;
+    editPost(postId);
+  });
+
+  // Create the delete button
+  const deleteButton = document.createElement("button");
+  deleteButton.classList.add("delete-button");
+  deleteButton.textContent = "Delete";
+  deleteButton.addEventListener("click", () => {
+    const postId = data.post.id;
+    deletePostFromDatabase(postId);
+    postContainer.remove();
+    navigateTo("/");
+  });
+
+  postContainer.append(
+    author,
+    postTitle,
+    postContent,
+    createdAt,
+    editButton,
+    deleteButton
+  );
+  return postContainer;
+}
+
 export function createPostComponent(post) {
   // Create the post container
   const postContainer = document.createElement("div");
@@ -68,7 +133,7 @@ export function createPostComponent(post) {
   postTitle.classList.add("post-title");
   postTitle.textContent = post.title;
   postTitle.addEventListener("click", () => {
-    navigateTo("/post/" + post.id); 
+    navigateTo("/post/" + post.id);
   });
 
   // Displaying the author's name
@@ -114,6 +179,17 @@ export function createPostComponent(post) {
     deleteButton
   );
   return postContainer;
+}
+
+export async function getPosts(formAndPostContainer) {
+  // Get the data using fetchPosts function
+  const data = await fetchPosts();
+
+  // Create the post components
+  data.forEach((post) => {
+    const postComponent = createPostComponent(post);
+    formAndPostContainer.append(postComponent);
+  });
 }
 
 // Edit the post
@@ -163,7 +239,7 @@ export function editPost(postId) {
   updateButton.classList.add("update-button");
   updateButton.textContent = "Update";
   updateButton.addEventListener("click", (e) => {
-    e.preventDefault;
+    e.preventDefault();
     updatePostInDatabase(postId);
   });
 
@@ -226,6 +302,8 @@ export function updatePostElement(post, postContainer) {
   deleteButton.addEventListener("click", () => {
     const postId = post.id;
     deletePostFromDatabase(postId);
+    postContainer.remove();
+    navigateTo("/");
   });
 
   postContainer.append(editButton, deleteButton);

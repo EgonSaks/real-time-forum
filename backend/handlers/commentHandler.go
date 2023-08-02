@@ -12,8 +12,7 @@ import (
 	"github.com/real-time-forum/database/sqlite"
 )
 
-// The function `Comments` handles different HTTP methods for creating, updating, deleting, and retrieving
-// comments.
+// The function `Comments` handles different HTTP methods for creating, updating, deleting, and retrieving comments.
 func Comments(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		createComment(w, r)
@@ -127,9 +126,7 @@ func updateComment(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-// The deleteComment function receives a HTTP request, extracts the comment ID from the request body, deletes
-// the corresponding comment from a SQLite database, and sends a response indicating the success or
-// failure of the deletion.
+
 func deleteComment(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		CommentID string `json:"commentId"`

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/real-time-forum/database/models"
 	"github.com/real-time-forum/database/sqlite"
@@ -13,9 +14,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// The function `Posts` handles different HTTP methods for creating, updating, deleting, and retrieving
-// posts.
-func Posts(w http.ResponseWriter, r *http.Request) {
+// The function `Post` handles different HTTP methods for creating, updating, deleting, and retrieving post.
+func Post(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		createPost(w, r)
 	} else if r.Method == http.MethodPut {
@@ -23,14 +23,53 @@ func Posts(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == http.MethodDelete {
 		deletePost(w, r)
 	} else if r.Method == http.MethodGet {
+		getPost(w, r)
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+type ResponseData struct {
+	Post     *models.Post     `json:"post"`
+	Comments []models.Comment `json:"comments"`
+}
+
+// The function `Posts` gets all posts from a database.
+func Posts(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
 		getPosts(w, r)
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
-// The createPost function creates a new post, saves it to a database, and returns the created post as
-// JSON.
+// The function retrieves all posts from a database
+func getPosts(w http.ResponseWriter, r *http.Request) {
+	database, err := sqlite.OpenDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.DB.Close()
+
+	posts, err := models.GetAllPosts(database.DB)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	data, err := json.Marshal(posts)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+}
+
+// The createPost function creates a new post
 func createPost(w http.ResponseWriter, r *http.Request) {
 	var post models.Post
 	post.ID = uuid.New().String()
@@ -66,22 +105,54 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-// The function retrieves all posts from a database and returns them as a JSON response.
-func getPosts(w http.ResponseWriter, r *http.Request) {
+// Function to get a single post by its ID
+func getPost(w http.ResponseWriter, r *http.Request) {
+	// Get the post ID from the URL query parameter
+	postID := strings.TrimPrefix(r.URL.Path, "/api/post/")
+	if postID == "" {
+		http.NotFound(w, r)
+		return
+	}
+	// Open the database connection
 	database, err := sqlite.OpenDatabase()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer database.DB.Close()
 
-	posts, err := models.GetAllPosts(database.DB)
+	// Retrieve the post from the database by its ID
+	post, err := models.GetPostByID(database.DB, postID)
 	if err != nil {
+		// If the post is not found, return a 404 Not Found response
+		if err == sql.ErrNoRows {
+			http.NotFound(w, r)
+			return
+		}
+
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println(err)
 		return
 	}
 
-	data, err := json.Marshal(posts)
+	comments, err := models.GetCommentsByPostID(database.DB, postID)
+	if err != nil {
+		// If the post is not found, return a 404 Not Found response
+		if err == sql.ErrNoRows {
+			http.NotFound(w, r)
+			return
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	responseData := &ResponseData{
+		Post:     post,
+		Comments: comments,
+	}
+
+	data, err := json.Marshal(responseData)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println(err)
@@ -92,6 +163,7 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// The updatePost function updates an existing post
 func updatePost(w http.ResponseWriter, r *http.Request) {
 	var post models.Post
 
@@ -128,9 +200,7 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-// The deletePost function receives a HTTP request, extracts the post ID from the request body, deletes
-// the corresponding post from a SQLite database, and sends a response indicating the success or
-// failure of the deletion.
+// The deletePost function deletes an existing post
 func deletePost(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		PostID string `json:"postId"`
@@ -162,42 +232,4 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Post deleted successfully")
-}
-
-// Function to get a single post by its ID
-func GetPost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Hello from get post")
-	// Get the post ID from the URL query parameter
-	postID := r.URL.Query().Get("postId")
-
-	// Open the database connection
-	database, err := sqlite.OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer database.DB.Close()
-
-	// Retrieve the post from the database by its ID
-	post, err := models.GetPostByID(database.DB, postID)
-	if err != nil {
-		// If the post is not found, return a 404 Not Found response
-		if err == sql.ErrNoRows {
-			http.NotFound(w, r)
-			return
-		}
-
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
-		return
-	}
-
-	data, err := json.Marshal(post)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(data)
 }

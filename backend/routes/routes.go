@@ -9,9 +9,11 @@ import (
 func Routes() http.Handler {
 	mux := http.NewServeMux()
 
-	// mux.HandleFunc("/api/post", handlers.Post)
+	mux.HandleFunc("/login", handlers.Login)
+	mux.HandleFunc("/register", handlers.Register)
+
 	mux.HandleFunc("/api/posts", handlers.Posts)
-	// mux.HandleFunc("/api/comment", handlers.Comment)
+	mux.HandleFunc("/api/post/", handlers.Post)
 	mux.HandleFunc("/api/comments", handlers.Comments)
 
 	return mux

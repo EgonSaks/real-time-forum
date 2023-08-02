@@ -1,18 +1,20 @@
-import { deletePostFromDatabase, fetchPosts } from "../api/postAPI.js";
-import { createCommentFormComponent } from "../components/comment.js";
-import { createPostComponent } from "../components/post.js";
-import { navigateTo } from "../router/router.js";
+import { fetchSinglePost } from "../api/postAPI.js";
+import {
+  createCommentFormComponent,
+  updateCommentsView,
+} from "../components/comment.js";
+import { createSinglePostComponent } from "../components/post.js";
 
 // PostView function with messengerVisible parameter
 export async function PostView(_, messengerVisible) {
   const urlParts = window.location.href.split("/");
   const id = urlParts[urlParts.length - 1];
 
-  // Get the data using fetchPosts function
-  const data = await fetchPosts();
+  // Get the data object with post and comments
+  const post = await fetchSinglePost(id);
 
-  // Find the post with matching id
-  const singlePost = data.find((post) => post.id === id);
+  // Fetch the comments for the post
+  const comments = post ? post.comments : [];
 
   // Try to get the existing contentContainer
   let contentContainer = document.getElementById("content-container");
@@ -33,38 +35,20 @@ export async function PostView(_, messengerVisible) {
     root.append(postViewContainer);
   }
 
-  // const comments = await fetchComments();
-  // console.log("comments from single post", comments);
-
-  // if (comments) {
-  //   const contentContainer = document.getElementById("content-container");
-  //   const commentComponent = updateCommentsView(comments);
-
-  //   contentContainer.append(commentComponent);
-  // }
-
   // Clear the existing posts
   contentContainer.innerHTML = "";
 
   // If there is a matching post, create the post component for the single post
-  if (singlePost) {
-    const postComponent = createPostComponent(singlePost);
-
-    const deleteButton = postComponent.querySelector(".delete-button");
-
-    deleteButton.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const postId = singlePost.id;
-      await deletePostFromDatabase(postId);
-      navigateTo("/");
-    });
+  if (post) {
+    const id = post.post.id;
+    const commentForm = createCommentFormComponent(id);
+    const postComponent = createSinglePostComponent(post);
 
     const postTitle = postComponent.querySelector(".post-title");
     postTitle.style.cursor = "default";
 
-    const commentForm = createCommentFormComponent(singlePost.id);
-
     contentContainer.append(postComponent, commentForm);
+    updateCommentsView(comments, contentContainer);
   } else {
     const errorMessage = document.createElement("p");
     errorMessage.textContent = "No post found.";
