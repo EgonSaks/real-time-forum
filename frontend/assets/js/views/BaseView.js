@@ -19,6 +19,7 @@ export function createBaseView(params, matchedView) {
   const navbar = createNavbar(user);
 
   const messengerVisible = getMessengerVisibility();
+  // console.log(messengerVisible);
 
   const userLoggedIn = user.isLoggedIn;
 
@@ -42,9 +43,13 @@ export function createBaseView(params, matchedView) {
 
   if (userLoggedIn) {
     if (matchedView === HomeView) {
+      // console.log(messengerVisible, "HomeView");
+
       matchedView(params, messengerVisible);
       appContainer.append(navbar, chatContainer);
     } else if (matchedView === PostView) {
+
+      // console.log(messengerVisible, "PostView");
       matchedView(params, messengerVisible);
       appContainer.append(navbar, chatContainer);
     }
