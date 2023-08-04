@@ -36,34 +36,23 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(user)
-
-	// Check if either username or email matches and compare passwords.
 	if (user.Username == creds.Username || user.Email == creds.Email) && utils.ComparePasswords(user.Password, creds.Password) {
 
 		_, err := utils.SetSession(w, r, user.UserID)
 		if err != nil {
-			// Handle error if necessary
 			fmt.Println("Error setting session:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		response := map[string]string{"message": "Login successful"}
+		response := map[string]interface{}{
+			"message":  "Login successful",
+			"username": user.Username,
+			"email":    user.Email,
+		}
 		json.NewEncoder(w).Encode(response)
 	} else {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
-
-}
-
-func Logout(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
-	response := map[string]string{"message": "Logout successful"}
-	json.NewEncoder(w).Encode(response)
 }

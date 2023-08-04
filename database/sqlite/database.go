@@ -18,7 +18,6 @@ func OpenDatabase() (*Database, error) {
 		return nil, err
 	}
 
-	// Print out the schema file path
 	schemaFilePath := "../database/sqlite/schema.sql"
 	schema, err := os.ReadFile(schemaFilePath)
 	if err != nil {

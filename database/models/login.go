@@ -12,10 +12,7 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-// GetUserDetails retrieves the user credentials from the database based on the provided username or email.
 func GetUserDetails(db *sql.DB, credentials Credentials) (storedCredentials Credentials, err error) {
-	fmt.Println("credentials in login, before getting from the database", credentials)
-
 	// Check if the username or email is provided.
 	var identifier string
 	if credentials.Username != "" {

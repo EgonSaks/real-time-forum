@@ -5,12 +5,10 @@ import { registerUser } from "../api/registerAPI.js";
 import { createCommentComponent } from "../components/comment.js";
 import { updatePostsView } from "../components/post.js";
 
-// Validate form input
 export async function validatePostInput(titleInput, contentInput, errorMsg) {
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
 
-  // Validate the data
   if (title === "") {
     errorMsg.innerHTML = "Title cannot be empty";
     errorMsg.style.display = "block";
@@ -27,7 +25,6 @@ export async function validatePostInput(titleInput, contentInput, errorMsg) {
     errorMsg.innerHTML = "";
     errorMsg.style.display = "none";
 
-    // Prepare the data
     const post = {
       title: title,
       content: content,
@@ -47,7 +44,6 @@ export async function validatePostInput(titleInput, contentInput, errorMsg) {
   }
 }
 
-// Function to validate the updated data
 export function validateUpdatedData(title, content, postContainer) {
   if (title === "") {
     const errorMsg = postContainer.querySelector(".error-msg");
@@ -77,15 +73,9 @@ export function validateUpdatedData(title, content, postContainer) {
   }
 }
 
-// Validate the comment input
-export async function validateCommentInput(
-  commentContentInput,
-  errorMsg,
-  postId
-) {
+export async function validateCommentInput(commentContentInput, errorMsg, postID, author) {
   const commentContent = commentContentInput.value.trim();
 
-  // Validate the data
   if (commentContent === "") {
     errorMsg.innerHTML = "Comment cannot be empty";
     errorMsg.style.display = "block";
@@ -100,9 +90,9 @@ export async function validateCommentInput(
     errorMsg.innerHTML = "";
     errorMsg.style.display = "none";
 
-    // Prepare the data
     const comment = {
-      post_id: postId,
+      post_id: postID,
+      author: author,
       content: commentContent,
       created_at: new Date().toISOString(),
     };
@@ -130,7 +120,6 @@ export async function validateCommentInput(
   }
 }
 
-// Validate the register form data
 export async function validateRegisterFormData(
   usernameInput,
   firstNameInput,
@@ -221,7 +210,6 @@ export async function validateRegisterFormData(
     errorMsg.style.marginTop = "0";
     errorMsg.style.marginLeft = "0";
 
-    // Prepare the data
     const gender = male ? "Male" : "Female";
     const user = {
       username: username,
@@ -236,14 +224,12 @@ export async function validateRegisterFormData(
     try {
       const response = await registerUser(user);
 
-      // Check if the server response contains an error message
       if (response.error) {
         errorMsg.innerHTML = response.error;
         errorMsg.style.display = "block";
         return false;
       }
 
-      // Registration successful
       return true;
     } catch (error) {
       errorMsg.textContent =
@@ -255,7 +241,6 @@ export async function validateRegisterFormData(
   }
 }
 
-// Validate the login form input
 export async function validateLoginFormInput(
   usernameOrEmailInput,
   passwordInput
@@ -274,48 +259,6 @@ export async function validateLoginFormInput(
     errorMsg.style.marginBottom = "0.625rem";
     errorMsg.style.display = "block";
   } else {
-    // Check if the input looks like an email address
-    // const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usernameOrEmail);
-
-    // if (isEmail) {
-    //   console.log("Email login:", usernameOrEmail);
-    //   // Login with email
-    //   const user = {
-    //     email: usernameOrEmail,
-    //     password: password,
-    //   };
-    //   try {
-    //     await loginUser(user);
-    //     // If login is successful, clear the error message.
-    //     errorMsg.innerHTML = "";
-    //     errorMsg.style.display = "none";
-    //   } catch (error) {
-    //     // If there's an error, display the error message to the user.
-    //     errorMsg.innerHTML = error.message;
-    //     errorMsg.style.marginBottom = "0.625rem";
-    //     errorMsg.style.display = "block";
-    //   }
-    // } else {
-    //   console.log("Username login:", usernameOrEmail);
-    //   // Login with username
-    //   const user = {
-    //     username: usernameOrEmail,
-    //     password: password,
-    //   };
-    //   try {
-    //     await loginUser(user);
-    //     // If login is successful, clear the error message.
-    //     errorMsg.innerHTML = "";
-    //     errorMsg.style.display = "none";
-    //   } catch (error) {
-    //     // If there's an error, display the error message to the user.
-    //     errorMsg.innerHTML = error.message;
-    //     errorMsg.style.marginBottom = "0.625rem";
-    //     errorMsg.style.display = "block";
-    //   }
-    // }
-
-    // Check if the input looks like an email address
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usernameOrEmail);
 
     if (isEmail) {
@@ -326,14 +269,11 @@ export async function validateLoginFormInput(
         password: password,
       };
 
-
       try {
         await loginUser(user);
-        // If login is successful, clear the error message.
         errorMsg.innerHTML = "";
         errorMsg.style.display = "none";
       } catch (error) {
-        // If there's an error, display the error message to the user.
         errorMsg.innerHTML = error.message;
         errorMsg.style.marginBottom = "0.625rem";
         errorMsg.style.display = "block";
@@ -345,14 +285,12 @@ export async function validateLoginFormInput(
         username: usernameOrEmail,
         password: password,
       };
-      
+
       try {
         await loginUser(user);
-        // If login is successful, clear the error message.
         errorMsg.innerHTML = "";
         errorMsg.style.display = "none";
       } catch (error) {
-        // If there's an error, display the error message to the user.
         errorMsg.innerHTML = error.message;
         errorMsg.style.marginBottom = "0.625rem";
         errorMsg.style.display = "block";

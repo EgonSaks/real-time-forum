@@ -77,7 +77,6 @@ export function registerFormElement() {
   registerButton.setAttribute("type", "submit");
   registerButton.textContent = "Register";
 
-  // Create the error message
   const errorMsg = document.createElement("p");
   errorMsg.classList.add("error-msg");
   errorMsg.style.display = "none";

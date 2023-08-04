@@ -14,19 +14,12 @@ import (
 func Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		createUser(w, r)
-	} else if r.Method == http.MethodPut {
-		updateUser(w, r)
-	} else if r.Method == http.MethodDelete {
-		deleteUser(w, r)
-	} else if r.Method == http.MethodGet {
-		getUser(w, r)
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
 func createUser(w http.ResponseWriter, r *http.Request) {
-
 	var user models.User
 	user.ID = uuid.New().String()
 
@@ -82,13 +75,4 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(data)
-}
-
-func getUser(w http.ResponseWriter, r *http.Request) {
-}
-
-func updateUser(w http.ResponseWriter, r *http.Request) {
-}
-
-func deleteUser(w http.ResponseWriter, r *http.Request) {
 }

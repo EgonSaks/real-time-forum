@@ -182,10 +182,15 @@ button:focus {
 
 .input-title,
 .input-content {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin-bottom: 0.625rem;
   padding: 0.4rem;
   resize: none;
+}
+
+.input-title::placeholder,
+.input-content::placeholder {
+  color: rgb(255, 85, 85);
 }
 
 .character-count{
@@ -519,7 +524,6 @@ a.register-link {
 
 .messenger-header {
   padding: 0.625rem;
-  height: 5vh;
   font-size: 1.2rem;
   font-weight: bold;
 }
@@ -566,8 +570,8 @@ a.register-link {
   border-radius: 0.3rem;
   margin-left: 0.5rem;
   margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
   padding: 0.4rem;
-  height: 3vh;
   width: 75%;
   overflow: auto;
   resize: none;
@@ -575,11 +579,12 @@ a.register-link {
   white-space: pre-wrap;
 }
 
+
+
 .message-send-button {
   margin-left: 0.3rem;
-  margin-top: 0.5rem; 
-  margin-right: 0.3rem;
-  height: 3vh;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
   width: 18%;
   overflow: auto;
   resize: none;
@@ -623,7 +628,6 @@ a.register-link {
   border-radius: 0.3rem;
   cursor: pointer;
   padding: 0.625rem;
-  height: 5vh;
   margin: 0.3rem 0.3rem;
 }
 

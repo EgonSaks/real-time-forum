@@ -21,7 +21,6 @@ export async function registerUser(user) {
     navigateTo("/login");
     return responseData;
   } catch (error) {
-    // console.error(error);
     throw error;
   }
 }

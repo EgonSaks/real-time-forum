@@ -1,18 +1,15 @@
 export function convertTime(inputDateString) {
-  // Convert the input string to a Date object
   const date = new Date(inputDateString);
 
-  // Format the time
   const timeOptions = {
     hour: "numeric",
     minute: "2-digit",
-    hour12: true, // Use 12-hour format (AM/PM)
+    hour12: true, 
   };
   const timeString = date.toLocaleString("en-US", timeOptions);
 
-  // Format the date
   const dateOptions = {
-    month: "long", // Use "long" to get the full month name
+    month: "long", 
     day: "numeric",
     year: "numeric",
   };

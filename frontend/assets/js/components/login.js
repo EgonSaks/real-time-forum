@@ -24,7 +24,6 @@ export function loginFormElement() {
   password.setAttribute("type", "password");
   password.setAttribute("autocomplete", "current-password");
 
-  // Create the error message
   const errorMsg = document.createElement("p");
   errorMsg.classList.add("error-msg");
   errorMsg.style.display = "none";

@@ -11,18 +11,6 @@ import (
 	"github.com/real-time-forum/database/sqlite"
 )
 
-func SessionMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, ok := GetUserFromSession(r)
-		if !ok {
-			fmt.Println("No active session found")
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
 func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie, error) {
 	user := models.User{
 		ID: id,
@@ -47,7 +35,7 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 			HttpOnly: true,
 			Expires:  time.Now().Add(2 * time.Hour),
 			Secure:   true,
-			SameSite: http.SameSiteStrictMode,
+			SameSite: http.SameSiteNoneMode,
 		}
 		http.SetCookie(w, cookie)
 
@@ -79,7 +67,7 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 				HttpOnly: true,
 				Expires:  time.Now().Add(2 * time.Hour),
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteNoneMode,
 			}
 
 			http.SetCookie(w, cookie)
@@ -107,7 +95,7 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 				HttpOnly: true,
 				Expires:  time.Now().Add(2 * time.Hour),
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteNoneMode,
 			}
 			http.SetCookie(w, cookie)
 
@@ -130,7 +118,6 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 }
 
 func GetUserFromSession(r *http.Request) (models.User, bool) {
-
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		return models.User{}, false
@@ -149,7 +136,7 @@ func GetUserFromSession(r *http.Request) (models.User, bool) {
 	}
 
 	var user models.User
-	err = database.DB.QueryRow(`SELECT id, name, email, hashed_password, created_at, updated_at FROM users WHERE id = ?`, userID).Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err = database.DB.QueryRow(`SELECT id, username, first_name, last_name, email, age, password, gender, created_at, updated_at FROM users WHERE id = ?`, userID).Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.Email, &user.Age, &user.Password, &user.Gender, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return models.User{}, false
 	}

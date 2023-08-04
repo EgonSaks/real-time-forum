@@ -1,7 +1,6 @@
-const POST_API = "http://localhost:8081/api/post/";
 const POSTS_API = "http://localhost:8081/api/posts";
+const POST_API = "http://localhost:8081/api/post/";
 
-// Function to fetch all posts from the database
 export async function fetchPosts() {
   return fetch(POSTS_API, {
     credentials: "include",
@@ -18,7 +17,6 @@ export async function fetchPosts() {
     });
 }
 
-// Function to create a new post in the database
 export async function createPostToDatabase(data) {
   return fetch(POST_API, {
     method: "POST",
@@ -54,7 +52,6 @@ export async function fetchSinglePost(postID) {
     });
 }
 
-// Function to delete a post from the database
 export async function deletePostFromDatabase(postId) {
   return fetch(POST_API, {
     method: "DELETE",
@@ -74,7 +71,6 @@ export async function deletePostFromDatabase(postId) {
     });
 }
 
-// Function to update a post in the database
 export async function updatePostData(updatedData) {
   const url = POST_API;
   const payload = {

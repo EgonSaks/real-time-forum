@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,27 +15,26 @@ func main() {
 		port = "8080"
 	}
 
-	templatesPath := filepath.Join(".", "templates")
-	indexPath := filepath.Join(templatesPath, "index.html")
-	assetsPath := filepath.Join(".", "assets")
+	http.HandleFunc("/", index)
 
+	assetsPath := filepath.Join(".", "assets")
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsPath))))
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmpl, err := template.ParseFiles(indexPath)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		err = tmpl.Execute(w, nil)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	})
-
 	addr := ":" + port
-	fmt.Println("Frontend server running at http://localhost:" + port)
-	http.ListenAndServe(addr, nil)
+	fmt.Println("Frontend server running at https://localhost:" + port)
+	log.Fatal(http.ListenAndServe(addr, nil))
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(filepath.Join("templates/index.html"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
