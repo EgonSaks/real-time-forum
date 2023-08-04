@@ -57,6 +57,7 @@ export function createChats(users) {
 }
 
 function showMessenger(user) {
+  console.log("Showing messenger...");
   if (currentUser === user) {
     return;
   }
@@ -77,6 +78,7 @@ function showMessenger(user) {
 
   messengerVisible = true;
   messenger.classList.remove("messenger-hidden");
+  console.log("Showing messenger");
 
   const messengerBody = messenger.querySelector(".messenger-body");
   const inputContainer = messenger.querySelector(".input-container");
@@ -117,6 +119,7 @@ function hideMessenger() {
 
   currentUser = null;
   messengerVisible = false;
+  console.log("Hiding messenger");
 
   messenger.classList.add("messenger-hidden");
 
@@ -154,8 +157,10 @@ function sendMessage() {
 }
 
 export function createMessenger(user) {
+  console.log("Creating messenger...");
   const messenger = document.createElement("div");
   messenger.classList.add("messenger", "messenger-hidden");
+  messenger.classList.add("messenger");
 
   const messengerHeader = document.createElement("div");
   messengerHeader.classList.add("messenger-header");
@@ -201,14 +206,14 @@ export function createMessenger(user) {
       sendButton.style.backgroundColor = "rgb(25, 195, 125)";
       sendButton.style.color = "#fff";
       sendButton.style.cursor = "pointer";
-      sendButton.style.borderRadius = "0.3rem"; 
-      sendButton.style.border = "none"; 
+      sendButton.style.borderRadius = "0.3rem";
+      sendButton.style.border = "none";
     } else {
       sendButton.style.backgroundColor = "";
-      sendButton.style.color = ""; 
-      sendButton.style.cursor = ""; 
-      sendButton.style.borderRadius = ""; 
-      sendButton.style.border = ""; // 
+      sendButton.style.color = "";
+      sendButton.style.cursor = "";
+      sendButton.style.borderRadius = "";
+      sendButton.style.border = ""; //
     }
   }
 

@@ -10,17 +10,16 @@ import { Login } from "../views/Login.js";
 import { PostView } from "../views/PostView.js";
 import { Register } from "../views/Register.js";
 
+// Create chatContainer and navbar outside the function
+const chatContainer = createChatContainer();
+const user = isLoggedIn();
+const navbar = createNavbar(user);
+
 export function createBaseView(params, matchedView) {
   const appContainer = document.querySelector("#app");
   appContainer.innerHTML = "";
 
-  const user = isLoggedIn();
-  const chatContainer = createChatContainer();
-  const navbar = createNavbar(user);
-
   const messengerVisible = getMessengerVisibility();
-  // console.log(messengerVisible);
-
   const userLoggedIn = user.isLoggedIn;
 
   if (
@@ -43,16 +42,13 @@ export function createBaseView(params, matchedView) {
 
   if (userLoggedIn) {
     if (matchedView === HomeView) {
-      // console.log(messengerVisible, "HomeView");
-
       matchedView(params, messengerVisible);
-      appContainer.append(navbar, chatContainer);
     } else if (matchedView === PostView) {
-
-      // console.log(messengerVisible, "PostView");
       matchedView(params, messengerVisible);
-      appContainer.append(navbar, chatContainer);
     }
+
+    // Append the chatContainer and navbar only once
+    appContainer.append(navbar, chatContainer);
   } else {
     if (matchedView === Register) {
       matchedView();
@@ -61,3 +57,4 @@ export function createBaseView(params, matchedView) {
     }
   }
 }
+
