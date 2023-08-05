@@ -1,10 +1,14 @@
 import { fetchCommentsByPostID } from "../api/commentAPI.js";
-import { deletePostFromDatabase, fetchSinglePost } from "../api/postAPI.js";
+import {
+  deletePostFromDatabase,
+  fetchPosts,
+  fetchSinglePost,
+} from "../api/postAPI.js";
 import {
   createCommentFormComponent,
   updateCommentsView,
 } from "../components/comment.js";
-import { createPostComponent } from "../components/post.js";
+import { createPostComponent, updatePostsView } from "../components/post.js";
 import { navigateTo } from "../router/router.js";
 
 export async function PostView(_, messengerVisible) {
@@ -13,6 +17,10 @@ export async function PostView(_, messengerVisible) {
 
   const post = await fetchSinglePost(id);
   const comment = await fetchCommentsByPostID(id);
+
+  const author = comment.length > 0 ? comment[0].author : null;
+
+  console.log(comment);
 
   let contentContainer = document.getElementById("content-container");
 
@@ -32,7 +40,7 @@ export async function PostView(_, messengerVisible) {
   contentContainer.innerHTML = "";
 
   if (post) {
-    const commentForm = createCommentFormComponent(post.id, post.author);
+    const commentForm = createCommentFormComponent(post.id, author);
     const postContainer = createPostComponent(post);
 
     const postTitle = postContainer.querySelector(".post-title");
@@ -41,12 +49,20 @@ export async function PostView(_, messengerVisible) {
     postTitleClone.style.cursor = "default";
 
     const deleteButton = postContainer.querySelector(".delete-button");
-    deleteButton.addEventListener("click", () => {
-      deletePostFromDatabase(post.id);
+    deleteButton.addEventListener("click", async () => {
+      await deletePostFromDatabase(post.id);
       console.log("post deleted");
+
       postContainer.remove();
 
-      navigateTo("/");
+      const updatedPosts = await fetchPosts();
+      const postExistsInHomeView = updatedPosts.some((p) => p.id === post.id);
+
+      if (!postExistsInHomeView) {
+        navigateTo("/");
+      } else {
+        updatePostsView(updatedPosts);
+      }
     });
 
     contentContainer.append(postContainer, commentForm);

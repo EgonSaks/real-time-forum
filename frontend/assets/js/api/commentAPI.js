@@ -1,4 +1,3 @@
-// const COMMENTS_API = "http://localhost:8081/api/comments";
 const COMMENT_API = "http://localhost:8081/api/comment";
 
 export async function createCommentToDatabase(data) {

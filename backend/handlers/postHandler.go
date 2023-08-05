@@ -37,31 +37,6 @@ func Posts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getPosts(w http.ResponseWriter, r *http.Request) {
-	database, err := sqlite.OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer database.DB.Close()
-
-	posts, err := models.GetAllPosts(database.DB)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
-		return
-	}
-
-	data, err := json.Marshal(posts)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(data)
-}
-
 func createPost(w http.ResponseWriter, r *http.Request) {
 	var post models.Post
 	post.ID = uuid.New().String()
@@ -104,8 +79,32 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func getPost(w http.ResponseWriter, r *http.Request) {
+func getPosts(w http.ResponseWriter, r *http.Request) {
+	database, err := sqlite.OpenDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.DB.Close()
 
+	posts, err := models.GetAllPosts(database.DB)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	data, err := json.Marshal(posts)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+}
+
+func getPost(w http.ResponseWriter, r *http.Request) {
 	postID := strings.TrimPrefix(r.URL.Path, "/api/post/")
 	if postID == "" {
 		http.NotFound(w, r)

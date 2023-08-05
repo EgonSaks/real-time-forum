@@ -58,6 +58,37 @@ func GetUser(db *sql.DB, userID string) (User, error) {
 	return user, nil
 }
 
+func GetAllUsers(db *sql.DB) ([]User, error) {
+	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var users []User
+	query := "SELECT * FROM users"
+	rows, err := db.QueryContext(context, query)
+	if err != nil {
+		fmt.Printf("failed to fetch users: %v", err)
+		return nil, fmt.Errorf("failed to fetch users: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user User
+		err := rows.Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.Email, &user.Age, &user.Password, &user.Gender, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			fmt.Printf("failed to scan user row: %v", err)
+			return nil, fmt.Errorf("failed to scan user row: %v", err)
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Printf("error while iterating through rows: %v", err)
+		return nil, fmt.Errorf("error while iterating through rows: %v", err)
+	}
+
+	return users, nil
+}
+
 func UpdateUser(db *sql.DB, user User) error {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

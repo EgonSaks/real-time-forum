@@ -212,6 +212,7 @@ export function updatePostElement(post, postContainer) {
     const postId = post.id;
     deletePostFromDatabase(postId);
     postContainer.remove();
+
     navigateTo("/");
   });
 
@@ -247,16 +248,20 @@ export function updatePostsView(posts) {
     "form-and-post-container"
   );
 
-  const firstPostComponent = formAndPostContainer.querySelector(
-    ".post-container:first-child"
-  );
+  const existingPostContainers = formAndPostContainer.querySelectorAll(".post-container");
 
-  const latestPost = posts[posts.length - 1];
-  const latestPostComponent = createPostComponent(latestPost);
+  const updatedPostIds = new Set(posts.map((post) => post.id));
 
-  if (firstPostComponent) {
-    formAndPostContainer.insertBefore(latestPostComponent, firstPostComponent);
-  } else {
-    formAndPostContainer.append(latestPostComponent);
-  }
+  existingPostContainers.forEach((postContainer) => {
+    const postId = postContainer.id.trim;
+
+    if (!updatedPostIds.has(postId)) {
+      postContainer.remove();
+    }
+  });
+
+  posts.forEach((post) => {
+    const postComponent = createPostComponent(post);
+    formAndPostContainer.append(postComponent);
+  });
 }

@@ -14,6 +14,9 @@ func Routes() http.Handler {
 	mux.HandleFunc("/logout", auth.Logout)
 	mux.HandleFunc("/register", auth.Register)
 
+	mux.HandleFunc("/api/users", handlers.Users)
+	mux.HandleFunc("/api/user/", handlers.User)
+
 	mux.HandleFunc("/api/posts", handlers.Posts)
 	mux.HandleFunc("/api/post/", handlers.Post)
 	mux.HandleFunc("/api/comment", handlers.Comment)

@@ -1,5 +1,6 @@
 import { createBaseView } from "../views/BaseView.js";
 import { routes } from "./routes.js";
+import { isLoggedIn } from "../utils/auth.js";
 
 const pathToRegex = (path) =>
   new RegExp(
@@ -45,7 +46,9 @@ export const router = async () => {
   const matchedView = matchedRoute.route.view;
   const params = await getParams(matchedRoute);
 
-  createBaseView(params, matchedView);
+  const user = isLoggedIn();
+
+  createBaseView(params, matchedView, user);
 };
 
 window.addEventListener("popstate", () => {

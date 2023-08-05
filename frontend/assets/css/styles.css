@@ -152,6 +152,9 @@ button:focus {
 .logged-in-label {
   margin-right: 1.5rem; 
   font-weight: bolder;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: rgb(255, 85, 85);
 }
 
 .logout-button {

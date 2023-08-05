@@ -57,7 +57,6 @@ export function createChats(users) {
 }
 
 function showMessenger(user) {
-  console.log("Showing messenger...");
   if (currentUser === user) {
     return;
   }
@@ -78,7 +77,6 @@ function showMessenger(user) {
 
   messengerVisible = true;
   messenger.classList.remove("messenger-hidden");
-  console.log("Showing messenger");
 
   const messengerBody = messenger.querySelector(".messenger-body");
   const inputContainer = messenger.querySelector(".input-container");
@@ -119,7 +117,6 @@ function hideMessenger() {
 
   currentUser = null;
   messengerVisible = false;
-  console.log("Hiding messenger");
 
   messenger.classList.add("messenger-hidden");
 
@@ -157,7 +154,6 @@ function sendMessage() {
 }
 
 export function createMessenger(user) {
-  console.log("Creating messenger...");
   const messenger = document.createElement("div");
   messenger.classList.add("messenger", "messenger-hidden");
   messenger.classList.add("messenger");
@@ -243,7 +239,7 @@ export function createMessenger(user) {
   return messenger;
 }
 
-export function createChatContainer() {
+export async function createChatContainer() {
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats");
 
