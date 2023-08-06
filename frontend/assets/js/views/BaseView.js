@@ -1,4 +1,3 @@
-import { fetchUsers } from "../api/userAPI.js";
 import {
   createChatContainer,
   getMessengerVisibility,
@@ -21,8 +20,8 @@ export async function createBaseView(params, matchedView, user) {
   const userLoggedIn = user && user.isLoggedIn;
   const navbar = createNavbar(user);
 
-  const users = await fetchUsers();
-  console.log(users);
+  // const users = await fetchUsers();
+  // console.log(users);
 
   if (
     !userLoggedIn &&

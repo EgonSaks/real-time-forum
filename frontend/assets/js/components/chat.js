@@ -1,3 +1,4 @@
+import { sendEvent } from "../websocket/websocket.js";
 import { data } from "./dummyData.js";
 let currentUser = null;
 let messengerVisible = false;
@@ -133,7 +134,8 @@ function hideMessenger() {
 function sendMessage() {
   const messageInput = document.querySelector(".messenger-input");
   const message = messageInput.value.trim();
-  if (message !== "") {
+
+  if (message !== null && message !== "") {
     const chatMessages = document.querySelector(".chat-messages");
 
     const messageContainer = document.createElement("div");
@@ -141,7 +143,9 @@ function sendMessage() {
 
     const messageElement = document.createElement("p");
     messageElement.classList.add("message");
-    messageElement.textContent = message;
+    // messageElement.textContent = message;
+    // messageElement.textContent = sendEvent("send_message", { message: message, from: "user" });
+    messageElement.textContent = sendEvent("send_message", message);
 
     messageContainer.appendChild(messageElement);
     chatMessages.appendChild(messageContainer);
@@ -149,7 +153,6 @@ function sendMessage() {
     console.log("Sending message:", message);
     messageInput.value = "";
   }
-
   showMessenger(currentUser);
 }
 
@@ -191,7 +194,7 @@ export function createMessenger(user) {
   inputContainer.classList.add("input-container");
 
   const messengerInput = document.createElement("textarea");
-  messengerInput.setAttribute("placeholder", "Type a message...");
+  messengerInput.setAttribute("placeholder", "Send a message");
   messengerInput.classList.add("messenger-input");
 
   function handleTyping() {

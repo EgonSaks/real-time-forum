@@ -185,10 +185,14 @@ button:focus {
 
 .input-title,
 .input-content {
+  border-radius: 0.3rem;
   font-size: 1rem;
   margin-bottom: 0.625rem;
   padding: 0.4rem;
   resize: none;
+  border: none;
+  outline: none; 
+  border: 1px solid #ccc;
 }
 
 .input-title::placeholder,
@@ -585,6 +589,7 @@ a.register-link {
 
 
 .message-send-button {
+  margin-right: 0.3rem;
   margin-left: 0.3rem;
   padding-top: 0.6rem;
   padding-bottom: 0.6rem;

@@ -1,4 +1,5 @@
 import { navigateTo } from "../router/router.js";
+import { connectWebsocket } from "../websocket/websocket.js";
 
 const LOGIN_API = "http://localhost:8081/login";
 
@@ -18,12 +19,12 @@ export async function loginUser(credentials) {
       return response.json();
     })
     .then((data) => {
-      
       const expiryTime = new Date();
       expiryTime.setHours(expiryTime.getHours() + 2);
       const userData = { ...data, expiresAt: expiryTime.getTime() };
       localStorage.setItem("user", JSON.stringify(userData));
-      
+
+      connectWebsocket(data.otp);
       navigateTo("/");
       return data;
     })

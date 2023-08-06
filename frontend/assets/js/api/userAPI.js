@@ -2,7 +2,7 @@ const USERS_API = "http://localhost:8081/api/users";
 const USER_API = "http://localhost:8081/api/user/";
 
 export async function fetchUsers() {
-    console.log("fetching users");
+  console.log("fetching users");
   return fetch(USERS_API, {
     credentials: "include",
   })
@@ -19,7 +19,6 @@ export async function fetchUsers() {
 }
 
 export async function fetchSingleUser(userID) {
-    console.log("fetching user");
   return fetch(USER_API, {
     method: "GET",
     credentials: "include",

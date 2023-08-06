@@ -10,6 +10,7 @@ export async function logoutUser() {
     .then((response) => {
       if (response.ok) {
         localStorage.removeItem("user");
+        localStorage.removeItem("websocketStatus");
         navigateTo("/login");
       } else {
         console.error("Logout error:", response.statusText);
