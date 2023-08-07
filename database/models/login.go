@@ -13,7 +13,6 @@ type Credentials struct {
 }
 
 func GetUserDetails(db *sql.DB, credentials Credentials) (storedCredentials Credentials, err error) {
-	// Check if the username or email is provided.
 	var identifier string
 	if credentials.Username != "" {
 		identifier = credentials.Username

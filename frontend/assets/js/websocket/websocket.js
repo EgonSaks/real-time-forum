@@ -1,31 +1,36 @@
-// selectedchat is by default General.
-var selectedchat = "general";
 let conn;
-/**
- * Event is used to wrap all messages Send and Recieved
- * on the Websocket
- * The type is used as a RPC
- * */
+
+import { appendChatMessage } from "../components/chat.js";
 class Event {
-  // Each Event needs a Type
-  // The payload is not required
   constructor(type, payload) {
     this.type = type;
     this.payload = payload;
   }
 }
-/**
- * routeEvent is a proxy function that routes
- * events into their correct Handler
- * based on the type field
- * */
+
+export class SendMessageEvent {
+  constructor(message, from) {
+    this.message = message;
+    this.from = from;
+  }
+}
+
+export class NewMessageEvent {
+  constructor(message, from, sent) {
+    this.message = message;
+    this.from = from;
+    this.sent = sent;
+  }
+}
+
 function routeEvent(event) {
   if (event.type === undefined) {
     alert("no 'type' field in event");
   }
   switch (event.type) {
     case "new_message":
-      console.log("new message");
+      const messageEvent = Object.assign(new NewMessageEvent(), event.payload);
+      appendChatMessage(messageEvent);
       break;
     default:
       alert("unsupported message type");
@@ -33,35 +38,11 @@ function routeEvent(event) {
   }
 }
 
-/**
- * changeChatRoom will update the value of selectedchat
- * and also notify the server that it changes chatroom
- * */
-function changeChatRoom() {
-  // Change Header to reflect the Changed chatroom
-  var newchat = document.getElementById("chatroom");
-  if (newchat != null && newchat.value != selectedchat) {
-    console.log(newchat);
-  }
-  return false;
-}
-
-/**
- * sendEvent
- * eventname - the event name to send on
- * payload - the data payload
- * */
 export function sendEvent(eventName, payload) {
-  // Create a event Object with a event named send_message
   const event = new Event(eventName, payload);
-  // Format as JSON and send
   conn.send(JSON.stringify(event));
 }
 
-/**
- * Once the website loads, we want to apply listeners and connect to websocket
- * */
-// export function connectWebsocket(otp)
 export function connectWebsocket(otp) {
   if (window["WebSocket"]) {
     console.log("Supports WebSockets");
@@ -69,26 +50,22 @@ export function connectWebsocket(otp) {
     try {
       console.log("Connecting to Websocket");
       conn = new WebSocket("ws://localhost:8081/ws?otp=" + otp);
-      // conn = new WebSocket("ws://localhost:8081/ws");
 
       conn.onopen = function (e) {
         console.log("WebSocket connection established");
-        const websocketStatus = {status: "connected"};
-        localStorage.setItem("websocketStatus",JSON.stringify(websocketStatus));
+        // const websocketStatus = { status: "connected", otp: otp };
+        // localStorage.setItem("websocketStatus", JSON.stringify(websocketStatus));
       };
 
-      conn.onclose = function(e) {
-       console.log("WebSocket connection closed");
-    }
+      conn.onclose = function (e) {
+        console.log("WebSocket connection closed");
+        localStorage.removeItem("websocketStatus");
+      };
 
       conn.onmessage = function (e) {
-        console.log(e);
-
         const eventData = JSON.parse(e.data);
-
         const event = Object.assign(new Event(), eventData);
-        console.log(event);
-
+        console.log("Received event:", event);
         routeEvent(event);
         return conn;
       };
@@ -103,12 +80,13 @@ export function connectWebsocket(otp) {
 }
 
 window.addEventListener("load", function () {
-  const websocketStatus = localStorage.getItem("websocketStatus");
-  if (websocketStatus) {
-    const statusObj = JSON.parse(websocketStatus);
-    if (statusObj.status === "connected") {
+  const user = localStorage.getItem("user");
+  if (user) {
+    console.log("user", user);
+    const userObj = JSON.parse(user);
+    if (userObj.otp !== "") {
       console.log("Reconnecting to websocket");
-      connectWebsocket();
+      connectWebsocket(userObj.otp);
     }
   }
 });

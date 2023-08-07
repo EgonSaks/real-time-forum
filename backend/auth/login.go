@@ -20,7 +20,6 @@ type LoginResponse struct {
 }
 
 func Login(manager *websockets.Manager) http.HandlerFunc {
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
@@ -56,7 +55,7 @@ func Login(manager *websockets.Manager) http.HandlerFunc {
 			}
 
 			otp := manager.Otps.NewOTP()
-
+			fmt.Println("OTP:", otp.Key)
 			response := LoginResponse{
 				Message:  "Login successful",
 				Username: user.Username,
@@ -68,7 +67,5 @@ func Login(manager *websockets.Manager) http.HandlerFunc {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
-
 	}
-
 }

@@ -21,7 +21,7 @@ func main() {
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsPath))))
 
 	addr := ":" + port
-	fmt.Println("Frontend server running at https://localhost:" + port)
+	fmt.Println("Frontend server running at http://localhost:" + port)
 	log.Fatal(http.ListenAndServe(addr, nil))
 }
 

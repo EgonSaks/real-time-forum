@@ -1,4 +1,4 @@
-import { sendEvent } from "../websocket/websocket.js";
+import { sendEvent, SendMessageEvent } from "../websocket/websocket.js";
 import { data } from "./dummyData.js";
 let currentUser = null;
 let messengerVisible = false;
@@ -49,7 +49,6 @@ export function createChats(users) {
 
       chatsContainer.append(chat);
 
-      // Add a click event listener to the chat element
       chat.addEventListener("click", () => showMessenger(users[user]));
     }
   }
@@ -136,24 +135,39 @@ function sendMessage() {
   const message = messageInput.value.trim();
 
   if (message !== null && message !== "") {
-    const chatMessages = document.querySelector(".chat-messages");
-
-    const messageContainer = document.createElement("div");
-    messageContainer.classList.add("message-container");
-
-    const messageElement = document.createElement("p");
-    messageElement.classList.add("message");
-    // messageElement.textContent = message;
-    // messageElement.textContent = sendEvent("send_message", { message: message, from: "user" });
-    messageElement.textContent = sendEvent("send_message", message);
-
-    messageContainer.appendChild(messageElement);
-    chatMessages.appendChild(messageContainer);
-
-    console.log("Sending message:", message);
+    let outgoingEvent = new SendMessageEvent(message);
+    sendEvent("send_message", outgoingEvent);
     messageInput.value = "";
   }
   showMessenger(currentUser);
+}
+
+export function appendChatMessage(messageElement) {
+  const chatMessages = document.querySelector(".chat-messages");
+  const messageContainer = document.createElement("div");
+  messageContainer.classList.add("message-container");
+
+  const date = new Date(messageElement.sent);
+  const formattedMsg = `${messageElement.message}`;
+
+  const message = document.createElement("p");
+  message.classList.add("message");
+  message.textContent = formattedMsg;
+
+  const dateContainer = document.createElement("div");
+  dateContainer.classList.add("date-container");
+  dateContainer.textContent = date.toLocaleString();
+
+  const messageContent = document.createElement("div");
+  messageContent.classList.add("message-content");
+  messageContent.appendChild(message);
+
+  messageContainer.appendChild(messageContent);
+  messageContainer.appendChild(dateContainer);
+
+  chatMessages.appendChild(messageContainer);
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 export function createMessenger(user) {

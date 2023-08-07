@@ -19,14 +19,6 @@ func Routes() http.Handler {
 
 	manager := websockets.NewManager(ctx)
 
-	mux.HandleFunc("/debug", func(w http.ResponseWriter, r *http.Request) {
-		numClients := len(manager.Clients)
-		responseText := fmt.Sprintf("Number of connected clients: %d", numClients)
-
-		fmt.Fprint(w, responseText)
-		fmt.Println(responseText)
-	})
-
 	mux.HandleFunc("/ws", manager.ServeWS)
 
 	mux.HandleFunc("/login", auth.Login(manager))
@@ -39,6 +31,13 @@ func Routes() http.Handler {
 	mux.HandleFunc("/api/posts", handlers.Posts)
 	mux.HandleFunc("/api/post/", handlers.Post)
 	mux.HandleFunc("/api/comment", handlers.Comment)
+
+	mux.HandleFunc("/debug", func(w http.ResponseWriter, r *http.Request) {
+		numClients := len(manager.Clients)
+		responseText := fmt.Sprintf("Number of connected clients: %d", numClients)
+		fmt.Fprint(w, responseText)
+		fmt.Println(responseText)
+	})
 
 	return mux
 }

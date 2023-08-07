@@ -586,8 +586,6 @@ a.register-link {
   white-space: pre-wrap;
 }
 
-
-
 .message-send-button {
   margin-right: 0.3rem;
   margin-left: 0.3rem;
@@ -611,17 +609,24 @@ a.register-link {
 
 .message-container {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column; 
+  align-items: flex-end; 
   margin: 0.1rem 0;
 }
 
 .message {
   color: white;
-  padding: 0.3rem 0.6rem; 
+  padding: 0.3rem 0.6rem;
   border-radius: 0.3rem;
-  background-color: #1e90ff; 
+  background-color: #1e90ff;
 }
 
+.date-container {
+  font-size: 0.6rem;
+  color: #d1d7dc;
+  margin-top: 0.2rem;
+  border-radius: 0.3rem;
+}
 /* Chat header */
 .chats-header {
   font-size: 1rem;
