@@ -36,12 +36,12 @@ func (rm RetentionMap) VerifyOTP(otp string) bool {
 	if _, ok := rm[otp]; !ok {
 		return false
 	}
-	delete(rm, otp)
+	// delete(rm, otp)
 	return true
 }
 
 func (rm RetentionMap) Retention(ctx context.Context, retentionPeriod time.Duration) {
-	ticker := time.NewTicker(400 * time.Millisecond)
+	ticker := time.NewTicker(600 * time.Millisecond)
 	for {
 		select {
 		case <-ticker.C:

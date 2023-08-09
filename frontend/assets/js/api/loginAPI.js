@@ -1,11 +1,12 @@
 import { navigateTo } from "../router/router.js";
-import { connectWebsocket } from "../websocket/websocket.js";
+import { connectWebSocket } from "../websocket/websocket.js";
 
 const LOGIN_API = "http://localhost:8081/login";
 
 export async function loginUser(credentials) {
   return fetch(LOGIN_API, {
     method: "POST",
+    mode: 'cors',
     headers: {
       "Content-Type": "application/json",
     },
@@ -24,7 +25,7 @@ export async function loginUser(credentials) {
       const userData = { ...data, expiresAt: expiryTime.getTime() };
       localStorage.setItem("user", JSON.stringify(userData));
 
-      connectWebsocket(data.otp);
+      connectWebSocket(data.otp);
       navigateTo("/");
       return data;
     })

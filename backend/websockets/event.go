@@ -16,6 +16,7 @@ type EventHandler func(event Event, c *Client) error
 const (
 	EventSendMessage = "send_message"
 	EventNewMessage  = "new_message"
+	EventChangeRoom  = "change_room"
 )
 
 type SendMessageEvent struct {
@@ -29,7 +30,6 @@ type NewMessageEvent struct {
 
 func SendMessageHandler(event Event, c *Client) error {
 	var chatEvent SendMessageEvent
-
 	if err := json.Unmarshal(event.Payload, &chatEvent); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
 	}
@@ -46,14 +46,27 @@ func SendMessageHandler(event Event, c *Client) error {
 	}
 
 	var outgoingEvent Event
-
 	outgoingEvent.Payload = data
 	outgoingEvent.Type = EventNewMessage
-	// Broadcast to all other Clients
 	for client := range c.manager.Clients {
-		client.egress <- outgoingEvent
+		if client.chatroom == c.chatroom {
+			client.egress <- outgoingEvent
+		}
+	}
+	return nil
+}
+
+type ChangeRoomEvent struct {
+	Name string `json:"name"`
+}
+
+func ChatRoomHandler(event Event, c *Client) error {
+	var changeRoomEvent ChangeRoomEvent
+	if err := json.Unmarshal(event.Payload, &changeRoomEvent); err != nil {
+		return fmt.Errorf("bad payload in request: %v", err)
 	}
 
-	return nil
+	c.chatroom = changeRoomEvent.Name
 
+	return nil
 }

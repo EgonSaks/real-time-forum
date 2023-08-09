@@ -3,6 +3,7 @@ const COMMENT_API = "http://localhost:8081/api/comment";
 export async function createCommentToDatabase(data) {
   return fetch(COMMENT_API, {
     method: "POST",
+    mode: 'cors',
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -19,6 +20,7 @@ export async function createCommentToDatabase(data) {
 export async function fetchCommentsByPostID(postId) {
   return fetch(COMMENT_API, {
     method: "GET",
+    mode: 'cors',
     credentials: "include",
     headers: {
       "Content-Type": "application/json",

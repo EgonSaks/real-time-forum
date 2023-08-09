@@ -1,5 +1,5 @@
-import { sendEvent, SendMessageEvent } from "../websocket/websocket.js";
-import { data } from "./dummyData.js";
+import { SendMessageEvent, sendEvent } from "../websocket/websocket.js";
+import { changeChatRoom } from "../websocket/websocket.js";
 let currentUser = null;
 let messengerVisible = false;
 
@@ -16,7 +16,7 @@ export function createChats(users) {
   header.textContent = "Messenger";
   chatsContainer.append(header);
 
-  if (Object.keys(users).length === 0) {
+  if (users.length === 0) {
     const noUsersText = document.createElement("p");
     noUsersText.classList.add("no-users-text");
     noUsersText.textContent = "Wait for users to come online";
@@ -24,34 +24,39 @@ export function createChats(users) {
     return chatsContainer;
   }
 
-  for (const user in users) {
-    if (users.hasOwnProperty(user)) {
-      const chat = document.createElement("div");
-      chat.classList.add("chat");
+  users.forEach((user) => {
+    const chat = document.createElement("div");
+    chat.classList.add("chat");
 
-      const userDiv = document.createElement("div");
-      userDiv.classList.add("chat-name-with-last-seen");
+    const userDiv = document.createElement("div");
+    userDiv.classList.add("chat-name-with-last-seen");
 
-      const name = document.createElement("h4");
-      name.classList.add("chat-name");
-      name.textContent = users[user].name;
+    const name = document.createElement("h4");
+    name.classList.add("chat-name");
+    name.textContent = user.username;
 
-      const lastSeen = document.createElement("p");
-      lastSeen.classList.add("chat-last-seen");
-      lastSeen.textContent = users[user].last_seen;
+    const lastSeen = document.createElement("p");
+    lastSeen.classList.add("chat-last-seen");
+    lastSeen.textContent = "user.last_seen";
 
-      const status = document.createElement("p");
-      status.classList.add("chat-status", users[user].status.toLowerCase());
-      status.textContent = users[user].status;
+    const status = document.createElement("p");
+    status.classList.add(
+      "chat-status",
+      user.status === "online" ? "online" : "offline"
+    );
+    status.classList.add("chat-status", "online");
+    status.textContent = user.status;
 
-      userDiv.append(name, lastSeen);
-      chat.append(userDiv, status);
+    userDiv.append(name, lastSeen);
+    chat.append(userDiv, status);
 
-      chatsContainer.append(chat);
+    chatsContainer.append(chat);
 
-      chat.addEventListener("click", () => showMessenger(users[user]));
-    }
-  }
+    chat.addEventListener("click", () => {
+      changeChatRoom(user.username);
+      showMessenger(user);  
+    });
+  });
 
   return chatsContainer;
 }
@@ -69,17 +74,19 @@ function showMessenger(user) {
   const lastSeenElement = messengerHeader.querySelector(".messenger-last-seen");
   const statusElement = messengerHeader.querySelector(".messenger-status");
 
-  nameElement.textContent = user.name;
-  lastSeenElement.textContent = user.last_seen;
-  statusElement.textContent = user.status;
+  nameElement.textContent = user.username;
+  lastSeenElement.textContent = "user.last_seen";
+  statusElement.textContent = "user.status";
   statusElement.classList.remove("offline", "online");
-  statusElement.classList.add(user.status.toLowerCase());
 
   messengerVisible = true;
   messenger.classList.remove("messenger-hidden");
 
   const messengerBody = messenger.querySelector(".messenger-body");
   const inputContainer = messenger.querySelector(".input-container");
+
+  messenger.style.display = "block";
+  messengerHeader.style.display = "block";
   messengerBody.style.display = "block";
   inputContainer.style.display = "flex";
   messengerHeader.style.borderBottom = "1px solid #000";
@@ -104,12 +111,12 @@ function showMessenger(user) {
 
 function hideMessenger() {
   const messenger = document.querySelector(".messenger");
-  messenger.style.height = "";
-
   const messengerHeader = messenger.querySelector(".messenger-header");
   const messengerBody = messenger.querySelector(".messenger-body");
   const inputContainer = messenger.querySelector(".input-container");
 
+  messenger.style.display = "none";
+  messengerHeader.style.display = "none";
   messengerBody.style.display = "none";
   inputContainer.style.display = "none";
   messengerHeader.style.borderBottom = "none";
@@ -117,7 +124,6 @@ function hideMessenger() {
 
   currentUser = null;
   messengerVisible = false;
-
   messenger.classList.add("messenger-hidden");
 
   const contentContainer = document.getElementById("content-container");
@@ -170,9 +176,9 @@ export function appendChatMessage(messageElement) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-export function createMessenger(user) {
+export function createMessenger() {
   const messenger = document.createElement("div");
-  messenger.classList.add("messenger", "messenger-hidden");
+
   messenger.classList.add("messenger");
 
   const messengerHeader = document.createElement("div");
@@ -183,7 +189,7 @@ export function createMessenger(user) {
 
   const name = document.createElement("h4");
   name.classList.add("messenger-name");
-  name.textContent = "John Doe";
+  name.textContent = "";
 
   const lastSeen = document.createElement("p");
   lastSeen.classList.add("messenger-last-seen");
@@ -193,7 +199,7 @@ export function createMessenger(user) {
 
   const status = document.createElement("p");
   status.classList.add("messenger-status", "online");
-  status.textContent = "online";
+  status.textContent = "";
 
   messengerHeader.append(nameWithLastSeen, status);
 
@@ -256,17 +262,14 @@ export function createMessenger(user) {
   return messenger;
 }
 
-export async function createChatContainer() {
+export function createChatContainer(users) {
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats");
 
-  const users = data();
-
-  const chats = createChats(users);
-
+  const chat = createChats(users);
   const messenger = createMessenger();
 
-  chatsContainer.append(messenger, chats);
+  chatsContainer.append(chat, messenger);
 
   return chatsContainer;
 }

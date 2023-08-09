@@ -1,3 +1,4 @@
+import { fetchUsers } from "../api/userAPI.js";
 import {
   createChatContainer,
   getMessengerVisibility,
@@ -9,19 +10,20 @@ import { Login } from "../views/Login.js";
 import { PostView } from "../views/PostView.js";
 import { Register } from "../views/Register.js";
 
-// Create chatContainer and navbar outside the function
-const chatContainer = await createChatContainer();
-
 export async function createBaseView(params, matchedView, user) {
   const appContainer = document.querySelector("#app");
   appContainer.innerHTML = "";
 
+  const allUsers = await fetchUsers();
+
+  // const users = allUsers.filter(
+  //   (otherUser) => otherUser.username !== user.username
+  // );
+
   const messengerVisible = getMessengerVisibility();
   const userLoggedIn = user && user.isLoggedIn;
+  const chatContainer = createChatContainer(allUsers);
   const navbar = createNavbar(user);
-
-  // const users = await fetchUsers();
-  // console.log(users);
 
   if (
     !userLoggedIn &&
@@ -47,7 +49,6 @@ export async function createBaseView(params, matchedView, user) {
     } else if (matchedView === PostView) {
       matchedView(params, messengerVisible);
     }
-    // Append the chatContainer and navbar only once
     appContainer.append(navbar, chatContainer);
   } else {
     if (matchedView === Register) {

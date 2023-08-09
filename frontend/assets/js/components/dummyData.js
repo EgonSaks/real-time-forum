@@ -1,96 +1,137 @@
 export function data() {
-  const users = {
-    "Elon Musk": {
+  const users = [
+    {
+      id: "1",
+      username: "Elon",
       name: "Elon Musk",
-      status: "online",
+      status: "online"
     },
-    "Bill Gates": {
-      last_seen: "10 min",
+    {
+      id: "2",
+      username: "Bill",
       name: "Bill Gates",
-      status: "offline",
+      last_seen: "10 min",
+      status: "offline"
     },
-    "Jeff Bezos": {
+    {
+      id: "3",
+      username: "Jeff",
       name: "Jeff Bezos",
-      status: "online",
+      status: "online"
     },
-    "Mark Zuckerberg": {
-      last_seen: "1h",
+    {
+      id: "4",
+      username: "Mark",
       name: "Mark Zuckerberg",
-      status: "offline",
+      last_seen: "1h",
+      status: "offline"
     },
-    "Larry Page": {
+    {
+      id: "5",
+      username: "Larry",
       name: "Larry Page",
-      status: "online",
+      status: "online"
     },
-    "Sergey Brin": {
-      last_seen: "2h",
+    {
+      id: "6",
+      username: "Sergey",
       name: "Sergey Brin",
-      status: "offline",
+      last_seen: "2h",
+      status: "offline"
     },
-    "Steve Jobs": {
+    {
+      id: "7",
+      username: "Steve",
       name: "Steve Jobs",
-      status: "online",
+      status: "online"
     },
-    "Tim Cook": {
-      last_seen: "3h",
+    {
+      id: "8",
+      username: "Tim",
       name: "Tim Cook",
-      status: "offline",
+      last_seen: "3h",
+      status: "offline"
     },
-    "Jack Dorsey": {
+    {
+      id: "9",
+      username: "Jack",
       name: "Jack Dorsey",
-      status: "online",
+      status: "online"
     },
-    "Satya Nadella": {
-      last_seen: "4h",
+    {
+      id: "10",
+      username: "Satya",
       name: "Satya Nadella",
-      status: "offline",
+      last_seen: "4h",
+      status: "offline"
     },
-    "Sundar Pichai": {
+    {
+      id: "11",
+      username: "Sundar",
       name: "Sundar Pichai",
-      status: "online",
+      status: "online"
     },
-    "Susan Wojcicki": {
-      last_seen: "5h",
+    {
+      id: "12",
+      username: "Susan",
       name: "Susan Wojcicki",
-      status: "offline",
+      last_seen: "5h",
+      status: "offline"
     },
-    "Marissa Mayer": {
+    {
+      id: "13",
+      username: "Marissa",
       name: "Marissa Mayer",
-      status: "online",
+      status: "online"
     },
-    "Sheryl Sandberg": {
-      last_seen: "6h",
+    {
+      id: "14",
+      username: "Sheryl",
       name: "Sheryl Sandberg",
-      status: "offline",
+      last_seen: "6h",
+      status: "offline"
     },
-    "Reed Hastings": {
+    {
+      id: "15",
+      username: "Reed",
       name: "Reed Hastings",
-      status: "online",
+      status: "online"
     },
-    "Brian Chesky": {
-      last_seen: "7h",
+    {
+      id: "16",
+      username: "Brian",
       name: "Brian Chesky",
-      status: "offline",
+      last_seen: "7h",
+      status: "offline"
     },
-    "Travis Kalanick": {
+    {
+      id: "17",
+      username: "Travis",
       name: "Travis Kalanick",
-      status: "online",
+      status: "online"
     },
-    "Dara Khosrowshahi": {
-      last_seen: "8h",
+    {
+      id: "18",
+      username: "Dara",
       name: "Dara Khosrowshahi",
-      status: "offline",
+      last_seen: "8h",
+      status: "offline"
     },
-    "Daniel Ek": {
+    {
+      id: "19",
+      username: "Daniel",
       name: "Daniel Ek",
-      status: "online",
+      status: "online"
     },
-    "Evan Spiegel": {
-      last_seen: "9h",
+    {
+      id: "20",
+      username: "Evan",
       name: "Evan Spiegel",
-      status: "offline",
-    },
-  };
+      last_seen: "9h",
+      status: "offline"
+    }
+  ];
+  
   return users;
 }
 

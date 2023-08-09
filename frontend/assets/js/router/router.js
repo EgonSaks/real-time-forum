@@ -1,6 +1,6 @@
+import { isLoggedIn } from "../utils/auth.js";
 import { createBaseView } from "../views/BaseView.js";
 import { routes } from "./routes.js";
-import { isLoggedIn } from "../utils/auth.js";
 
 const pathToRegex = (path) =>
   new RegExp(

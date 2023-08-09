@@ -62,6 +62,7 @@ func NewManager(ctx context.Context) *Manager {
 
 func (m *Manager) setupEventHandlers() {
 	m.Handlers[EventSendMessage] = SendMessageHandler
+	m.Handlers[EventChangeRoom] = ChatRoomHandler
 }
 
 func (m *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {

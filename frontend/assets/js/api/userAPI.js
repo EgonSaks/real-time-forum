@@ -2,8 +2,8 @@ const USERS_API = "http://localhost:8081/api/users";
 const USER_API = "http://localhost:8081/api/user/";
 
 export async function fetchUsers() {
-  console.log("fetching users");
   return fetch(USERS_API, {
+    mode: "cors",
     credentials: "include",
   })
     .then((response) => {
@@ -21,6 +21,7 @@ export async function fetchUsers() {
 export async function fetchSingleUser(userID) {
   return fetch(USER_API, {
     method: "GET",
+    mode: "cors",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",

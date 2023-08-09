@@ -520,6 +520,7 @@ a.register-link {
 }
 
 .messenger {
+  display: none;
   border: 0.0625rem solid black;
   border-radius: 0.3rem;
   position: absolute;
@@ -530,6 +531,7 @@ a.register-link {
 }
 
 .messenger-header {
+  display: none;
   padding: 0.625rem;
   font-size: 1.2rem;
   font-weight: bold;

@@ -23,6 +23,12 @@ export class NewMessageEvent {
   }
 }
 
+class ChangeChatRoomEvent {
+  constructor(name) {
+    this.name = name;
+  }
+}
+
 function routeEvent(event) {
   if (event.type === undefined) {
     alert("no 'type' field in event");
@@ -43,23 +49,24 @@ export function sendEvent(eventName, payload) {
   conn.send(JSON.stringify(event));
 }
 
-export function connectWebsocket(otp) {
+export function connectWebSocket(otp) {
   if (window["WebSocket"]) {
-    console.log("Supports WebSockets");
+    // console.log("Supports WebSockets");
 
     try {
-      console.log("Connecting to Websocket");
+      // console.log("Connecting to WebSocket");
       conn = new WebSocket("ws://localhost:8081/ws?otp=" + otp);
 
       conn.onopen = function (e) {
-        console.log("WebSocket connection established");
-        // const websocketStatus = { status: "connected", otp: otp };
-        // localStorage.setItem("websocketStatus", JSON.stringify(websocketStatus));
+        // console.log("WebSocket connection established");
       };
 
       conn.onclose = function (e) {
-        console.log("WebSocket connection closed");
-        localStorage.removeItem("websocketStatus");
+        // console.log("WebSocket connection closed");
+
+        setTimeout(function () {
+          connectWebSocket(otp);
+        }, 5000);
       };
 
       conn.onmessage = function (e) {
@@ -79,14 +86,18 @@ export function connectWebsocket(otp) {
   }
 }
 
+export function changeChatRoom(username) {
+  let changeEvent = new ChangeChatRoomEvent(username);
+  sendEvent("change_room", changeEvent);
+}
+
 window.addEventListener("load", function () {
   const user = localStorage.getItem("user");
   if (user) {
-    console.log("user", user);
     const userObj = JSON.parse(user);
     if (userObj.otp !== "") {
-      console.log("Reconnecting to websocket");
-      connectWebsocket(userObj.otp);
+      // console.log("Reconnecting to websocket");
+      connectWebSocket(userObj.otp);
     }
   }
 });

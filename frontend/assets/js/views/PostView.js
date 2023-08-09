@@ -20,8 +20,6 @@ export async function PostView(_, messengerVisible) {
 
   const author = comment.length > 0 ? comment[0].author : null;
 
-  console.log(comment);
-
   let contentContainer = document.getElementById("content-container");
 
   if (!contentContainer) {
