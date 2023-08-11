@@ -51,11 +51,6 @@ func SendMessageHandler(event Event, client *Client) error {
 	outgoingEvent.Payload = data
 	outgoingEvent.Type = EventNewMessage
 	for c := range client.manager.Clients {
-
-		fmt.Println("client.username: ", client.username)
-		fmt.Println("chatEvent.From: ", chatEvent.From)
-		fmt.Println("chatEvent.To: ", chatEvent.To)
-
 		if c.username == chatEvent.To || c.username == chatEvent.From {
 			c.egress <- outgoingEvent
 		}

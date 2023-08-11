@@ -4,7 +4,6 @@ import {
   SendMessageEvent,
   sendEvent,
 } from "../websocket/websocket.js";
-let recipient = null;
 let messengerVisible = false;
 
 export function getMessengerVisibility() {
@@ -57,24 +56,20 @@ export function createChats(users) {
     chatsContainer.append(chat);
 
     chat.addEventListener("click", () => {
-      ChangeChat(user.username);
-      showMessenger(user);
-      console.log("clicked on chat");
-      console.log("showMessenger user",user);
-      console.log("ChangeChat user.username",user.username);
+      ChangeChat(user);
+      // ChangeChat(user.username);
+      // showMessenger(user);
+
+      // console.log("clicked on chat");
+      // console.log("showMessenger user", user);
+      // console.log("ChangeChat user.username", user.username);
     });
   });
 
   return chatsContainer;
 }
 
-function showMessenger(user) {
-  if (recipient === user) {
-    return;
-  }
-
-  recipient = user;
-
+export function showMessenger(user) {
   const messenger = document.querySelector(".messenger");
   const messengerHeader = messenger.querySelector(".messenger-header");
   const nameElement = messengerHeader.querySelector(".messenger-name");
@@ -116,7 +111,7 @@ function showMessenger(user) {
   inputContainer.style.borderTop = "1px solid #000";
 }
 
-function hideMessenger() {
+export function hideMessenger() {
   const messenger = document.querySelector(".messenger");
   const messengerHeader = messenger.querySelector(".messenger-header");
   const messengerBody = messenger.querySelector(".messenger-body");
@@ -129,7 +124,6 @@ function hideMessenger() {
   messengerHeader.style.borderBottom = "none";
   inputContainer.style.borderTop = "none";
 
-  recipient = null;
   messengerVisible = false;
   messenger.classList.add("messenger-hidden");
 
@@ -145,23 +139,18 @@ function hideMessenger() {
 
 function sendMessage(user) {
   const messageInput = document.querySelector(".messenger-input");
+  const messengerName = document.querySelector(".messenger-name");
+  const recipient = messageInput.getAttribute("data-recipient");
   const message = messageInput.value.trim();
   if (message !== null && message !== "") {
-    
-    console.log("Sending message", message);
-    console.log("From", user.username);
-    console.log("To", recipient.username);
-    console.log("Logged in user", isLoggedIn().username);
-
     let outgoingEvent = new SendMessageEvent(
       message,
       user.username,
-      recipient.username
+      recipient
     );
     sendEvent("send_message", outgoingEvent);
     messageInput.value = "";
   }
-  showMessenger(recipient);
 }
 
 export function appendChatMessage(messageElement) {

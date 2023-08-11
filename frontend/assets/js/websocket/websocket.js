@@ -1,6 +1,12 @@
-import { appendChatMessage } from "../components/chat.js";
+import {
+  appendChatMessage,
+  getMessengerVisibility,
+  hideMessenger,
+  showMessenger,
+} from "../components/chat.js";
 import { isLoggedIn } from "../utils/auth.js";
 let conn;
+let activeChatUser = null;
 
 class Event {
   constructor(type, payload) {
@@ -32,9 +38,21 @@ class ChangeChatEvent {
   }
 }
 
-export function ChangeChat(username) {
-  let changeEvent = new ChangeChatEvent(username);
-  sendEvent("change_chat", changeEvent);
+export function ChangeChat(user) {
+  if (activeChatUser !== user.username) {
+    activeChatUser = user.username;
+
+    if (getMessengerVisibility()) {
+      hideMessenger();
+    }
+    showMessenger(user);
+
+    const messageInput = document.querySelector(".messenger-input");
+    messageInput.setAttribute("data-recipient", user.username);
+
+    let changeEvent = new ChangeChatEvent(user.username);
+    sendEvent("change_chat", changeEvent);
+  }
 }
 
 function routeEvent(event) {
@@ -44,12 +62,17 @@ function routeEvent(event) {
   switch (event.type) {
     case "new_message":
       const messageEvent = Object.assign(new NewMessageEvent(), event.payload);
-
       const user = isLoggedIn();
-      if ( messageEvent.from === user.username || messageEvent.to === user.username) {
+
+      if (
+        (messageEvent.from === user.username &&
+          messageEvent.to === activeChatUser) ||
+        (messageEvent.to === user.username &&
+          messageEvent.from === activeChatUser)
+      ) {
+        console.log("messageEvent", messageEvent);
         appendChatMessage(messageEvent);
       }
-      
       break;
     default:
       alert("unsupported message type");
@@ -78,7 +101,6 @@ export function connectWebSocket(otp) {
       conn.onmessage = function (e) {
         const eventData = JSON.parse(e.data);
         const event = Object.assign(new Event(), eventData);
-
         routeEvent(event);
         return conn;
       };
