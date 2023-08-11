@@ -1,6 +1,7 @@
+import { appendChatMessage } from "../components/chat.js";
+import { isLoggedIn } from "../utils/auth.js";
 let conn;
 
-import { appendChatMessage } from "../components/chat.js";
 class Event {
   constructor(type, payload) {
     this.type = type;
@@ -43,7 +44,12 @@ function routeEvent(event) {
   switch (event.type) {
     case "new_message":
       const messageEvent = Object.assign(new NewMessageEvent(), event.payload);
-      appendChatMessage(messageEvent);
+
+      const user = isLoggedIn();
+      if ( messageEvent.from === user.username || messageEvent.to === user.username) {
+        appendChatMessage(messageEvent);
+      }
+      
       break;
     default:
       alert("unsupported message type");
@@ -72,6 +78,7 @@ export function connectWebSocket(otp) {
       conn.onmessage = function (e) {
         const eventData = JSON.parse(e.data);
         const event = Object.assign(new Event(), eventData);
+
         routeEvent(event);
         return conn;
       };

@@ -609,18 +609,32 @@ a.register-link {
   flex-direction: column;
 }
 
-.message-container {
+/* .message-container {
   display: flex;
   flex-direction: column; 
   align-items: flex-end; 
   margin: 0.1rem 0;
-}
+} */
 
 .message {
   color: white;
   padding: 0.3rem 0.6rem;
   border-radius: 0.3rem;
   background-color: #1e90ff;
+}
+
+.sender-message {
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-end; 
+  margin: 0.1rem 0;
+}
+  
+.recipient-message {
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start; 
+  margin: 0.1rem 0;
 }
 
 .date-container {

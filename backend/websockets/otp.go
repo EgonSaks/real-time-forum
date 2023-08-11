@@ -15,39 +15,39 @@ type OTP struct {
 type RetentionMap map[string]OTP
 
 func NewRetentionMap(ctx context.Context, retentionPeriod time.Duration) RetentionMap {
-	rm := make(RetentionMap)
+	retentionMap := make(RetentionMap)
 
-	go rm.Retention(ctx, retentionPeriod)
+	go retentionMap.Retention(ctx, retentionPeriod)
 
-	return rm
+	return retentionMap
 }
 
-func (rm RetentionMap) NewOTP() OTP {
-	o := OTP{
+func (retentionMap RetentionMap) NewOTP() OTP {
+	oneTimePassword := OTP{
 		Key:     uuid.NewString(),
 		Created: time.Now(),
 	}
 
-	rm[o.Key] = o
-	return o
+	retentionMap[oneTimePassword.Key] = oneTimePassword
+	return oneTimePassword
 }
 
-func (rm RetentionMap) VerifyOTP(otp string) bool {
-	if _, ok := rm[otp]; !ok {
+func (retentionMap RetentionMap) VerifyOTP(otp string) bool {
+	if _, ok := retentionMap[otp]; !ok {
 		return false
 	}
-	// delete(rm, otp)
+	// delete(retentionMap, otp)
 	return true
 }
 
-func (rm RetentionMap) Retention(ctx context.Context, retentionPeriod time.Duration) {
+func (retentionMap RetentionMap) Retention(ctx context.Context, retentionPeriod time.Duration) {
 	ticker := time.NewTicker(600 * time.Millisecond)
 	for {
 		select {
 		case <-ticker.C:
-			for _, otp := range rm {
+			for _, otp := range retentionMap {
 				if otp.Created.Add(retentionPeriod).Before(time.Now()) {
-					delete(rm, otp.Key)
+					delete(retentionMap, otp.Key)
 				}
 			}
 		case <-ctx.Done():

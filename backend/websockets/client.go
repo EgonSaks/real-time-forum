@@ -8,9 +8,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var (
-	pongWait     = 10 * time.Second
-	pingInterval = (pongWait * 9) / 10
+const (
+	pongWait       = 10 * time.Second
+	pingInterval   = (pongWait * 9) / 10
+	maxMessageSize = 10000
 )
 
 type ClientList map[*Client]bool
@@ -23,28 +24,28 @@ type Client struct {
 	username   string
 }
 
-func NewClient(conn *websocket.Conn, manager *Manager, username string) *Client {
+func NewClient(connection *websocket.Conn, manager *Manager, username string) *Client {
 	return &Client{
-		connection: conn,
+		connection: connection,
 		manager:    manager,
 		egress:     make(chan Event),
 		username:   username,
 	}
 }
 
-func (c *Client) readMessages() {
+func (client *Client) readMessages() {
 	defer func() {
-		c.manager.removeClient(c)
+		client.manager.removeClient(client)
 	}()
-	c.connection.SetReadLimit(1024)
-	if err := c.connection.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
+	client.connection.SetReadLimit(maxMessageSize)
+	if err := client.connection.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
 		log.Println(err)
 		return
 	}
-	c.connection.SetPongHandler(c.pongHandler)
+	client.connection.SetPongHandler(client.pongHandler)
 
 	for {
-		_, payload, err := c.connection.ReadMessage()
+		_, payload, err := client.connection.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error reading message: %v", err)
@@ -56,29 +57,29 @@ func (c *Client) readMessages() {
 			log.Printf("error marshalling message: %v", err)
 			break
 		}
-		if err := c.manager.routeEvent(request, c); err != nil {
+		if err := client.manager.routeEvent(request, client); err != nil {
 			log.Println("Error handling Message: ", err)
 		}
 	}
 }
 
-func (c *Client) pongHandler(pongMsg string) error {
+func (client *Client) pongHandler(pongMsg string) error {
 	// log.Println("pong")
-	return c.connection.SetReadDeadline(time.Now().Add(pongWait))
+	return client.connection.SetReadDeadline(time.Now().Add(pongWait))
 }
 
-func (c *Client) writeMessages() {
+func (client *Client) writeMessages() {
 	ticker := time.NewTicker(pingInterval)
 	defer func() {
 		ticker.Stop()
-		c.manager.removeClient(c)
+		client.manager.removeClient(client)
 	}()
 
 	for {
 		select {
-		case message, ok := <-c.egress:
+		case message, ok := <-client.egress:
 			if !ok {
-				if err := c.connection.WriteMessage(websocket.CloseMessage, nil); err != nil {
+				if err := client.connection.WriteMessage(websocket.CloseMessage, nil); err != nil {
 					log.Println("connection closed: ", err)
 				}
 				return
@@ -89,14 +90,14 @@ func (c *Client) writeMessages() {
 				log.Println(err)
 				return
 			}
-			if err := c.connection.WriteMessage(websocket.TextMessage, data); err != nil {
+			if err := client.connection.WriteMessage(websocket.TextMessage, data); err != nil {
 				log.Println(err)
 			}
 			log.Println("sent message")
 		case <-ticker.C:
 			// log.Println("ping")
 			// Send the Ping
-			if err := c.connection.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+			if err := client.connection.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 				log.Println("write msg: ", err)
 				return
 			}

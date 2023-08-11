@@ -1,7 +1,7 @@
 import { isLoggedIn } from "../utils/auth.js";
 import {
-  SendMessageEvent,
   ChangeChat,
+  SendMessageEvent,
   sendEvent,
 } from "../websocket/websocket.js";
 let recipient = null;
@@ -59,6 +59,9 @@ export function createChats(users) {
     chat.addEventListener("click", () => {
       ChangeChat(user.username);
       showMessenger(user);
+      console.log("clicked on chat");
+      console.log("showMessenger user",user);
+      console.log("ChangeChat user.username",user.username);
     });
   });
 
@@ -144,6 +147,12 @@ function sendMessage(user) {
   const messageInput = document.querySelector(".messenger-input");
   const message = messageInput.value.trim();
   if (message !== null && message !== "") {
+    
+    console.log("Sending message", message);
+    console.log("From", user.username);
+    console.log("To", recipient.username);
+    console.log("Logged in user", isLoggedIn().username);
+
     let outgoingEvent = new SendMessageEvent(
       message,
       user.username,
@@ -158,7 +167,6 @@ function sendMessage(user) {
 export function appendChatMessage(messageElement) {
   const chatMessages = document.querySelector(".chat-messages");
   const messageContainer = document.createElement("div");
-  messageContainer.classList.add("message-container");
 
   const date = new Date(messageElement.sent);
   const formattedMsg = `${messageElement.message}`;
@@ -177,6 +185,16 @@ export function appendChatMessage(messageElement) {
 
   messageContainer.appendChild(messageContent);
   messageContainer.appendChild(dateContainer);
+
+  const user = isLoggedIn();
+
+  if (messageElement.from === user.username) {
+    console.log("Message from user", user.username);
+    messageContainer.classList.add("sender-message");
+  } else if (messageElement.to === user.username) {
+    console.log("Message to user", user.username);
+    messageContainer.classList.add("recipient-message");
+  }
 
   chatMessages.appendChild(messageContainer);
 
