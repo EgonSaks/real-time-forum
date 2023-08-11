@@ -1,6 +1,10 @@
-import { SendMessageEvent, sendEvent } from "../websocket/websocket.js";
-import { changeChatRoom } from "../websocket/websocket.js";
-let currentUser = null;
+import { isLoggedIn } from "../utils/auth.js";
+import {
+  SendMessageEvent,
+  ChangeChat,
+  sendEvent,
+} from "../websocket/websocket.js";
+let recipient = null;
 let messengerVisible = false;
 
 export function getMessengerVisibility() {
@@ -53,8 +57,8 @@ export function createChats(users) {
     chatsContainer.append(chat);
 
     chat.addEventListener("click", () => {
-      changeChatRoom(user.username);
-      showMessenger(user);  
+      ChangeChat(user.username);
+      showMessenger(user);
     });
   });
 
@@ -62,11 +66,11 @@ export function createChats(users) {
 }
 
 function showMessenger(user) {
-  if (currentUser === user) {
+  if (recipient === user) {
     return;
   }
 
-  currentUser = user;
+  recipient = user;
 
   const messenger = document.querySelector(".messenger");
   const messengerHeader = messenger.querySelector(".messenger-header");
@@ -122,7 +126,7 @@ function hideMessenger() {
   messengerHeader.style.borderBottom = "none";
   inputContainer.style.borderTop = "none";
 
-  currentUser = null;
+  recipient = null;
   messengerVisible = false;
   messenger.classList.add("messenger-hidden");
 
@@ -136,16 +140,19 @@ function hideMessenger() {
   chatsContainer.style.width = "90%";
 }
 
-function sendMessage() {
+function sendMessage(user) {
   const messageInput = document.querySelector(".messenger-input");
   const message = messageInput.value.trim();
-
   if (message !== null && message !== "") {
-    let outgoingEvent = new SendMessageEvent(message);
+    let outgoingEvent = new SendMessageEvent(
+      message,
+      user.username,
+      recipient.username
+    );
     sendEvent("send_message", outgoingEvent);
     messageInput.value = "";
   }
-  showMessenger(currentUser);
+  showMessenger(recipient);
 }
 
 export function appendChatMessage(messageElement) {
@@ -176,7 +183,8 @@ export function appendChatMessage(messageElement) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-export function createMessenger() {
+export function createMessenger(user) {
+  console.log("Creating messenger for " + user.username + ".");
   const messenger = document.createElement("div");
 
   messenger.classList.add("messenger");
@@ -241,7 +249,7 @@ export function createMessenger() {
       messengerInput.value += "\n";
     } else if (e.key === "Enter") {
       e.preventDefault();
-      sendMessage();
+      sendMessage(user);
     }
     handleTyping();
   });
@@ -251,7 +259,10 @@ export function createMessenger() {
   const sendButton = document.createElement("button");
   sendButton.classList.add("message-send-button");
   sendButton.textContent = "Send";
-  sendButton.addEventListener("click", sendMessage);
+
+  sendButton.addEventListener("click", function () {
+    sendMessage(user);
+  });
 
   inputContainer.append(messengerInput, sendButton);
 
@@ -266,8 +277,10 @@ export function createChatContainer(users) {
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats");
 
+  const user = isLoggedIn();
+  console.log("Logged in as " + user.username + ".");
   const chat = createChats(users);
-  const messenger = createMessenger();
+  const messenger = createMessenger(user);
 
   chatsContainer.append(chat, messenger);
 

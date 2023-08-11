@@ -3,12 +3,14 @@ package websockets
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/real-time-forum/backend/utils"
 )
 
 /*
@@ -53,16 +55,9 @@ func NewManager(ctx context.Context) *Manager {
 	return m
 }
 
-// func (m *Manager) setupEventHandlers() {
-// 	m.Handlers[EventSendMessage] = func(e Event, c *Client) error {
-// 		fmt.Println(e)
-// 		return nil
-// 	}
-// }
-
 func (m *Manager) setupEventHandlers() {
 	m.Handlers[EventSendMessage] = SendMessageHandler
-	m.Handlers[EventChangeRoom] = ChatRoomHandler
+	m.Handlers[EventChangeChat] = ChatHandler
 }
 
 func (m *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +78,14 @@ func (m *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := NewClient(conn, m)
+	user, ok := utils.GetUserFromSession(r)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("User not found in session")
+		return
+	}
+
+	client := NewClient(conn, m, user.Username)
 	m.addClient(client)
 	go client.readMessages()
 	go client.writeMessages()

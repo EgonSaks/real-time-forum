@@ -19,14 +19,16 @@ type Client struct {
 	connection *websocket.Conn
 	manager    *Manager
 	egress     chan Event
-	chatroom   string
+	chat       string
+	username   string
 }
 
-func NewClient(conn *websocket.Conn, manager *Manager) *Client {
+func NewClient(conn *websocket.Conn, manager *Manager, username string) *Client {
 	return &Client{
 		connection: conn,
 		manager:    manager,
 		egress:     make(chan Event),
+		username:   username,
 	}
 }
 
@@ -61,7 +63,7 @@ func (c *Client) readMessages() {
 }
 
 func (c *Client) pongHandler(pongMsg string) error {
-	log.Println("pong")
+	// log.Println("pong")
 	return c.connection.SetReadDeadline(time.Now().Add(pongWait))
 }
 
@@ -92,7 +94,7 @@ func (c *Client) writeMessages() {
 			}
 			log.Println("sent message")
 		case <-ticker.C:
-			log.Println("ping")
+			// log.Println("ping")
 			// Send the Ping
 			if err := c.connection.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 				log.Println("write msg: ", err)

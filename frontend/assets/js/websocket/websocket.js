@@ -9,24 +9,31 @@ class Event {
 }
 
 export class SendMessageEvent {
-  constructor(message, from) {
+  constructor(message, from, to) {
     this.message = message;
     this.from = from;
+    this.to = to;
   }
 }
 
 export class NewMessageEvent {
-  constructor(message, from, sent) {
+  constructor(message, from, to, sent) {
     this.message = message;
     this.from = from;
+    this.to = to;
     this.sent = sent;
   }
 }
 
-class ChangeChatRoomEvent {
+class ChangeChatEvent {
   constructor(name) {
     this.name = name;
   }
+}
+
+export function ChangeChat(username) {
+  let changeEvent = new ChangeChatEvent(username);
+  sendEvent("change_chat", changeEvent);
 }
 
 function routeEvent(event) {
@@ -51,19 +58,12 @@ export function sendEvent(eventName, payload) {
 
 export function connectWebSocket(otp) {
   if (window["WebSocket"]) {
-    // console.log("Supports WebSockets");
-
     try {
-      // console.log("Connecting to WebSocket");
       conn = new WebSocket("ws://localhost:8081/ws?otp=" + otp);
 
-      conn.onopen = function (e) {
-        // console.log("WebSocket connection established");
-      };
+      conn.onopen = function (e) {};
 
       conn.onclose = function (e) {
-        // console.log("WebSocket connection closed");
-
         setTimeout(function () {
           connectWebSocket(otp);
         }, 5000);
@@ -72,7 +72,6 @@ export function connectWebSocket(otp) {
       conn.onmessage = function (e) {
         const eventData = JSON.parse(e.data);
         const event = Object.assign(new Event(), eventData);
-        console.log("Received event:", event);
         routeEvent(event);
         return conn;
       };
@@ -86,17 +85,11 @@ export function connectWebSocket(otp) {
   }
 }
 
-export function changeChatRoom(username) {
-  let changeEvent = new ChangeChatRoomEvent(username);
-  sendEvent("change_room", changeEvent);
-}
-
-window.addEventListener("load", function () {
+window.addEventListener("DOMContentLoaded", function () {
   const user = localStorage.getItem("user");
   if (user) {
     const userObj = JSON.parse(user);
     if (userObj.otp !== "") {
-      // console.log("Reconnecting to websocket");
       connectWebSocket(userObj.otp);
     }
   }

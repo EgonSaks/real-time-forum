@@ -16,13 +16,13 @@ export async function createBaseView(params, matchedView, user) {
 
   const allUsers = await fetchUsers();
 
-  // const users = allUsers.filter(
-  //   (otherUser) => otherUser.username !== user.username
-  // );
+  const users = allUsers.filter(
+    (otherUser) => otherUser.username !== user.username
+  );
 
   const messengerVisible = getMessengerVisibility();
   const userLoggedIn = user && user.isLoggedIn;
-  const chatContainer = createChatContainer(allUsers);
+  const chatContainer = createChatContainer(users);
   const navbar = createNavbar(user);
 
   if (
