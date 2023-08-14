@@ -139,9 +139,9 @@ export function hideMessenger() {
 
 function sendMessage(user) {
   const messageInput = document.querySelector(".messenger-input");
-  const messengerName = document.querySelector(".messenger-name");
   const recipient = messageInput.getAttribute("data-recipient");
   const message = messageInput.value.trim();
+  
   if (message !== null && message !== "") {
     let outgoingEvent = new SendMessageEvent(
       message,

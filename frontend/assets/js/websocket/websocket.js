@@ -70,7 +70,6 @@ function routeEvent(event) {
         (messageEvent.to === user.username &&
           messageEvent.from === activeChatUser)
       ) {
-        console.log("messageEvent", messageEvent);
         appendChatMessage(messageEvent);
       }
       break;
