@@ -5,7 +5,7 @@ export async function registerUser(user) {
   try {
     const response = await fetch(REGISTER_API, {
       method: "POST",
-      mode: 'cors',
+      mode: "cors",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",

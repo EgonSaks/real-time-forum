@@ -30,7 +30,5 @@ func GetUserDetails(db *sql.DB, credentials Credentials) (storedCredentials Cred
 		return storedCredentials, err
 	}
 
-	fmt.Println("storedCredentials from GetUserDetails in models", storedCredentials)
-
 	return storedCredentials, nil
 }

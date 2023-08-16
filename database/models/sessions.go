@@ -10,6 +10,7 @@ import (
 type Session struct {
 	ID        string    `json:"id"`
 	UserID    string    `json:"user_id"`
+	OTP       string    `json:"otp"`
 	CreatedAt time.Time `json:"created_at"`
 	ExpiresAt time.Time `json:"expires_at"`
 }
@@ -18,13 +19,13 @@ func CreateSession(db *sql.DB, session Session) (string, error) {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO sessions (id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)"
+	query := "INSERT INTO sessions (id, user_id, otp, created_at, expires_at) VALUES (?, ?, ?, ?, ?)"
 	statement, err := db.PrepareContext(context, query)
 	if err != nil {
 		return session.ID, fmt.Errorf("failed to prepare session statement: %v", err)
 	}
 
-	_, err = statement.ExecContext(context, session.ID, session.UserID, time.Now(), session.ExpiresAt)
+	_, err = statement.ExecContext(context, session.ID, session.UserID, session.OTP, time.Now(), session.ExpiresAt)
 	if err != nil {
 		fmt.Printf("failed to create session: %v", err)
 		return session.ID, err
@@ -35,8 +36,8 @@ func CreateSession(db *sql.DB, session Session) (string, error) {
 
 func GetSessionByID(db *sql.DB, id string) (Session, error) {
 	var session Session
-	query := "SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?"
-	err := db.QueryRow(query, id).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
+	query := "SELECT id, user_id, otp, created_at, expires_at FROM sessions WHERE id = ?"
+	err := db.QueryRow(query, id).Scan(&session.ID, &session.UserID, &session.OTP, &session.CreatedAt, &session.ExpiresAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return Session{}, nil

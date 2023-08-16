@@ -14,11 +14,11 @@ export async function createBaseView(params, matchedView, user) {
   const appContainer = document.querySelector("#app");
   appContainer.innerHTML = "";
 
-  const allUsers = await fetchUsers();
+  const allUsers = (await fetchUsers()) || [] || null;
 
-  const users = allUsers.filter(
-    (otherUser) => otherUser.username !== user.username
-  );
+  const users = allUsers && allUsers.length > 0
+      ? allUsers.filter((otherUser) => otherUser.username !== user.username)
+      : [] || null;
 
   const messengerVisible = getMessengerVisibility();
   const userLoggedIn = user && user.isLoggedIn;

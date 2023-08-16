@@ -73,7 +73,12 @@ export function validateUpdatedData(title, content, postContainer) {
   }
 }
 
-export async function validateCommentInput(commentContentInput, errorMsg, postID, author) {
+export async function validateCommentInput(
+  commentContentInput,
+  errorMsg,
+  postID,
+  author
+) {
   const commentContent = commentContentInput.value.trim();
 
   if (commentContent === "") {

@@ -11,7 +11,7 @@ import (
 	"github.com/real-time-forum/database/sqlite"
 )
 
-func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie, error) {
+func SetSession(w http.ResponseWriter, r *http.Request, id string, otp string) (*http.Cookie, error) {
 	user := models.User{
 		ID: id,
 	}
@@ -42,6 +42,7 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 		session := models.Session{
 			ID:        cookie.Value,
 			UserID:    user.ID,
+			OTP:       otp,
 			ExpiresAt: cookie.Expires,
 		}
 
@@ -75,6 +76,7 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 			session := models.Session{
 				ID:        cookie.Value,
 				UserID:    user.ID,
+				OTP:       otp,
 				ExpiresAt: cookie.Expires,
 			}
 
@@ -102,6 +104,7 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 			session := models.Session{
 				ID:        cookie.Value,
 				UserID:    user.ID,
+				OTP:       otp,
 				ExpiresAt: cookie.Expires,
 			}
 

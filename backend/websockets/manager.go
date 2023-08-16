@@ -3,7 +3,6 @@ package websockets
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -70,7 +69,13 @@ func (manager *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	log.Println("OTP verified")
+
+	// Get the user from the session
+	user, ok := utils.GetUserFromSession(r)
+	if !ok {
+		return
+	}
+
 	log.Println("Connection established")
 	connection, err := websocketUpgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -78,15 +83,9 @@ func (manager *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, ok := utils.GetUserFromSession(r)
-	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("User not found in session")
-		return
-	}
-
 	client := NewClient(connection, manager, user.Username)
 	manager.addClient(client)
+
 	go client.readMessages()
 	go client.writeMessages()
 }

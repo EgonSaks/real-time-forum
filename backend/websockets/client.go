@@ -22,15 +22,23 @@ type Client struct {
 	egress     chan Event
 	chat       string
 	username   string
+	online     bool
+	lastSeen   time.Time
 }
 
 func NewClient(connection *websocket.Conn, manager *Manager, username string) *Client {
-	return &Client{
+	client := &Client{
 		connection: connection,
 		manager:    manager,
 		egress:     make(chan Event),
 		username:   username,
+		online:     true,
+		lastSeen:   time.Now(),
 	}
+
+	log.Println("New client created:", client.username)
+
+	return client
 }
 
 func (client *Client) readMessages() {
@@ -43,6 +51,8 @@ func (client *Client) readMessages() {
 		return
 	}
 	client.connection.SetPongHandler(client.pongHandler)
+
+	client.lastSeen = time.Now()
 
 	for {
 		_, payload, err := client.connection.ReadMessage()
@@ -61,11 +71,6 @@ func (client *Client) readMessages() {
 			log.Println("Error handling Message: ", err)
 		}
 	}
-}
-
-func (client *Client) pongHandler(pongMsg string) error {
-	// log.Println("pong")
-	return client.connection.SetReadDeadline(time.Now().Add(pongWait))
 }
 
 func (client *Client) writeMessages() {
@@ -95,12 +100,18 @@ func (client *Client) writeMessages() {
 			}
 			log.Println("sent message")
 		case <-ticker.C:
+			client.lastSeen = time.Now()
 			// log.Println("ping")
-			// Send the Ping
+			// Send the Ping message to the client
 			if err := client.connection.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-				log.Println("write msg: ", err)
+				log.Println("write message: ", err)
 				return
 			}
 		}
 	}
+}
+
+func (client *Client) pongHandler(pongMsg string) error {
+	// log.Println("pong")
+	return client.connection.SetReadDeadline(time.Now().Add(pongWait))
 }

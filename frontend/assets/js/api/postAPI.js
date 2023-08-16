@@ -3,7 +3,7 @@ const POST_API = "http://localhost:8081/api/post/";
 
 export async function fetchPosts() {
   return fetch(POSTS_API, {
-    mode: 'cors',
+    mode: "cors",
     credentials: "include",
   })
     .then((response) => {
@@ -21,12 +21,12 @@ export async function fetchPosts() {
 export async function createPostToDatabase(data) {
   return fetch(POST_API, {
     method: "POST",
-    mode: 'cors',
+    mode: "cors",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-    credentials: "include",
   })
     .then((response) => {
       if (!response.ok) {
@@ -57,7 +57,8 @@ export async function fetchSinglePost(postID) {
 export async function deletePostFromDatabase(postId) {
   return fetch(POST_API, {
     method: "DELETE",
-    mode: 'cors',
+    mode: "cors",
+    credentials: "include",
     body: JSON.stringify({ postId: postId }),
     headers: {
       "Content-Type": "application/json",
@@ -78,7 +79,8 @@ export async function updatePostData(updatedData) {
   const url = POST_API;
   const payload = {
     method: "PUT",
-    mode: 'cors',
+    mode: "cors",
+    credentials: "include",
     body: JSON.stringify(updatedData),
     headers: {
       "Content-Type": "application/json",

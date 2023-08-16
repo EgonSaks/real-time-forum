@@ -6,12 +6,12 @@ const LOGIN_API = "http://localhost:8081/login";
 export async function loginUser(credentials) {
   return fetch(LOGIN_API, {
     method: "POST",
-    mode: 'cors',
+    mode: "cors",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(credentials),
-    credentials: "include",
   })
     .then((response) => {
       if (!response.ok) {

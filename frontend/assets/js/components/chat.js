@@ -19,7 +19,7 @@ export function createChats(users) {
   header.textContent = "Messenger";
   chatsContainer.append(header);
 
-  if (users.length === 0) {
+  if (users === null || users.length === 0) {
     const noUsersText = document.createElement("p");
     noUsersText.classList.add("no-users-text");
     noUsersText.textContent = "Wait for users to come online";
@@ -43,12 +43,9 @@ export function createChats(users) {
     lastSeen.textContent = "user.last_seen";
 
     const status = document.createElement("p");
-    status.classList.add(
-      "chat-status",
-      user.status === "online" ? "online" : "offline"
-    );
+    status.classList.add("chat-status",user.status === "online" ? "online" : "offline");
     status.classList.add("chat-status", "online");
-    status.textContent = user.status;
+    status.textContent = "user.status";
 
     userDiv.append(name, lastSeen);
     chat.append(userDiv, status);
@@ -57,12 +54,6 @@ export function createChats(users) {
 
     chat.addEventListener("click", () => {
       ChangeChat(user);
-      // ChangeChat(user.username);
-      // showMessenger(user);
-
-      // console.log("clicked on chat");
-      // console.log("showMessenger user", user);
-      // console.log("ChangeChat user.username", user.username);
     });
   });
 
@@ -141,13 +132,9 @@ function sendMessage(user) {
   const messageInput = document.querySelector(".messenger-input");
   const recipient = messageInput.getAttribute("data-recipient");
   const message = messageInput.value.trim();
-  
+
   if (message !== null && message !== "") {
-    let outgoingEvent = new SendMessageEvent(
-      message,
-      user.username,
-      recipient
-    );
+    let outgoingEvent = new SendMessageEvent(message, user.username, recipient);
     sendEvent("send_message", outgoingEvent);
     messageInput.value = "";
   }

@@ -22,7 +22,7 @@ func Routes() http.Handler {
 	mux.HandleFunc("/ws", manager.ServeWS)
 
 	mux.HandleFunc("/login", auth.Login(manager))
-	mux.HandleFunc("/logout", auth.Logout)
+	mux.HandleFunc("/logout", auth.Logout(manager))
 	mux.HandleFunc("/register", auth.Register)
 
 	mux.HandleFunc("/api/users", handlers.Users)

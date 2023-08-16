@@ -5,6 +5,7 @@ import {
   showMessenger,
 } from "../components/chat.js";
 import { isLoggedIn } from "../utils/auth.js";
+
 let conn;
 let activeChatUser = null;
 
@@ -85,16 +86,13 @@ export function sendEvent(eventName, payload) {
 }
 
 export function connectWebSocket(otp) {
+
   if (window["WebSocket"]) {
     try {
       conn = new WebSocket("ws://localhost:8081/ws?otp=" + otp);
 
-      conn.onopen = function (e) {};
-
-      conn.onclose = function (e) {
-        setTimeout(function () {
-          connectWebSocket(otp);
-        }, 5000);
+      conn.onopen = function (e) {
+        console.log("Connection established!");
       };
 
       conn.onmessage = function (e) {
@@ -102,6 +100,14 @@ export function connectWebSocket(otp) {
         const event = Object.assign(new Event(), eventData);
         routeEvent(event);
         return conn;
+      };
+
+      conn.onclose = function (e) {
+        console.log("WebSocket closed unexpectedly");
+
+        setTimeout(function () {
+          connectWebSocket(otp);
+        }, 5000);
       };
 
       return conn;

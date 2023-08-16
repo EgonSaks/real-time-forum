@@ -16,6 +16,7 @@ type LoginResponse struct {
 	Message  string `json:"message"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	Session  string `json:"session"`
 	OTP      string `json:"otp"`
 }
 
@@ -47,22 +48,30 @@ func Login(manager *websockets.Manager) http.HandlerFunc {
 
 		if (user.Username == creds.Username || user.Email == creds.Email) && utils.ComparePasswords(user.Password, creds.Password) {
 
-			_, err := utils.SetSession(w, r, user.UserID)
+			otp := manager.Otps.NewOTP()
+
+			session, err := utils.SetSession(w, r, user.UserID, otp.Key)
 			if err != nil {
 				fmt.Println("Error setting session:", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 
-			otp := manager.Otps.NewOTP()
-			fmt.Println("OTP:", otp.Key)
 			response := LoginResponse{
 				Message:  "Login successful",
 				Username: user.Username,
 				Email:    user.Email,
+				Session:  session.Value,
 				OTP:      otp.Key,
 			}
-			json.NewEncoder(w).Encode(response)
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			err = json.NewEncoder(w).Encode(response)
+			if err != nil {
+				http.Error(w, "Error encoding JSON response", http.StatusInternalServerError)
+				return
+			}
 		} else {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
