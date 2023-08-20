@@ -1,10 +1,9 @@
+import { config } from "../config/config.js";
 import { navigateTo } from "../router/router.js";
 import { connectWebSocket } from "../websocket/websocket.js";
 
-const LOGIN_API = "http://localhost:8081/login";
-
 export async function loginUser(credentials) {
-  return fetch(LOGIN_API, {
+  return fetch(config.api.login, {
     method: "POST",
     mode: "cors",
     credentials: "include",
@@ -25,7 +24,7 @@ export async function loginUser(credentials) {
       const userData = { ...data, expiresAt: expiryTime.getTime() };
       localStorage.setItem("user", JSON.stringify(userData));
 
-      connectWebSocket(data.otp);
+      connectWebSocket(data);
       navigateTo("/");
       return data;
     })

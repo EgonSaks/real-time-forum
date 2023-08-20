@@ -3,12 +3,25 @@ package websockets
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/real-time-forum/database/models"
+	"github.com/real-time-forum/database/sqlite"
 )
 
 type Event struct {
 	Type    string          `json:"type"`
 	Payload json.RawMessage `json:"payload"`
+}
+
+type PastMessages struct {
+	Messages []models.Message `json:"messages"`
+}
+
+type ChangeChatEvent struct {
+	Name string `json:"username"`
 }
 
 type EventHandler func(event Event, removeClient *Client) error
@@ -19,56 +32,80 @@ const (
 	EventChangeChat  = "change_chat"
 )
 
-type SendMessageEvent struct {
-	Message string `json:"message"`
-	From    string `json:"from"`
-	To      string `json:"to"`
-}
-type NewMessageEvent struct {
-	SendMessageEvent
-	Sent time.Time `json:"sent"`
-}
-
-func SendMessageHandler(event Event, client *Client) error {
-	var chatEvent SendMessageEvent
-	if err := json.Unmarshal(event.Payload, &chatEvent); err != nil {
+func SendMessage(event Event, client *Client) error {
+	var chatMessage *models.Message
+	if err := json.Unmarshal(event.Payload, &chatMessage); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
 	}
+	chatMessage.ID = uuid.New().String()
+	chatMessage.Sent = time.Now().UTC()
 
-	var broadMessage NewMessageEvent
+	database, err := sqlite.OpenDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.DB.Close()
 
-	broadMessage.Sent = time.Now()
-	broadMessage.Message = chatEvent.Message
-	broadMessage.From = chatEvent.From
-	broadMessage.To = chatEvent.To
+	_, err = models.CreateMessage(database.DB, *chatMessage)
+	if err != nil {
+		return fmt.Errorf("failed to create message: %v", err)
+	}
 
-	data, err := json.Marshal(broadMessage)
+	data, err := json.Marshal(chatMessage)
 	if err != nil {
 		return fmt.Errorf("failed to marshal broadcast message: %v", err)
 	}
 
 	var outgoingEvent Event
-	outgoingEvent.Payload = data
 	outgoingEvent.Type = EventNewMessage
+	outgoingEvent.Payload = data
+
 	for c := range client.manager.Clients {
-		if c.username == chatEvent.To || c.username == chatEvent.From {
+		if c.username == chatMessage.Receiver || c.username == chatMessage.Sender {
 			c.egress <- outgoingEvent
 		}
 	}
 	return nil
 }
 
-type ChangeChatEvent struct {
-	Name string `json:"name"`
-}
-
-func ChatHandler(event Event, client *Client) error {
-	var changeChatEvent ChangeChatEvent
-	if err := json.Unmarshal(event.Payload, &changeChatEvent); err != nil {
-		return fmt.Errorf("bad payload in request: %v", err)
+func GetPastMessages(client *Client, database *sqlite.Database, sender, receiver string) error {
+	messages, err := models.GetMessages(database.DB, sender, receiver)
+	if err != nil {
+		return fmt.Errorf("failed to fetch previous messages: %v", err)
 	}
 
-	client.chat = changeChatEvent.Name
+	pastMessages := PastMessages{Messages: messages}
+	pastMessagesJSON, err := json.Marshal(pastMessages)
+	if err != nil {
+		return fmt.Errorf("failed to marshal previous payload: %v", err)
+	}
+
+	previousMessages := Event{
+		Type:    EventNewMessage,
+		Payload: json.RawMessage(pastMessagesJSON),
+	}
+
+	client.egress <- previousMessages
+	return nil
+}
+
+func ChangeChat(event Event, client *Client) error {
+	var changeChat ChangeChatEvent
+	if err := json.Unmarshal(event.Payload, &changeChat); err != nil {
+		return fmt.Errorf("bad payload in request: %v", err)
+	}
+	client.chat = changeChat.Name
+
+	database, err := sqlite.OpenDatabase()
+	if err != nil {
+		return fmt.Errorf("failed to open database: %v", err)
+	}
+	defer database.DB.Close()
+
+	err = GetPastMessages(client, database, client.username, changeChat.Name)
+	if err != nil {
+		log.Printf("Failed to send previous messages: %v", err)
+	}
 
 	return nil
 }

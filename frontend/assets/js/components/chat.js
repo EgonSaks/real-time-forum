@@ -1,13 +1,39 @@
 import { isLoggedIn } from "../utils/auth.js";
-import {
-  ChangeChat,
-  SendMessageEvent,
-  sendEvent,
-} from "../websocket/websocket.js";
+import { changeChat, sendEvent } from "../websocket/websocket.js";
 let messengerVisible = false;
 
 export function getMessengerVisibility() {
   return messengerVisible;
+}
+
+export function updateUserStatus(username, online) {
+  // console.log("updateUserStatus", username, online);
+
+  const chatsContainer = document.querySelector(".chats-container");
+  if (chatsContainer) {
+    const chats = chatsContainer.querySelectorAll(".chat");
+
+    chats.forEach((chat) => {
+      const name = chat.querySelector(".chat-name");
+      if (name.getAttribute("data-username") === username) {
+        const status = chat.querySelector(".chat-status");
+        status.classList.remove("offline", "online");
+        status.classList.add(online ? "online" : "offline");
+        status.textContent = online ? "online" : "offline";
+      }
+    });
+  }
+
+  const messenger = document.querySelector(".messenger");
+  if (messenger) {
+    const messengerName = messenger.querySelector(".messenger-name");
+    if (messengerName.textContent === username) {
+      const messengerStatus = messenger.querySelector(".messenger-status");
+      messengerStatus.classList.remove("offline", "online");
+      messengerStatus.classList.add(online ? "online" : "offline");
+      messengerStatus.textContent = online ? "online" : "offline";
+    }
+  }
 }
 
 export function createChats(users) {
@@ -37,15 +63,19 @@ export function createChats(users) {
     const name = document.createElement("h4");
     name.classList.add("chat-name");
     name.textContent = user.username;
+    name.setAttribute("data-username", user.username);
 
     const lastSeen = document.createElement("p");
     lastSeen.classList.add("chat-last-seen");
     lastSeen.textContent = "user.last_seen";
 
     const status = document.createElement("p");
-    status.classList.add("chat-status",user.status === "online" ? "online" : "offline");
+    status.classList.add(
+      "chat-status",
+      user.status === "online" ? "online" : "offline"
+    );
     status.classList.add("chat-status", "online");
-    status.textContent = "user.status";
+    status.textContent = user.status || "offline";
 
     userDiv.append(name, lastSeen);
     chat.append(userDiv, status);
@@ -53,7 +83,7 @@ export function createChats(users) {
     chatsContainer.append(chat);
 
     chat.addEventListener("click", () => {
-      ChangeChat(user);
+      changeChat(user);
     });
   });
 
@@ -69,8 +99,13 @@ export function showMessenger(user) {
 
   nameElement.textContent = user.username;
   lastSeenElement.textContent = "user.last_seen";
-  statusElement.textContent = "user.status";
-  statusElement.classList.remove("offline", "online");
+
+  statusElement.classList.add(
+    "messenger-status",
+    user.status === "online" ? "online" : "offline"
+  );
+  statusElement.classList.add("messenger-status", "online");
+  statusElement.textContent = user.status || "offline";
 
   messengerVisible = true;
   messenger.classList.remove("messenger-hidden");
@@ -134,8 +169,12 @@ function sendMessage(user) {
   const message = messageInput.value.trim();
 
   if (message !== null && message !== "") {
-    let outgoingEvent = new SendMessageEvent(message, user.username, recipient);
-    sendEvent("send_message", outgoingEvent);
+    let outgoingMessage = {
+      message,
+      sender: user.username,
+      receiver: recipient,
+    };
+    sendEvent("send_message", outgoingMessage);
     messageInput.value = "";
   }
 }
@@ -144,7 +183,7 @@ export function appendChatMessage(messageElement) {
   const chatMessages = document.querySelector(".chat-messages");
   const messageContainer = document.createElement("div");
 
-  const date = new Date(messageElement.sent);
+  const date = new Date(messageElement.sent_at);
   const formattedMsg = `${messageElement.message}`;
 
   const message = document.createElement("p");
@@ -164,10 +203,10 @@ export function appendChatMessage(messageElement) {
 
   const user = isLoggedIn();
 
-  if (messageElement.from === user.username) {
+  if (messageElement.sender === user.username) {
     console.log("Message from user", user.username);
     messageContainer.classList.add("sender-message");
-  } else if (messageElement.to === user.username) {
+  } else if (messageElement.receiver === user.username) {
     console.log("Message to user", user.username);
     messageContainer.classList.add("recipient-message");
   }
@@ -180,7 +219,6 @@ export function appendChatMessage(messageElement) {
 export function createMessenger(user) {
   console.log("Creating messenger for " + user.username + ".");
   const messenger = document.createElement("div");
-
   messenger.classList.add("messenger");
 
   const messengerHeader = document.createElement("div");
@@ -197,10 +235,15 @@ export function createMessenger(user) {
   lastSeen.classList.add("messenger-last-seen");
   lastSeen.textContent = "";
 
-  nameWithLastSeen.append(name, lastSeen);
+  const closeButton = document.createElement("closeButton");
+  closeButton.classList.add("messenger-close-button");
+  closeButton.textContent = "x";
+  closeButton.addEventListener("click", hideMessenger);
+
+  nameWithLastSeen.append(name, lastSeen, closeButton);
 
   const status = document.createElement("p");
-  status.classList.add("messenger-status", "online");
+  status.classList.add("messenger-status");
   status.textContent = "";
 
   messengerHeader.append(nameWithLastSeen, status);
@@ -222,19 +265,10 @@ export function createMessenger(user) {
   function handleTyping() {
     const messengerInput = document.querySelector(".messenger-input");
     const sendButton = document.querySelector(".message-send-button");
-
     if (messengerInput.value.trim().length > 0) {
-      sendButton.style.backgroundColor = "rgb(25, 195, 125)";
-      sendButton.style.color = "#fff";
-      sendButton.style.cursor = "pointer";
-      sendButton.style.borderRadius = "0.3rem";
-      sendButton.style.border = "none";
+      sendButton.classList.add("send-button-active");
     } else {
-      sendButton.style.backgroundColor = "";
-      sendButton.style.color = "";
-      sendButton.style.cursor = "";
-      sendButton.style.borderRadius = "";
-      sendButton.style.border = ""; //
+      sendButton.classList.remove("send-button-active");
     }
   }
 

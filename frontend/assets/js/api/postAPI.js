@@ -1,8 +1,7 @@
-const POSTS_API = "http://localhost:8081/api/posts";
-const POST_API = "http://localhost:8081/api/post/";
+import { config } from "../config/config.js";
 
 export async function fetchPosts() {
-  return fetch(POSTS_API, {
+  return fetch(config.api.posts, {
     mode: "cors",
     credentials: "include",
   })
@@ -19,7 +18,7 @@ export async function fetchPosts() {
 }
 
 export async function createPostToDatabase(data) {
-  return fetch(POST_API, {
+  return fetch(config.api.post, {
     method: "POST",
     mode: "cors",
     credentials: "include",
@@ -41,7 +40,7 @@ export async function createPostToDatabase(data) {
 }
 
 export async function fetchSinglePost(postID) {
-  return fetch(POST_API + postID)
+  return fetch(config.api.post + postID)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -55,7 +54,7 @@ export async function fetchSinglePost(postID) {
 }
 
 export async function deletePostFromDatabase(postId) {
-  return fetch(POST_API, {
+  return fetch(config.api.post, {
     method: "DELETE",
     mode: "cors",
     credentials: "include",
@@ -76,7 +75,7 @@ export async function deletePostFromDatabase(postId) {
 }
 
 export async function updatePostData(updatedData) {
-  const url = POST_API;
+  const url = config.api.post;
   const payload = {
     method: "PUT",
     mode: "cors",

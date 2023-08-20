@@ -1,9 +1,9 @@
-const COMMENT_API = "http://localhost:8081/api/comment";
+import { config } from "../config/config.js";
 
 export async function createCommentToDatabase(data) {
-  return fetch(COMMENT_API, {
+  return fetch(config.api.comment, {
     method: "POST",
-    mode: 'cors',
+    mode: "cors",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -18,9 +18,9 @@ export async function createCommentToDatabase(data) {
 }
 
 export async function fetchCommentsByPostID(postId) {
-  return fetch(COMMENT_API, {
+  return fetch(config.api.comment, {
     method: "GET",
-    mode: 'cors',
+    mode: "cors",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",

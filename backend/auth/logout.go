@@ -15,6 +15,14 @@ func Logout(manager *websockets.Manager) http.HandlerFunc {
 			return
 		}
 
+		// Get the user from the session
+		user, ok := utils.GetUserFromSession(r)
+		if !ok {
+			http.Error(w, "User not found", http.StatusUnauthorized)
+			return
+		}
+
+		manager.CloseWebSocket(user.Username)
 		utils.DeleteSession(w, r)
 
 		response := map[string]string{"message": "Logout successful"}

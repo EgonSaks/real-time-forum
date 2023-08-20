@@ -44,7 +44,9 @@ func NewClient(connection *websocket.Conn, manager *Manager, username string) *C
 func (client *Client) readMessages() {
 	defer func() {
 		client.manager.removeClient(client)
+		client.online = false
 	}()
+
 	client.connection.SetReadLimit(maxMessageSize)
 	if err := client.connection.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
 		log.Println(err)
@@ -100,9 +102,20 @@ func (client *Client) writeMessages() {
 			}
 			log.Println("sent message")
 		case <-ticker.C:
-			client.lastSeen = time.Now()
-			// log.Println("ping")
+
+			client.manager.RLock()
+			_, clientExists := client.manager.Clients[client]
+			client.manager.RUnlock()
+
+			if clientExists {
+				client.online = true
+				client.lastSeen = time.Now()
+			} else {
+				client.online = false
+				return
+			}
 			// Send the Ping message to the client
+			// log.Println("ping")
 			if err := client.connection.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 				log.Println("write message: ", err)
 				return

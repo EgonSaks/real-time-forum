@@ -17,7 +17,6 @@ type LoginResponse struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Session  string `json:"session"`
-	OTP      string `json:"otp"`
 }
 
 func Login(manager *websockets.Manager) http.HandlerFunc {
@@ -48,9 +47,7 @@ func Login(manager *websockets.Manager) http.HandlerFunc {
 
 		if (user.Username == creds.Username || user.Email == creds.Email) && utils.ComparePasswords(user.Password, creds.Password) {
 
-			otp := manager.Otps.NewOTP()
-
-			session, err := utils.SetSession(w, r, user.UserID, otp.Key)
+			session, err := utils.SetSession(w, r, user.UserID)
 			if err != nil {
 				fmt.Println("Error setting session:", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -62,7 +59,6 @@ func Login(manager *websockets.Manager) http.HandlerFunc {
 				Username: user.Username,
 				Email:    user.Email,
 				Session:  session.Value,
-				OTP:      otp.Key,
 			}
 
 			w.Header().Set("Content-Type", "application/json")

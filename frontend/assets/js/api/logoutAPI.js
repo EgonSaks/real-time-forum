@@ -1,15 +1,16 @@
+import { config } from "../config/config.js";
 import { navigateTo } from "../router/router.js";
-
-const LOGOUT_API = "http://localhost:8081/logout";
+import { closeWebSocket } from "../websocket/websocket.js";
 
 export async function logoutUser() {
-  fetch(LOGOUT_API, {
+  fetch(config.api.logout, {
     method: "GET",
     mode: "cors",
     credentials: "include",
   })
     .then((response) => {
       if (response.ok) {
+        closeWebSocket();
         localStorage.removeItem("user");
         navigateTo("/login");
       } else {

@@ -1,21 +1,15 @@
 package websockets
 
 import (
-	"context"
 	"errors"
 	"log"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/real-time-forum/backend/utils"
 )
 
-/*
-*
-websocketUpgrader is used to upgrade incoming HTTP requests into a persistent websocket connection
-*/
 var websocketUpgrader = websocket.Upgrader{
 	ReadBufferSize:  4096,
 	WriteBufferSize: 4096,
@@ -38,39 +32,26 @@ func checkOrigin(r *http.Request) bool {
 var ErrEventNotSupported = errors.New("this event type is not supported")
 
 type Manager struct {
-	Clients ClientList
-	sync.RWMutex
+	Clients  ClientList
 	Handlers map[string]EventHandler
-	Otps     RetentionMap
+	sync.RWMutex
 }
 
-func NewManager(ctx context.Context) *Manager {
+func NewManager() *Manager {
 	manager := &Manager{
 		Clients:  make(ClientList),
 		Handlers: make(map[string]EventHandler),
-		Otps:     NewRetentionMap(ctx, 5*time.Second),
 	}
 	manager.setupEventHandlers()
 	return manager
 }
 
 func (manager *Manager) setupEventHandlers() {
-	manager.Handlers[EventSendMessage] = SendMessageHandler
-	manager.Handlers[EventChangeChat] = ChatHandler
+	manager.Handlers[EventSendMessage] = SendMessage
+	manager.Handlers[EventChangeChat] = ChangeChat
 }
 
 func (manager *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
-	otp := r.URL.Query().Get("otp")
-	if otp == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	if !manager.Otps.VerifyOTP(otp) {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	// Get the user from the session
 	user, ok := utils.GetUserFromSession(r)
 	if !ok {
 		return
@@ -82,6 +63,8 @@ func (manager *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+
+	log.Printf("Connection from %s\n", connection.RemoteAddr().String())
 
 	client := NewClient(connection, manager, user.Username)
 	manager.addClient(client)
@@ -95,6 +78,7 @@ func (manager *Manager) addClient(client *Client) {
 	defer manager.Unlock()
 
 	manager.Clients[client] = true
+	log.Printf("%v is online\n", client.username)
 }
 
 func (manager *Manager) removeClient(client *Client) {
@@ -104,6 +88,7 @@ func (manager *Manager) removeClient(client *Client) {
 	if _, ok := manager.Clients[client]; ok {
 		client.connection.Close()
 		delete(manager.Clients, client)
+		log.Printf("%v is offline\n", client.username)
 	}
 }
 
@@ -115,5 +100,18 @@ func (manager *Manager) routeEvent(event Event, client *Client) error {
 		return nil
 	} else {
 		return ErrEventNotSupported
+	}
+}
+
+func (manager *Manager) CloseWebSocket(username string) {
+	manager.Lock()
+	defer manager.Unlock()
+
+	for client := range manager.Clients {
+		if client.username == username {
+			client.connection.Close()
+			delete(manager.Clients, client)
+			log.Printf("%v is offline\n", client.username)
+		}
 	}
 }

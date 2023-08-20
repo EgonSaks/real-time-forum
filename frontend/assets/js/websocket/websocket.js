@@ -3,43 +3,77 @@ import {
   getMessengerVisibility,
   hideMessenger,
   showMessenger,
+  updateUserStatus,
 } from "../components/chat.js";
+import { config } from "../config/config.js";
 import { isLoggedIn } from "../utils/auth.js";
 
-let conn;
+let ws;
 let activeChatUser = null;
 
-class Event {
-  constructor(type, payload) {
-    this.type = type;
-    this.payload = payload;
+export function connectWebSocket(user) {
+  if (window["WebSocket"]) {
+    try {
+      const url = `ws://${window.location.hostname}:${config.wsPort}/ws`;
+      ws = new WebSocket(url);
+
+      ws.onopen = function (message) {
+        console.log("Connection established!");
+        updateUserStatus(user.username, true);
+      };
+
+      ws.onmessage = function (message) {
+        const data = JSON.parse(message.data);
+        routeEvent(data);
+      };
+
+      ws.onclose = function (message) {
+        console.log("WebSocket closed unexpectedly");
+        updateUserStatus(user.username, false);
+      };
+
+      return ws;
+    } catch (error) {
+      console.error("WebSocket connection could not be established:", error);
+    }
+  } else {
+    alert("WebSockets are not supported in this browser.");
   }
 }
 
-export class SendMessageEvent {
-  constructor(message, from, to) {
-    this.message = message;
-    this.from = from;
-    this.to = to;
+export function sendEvent(eventType, payload) {
+  const msg = { type: eventType, payload };
+  ws.send(JSON.stringify(msg));
+}
+
+function routeEvent(msg) {
+  switch (msg.type) {
+    case "new_message":
+      const message = msg.payload;
+
+      if (message.messages) {
+        message.messages.forEach((message) => {
+          appendChatMessage(message);
+        });
+      } else {
+        const user = isLoggedIn();
+        if (
+          (message.sender === user.username &&
+            message.receiver === activeChatUser) ||
+          (message.receiver === user.username &&
+            message.sender === activeChatUser)
+        ) {
+          appendChatMessage(message);
+        }
+      }
+      break;
+    default:
+      alert("unsupported message type");
+      break;
   }
 }
 
-export class NewMessageEvent {
-  constructor(message, from, to, sent) {
-    this.message = message;
-    this.from = from;
-    this.to = to;
-    this.sent = sent;
-  }
-}
-
-class ChangeChatEvent {
-  constructor(name) {
-    this.name = name;
-  }
-}
-
-export function ChangeChat(user) {
+export function changeChat(user) {
   if (activeChatUser !== user.username) {
     activeChatUser = user.username;
 
@@ -50,72 +84,15 @@ export function ChangeChat(user) {
 
     const messageInput = document.querySelector(".messenger-input");
     messageInput.setAttribute("data-recipient", user.username);
-
-    let changeEvent = new ChangeChatEvent(user.username);
-    sendEvent("change_chat", changeEvent);
+    const username = { username: user.username };
+    console.log(username);
+    sendEvent("change_chat", username);
   }
 }
 
-function routeEvent(event) {
-  if (event.type === undefined) {
-    alert("no 'type' field in event");
-  }
-  switch (event.type) {
-    case "new_message":
-      const messageEvent = Object.assign(new NewMessageEvent(), event.payload);
-      const user = isLoggedIn();
-
-      if (
-        (messageEvent.from === user.username &&
-          messageEvent.to === activeChatUser) ||
-        (messageEvent.to === user.username &&
-          messageEvent.from === activeChatUser)
-      ) {
-        appendChatMessage(messageEvent);
-      }
-      break;
-    default:
-      alert("unsupported message type");
-      break;
-  }
-}
-
-export function sendEvent(eventName, payload) {
-  const event = new Event(eventName, payload);
-  conn.send(JSON.stringify(event));
-}
-
-export function connectWebSocket(otp) {
-
-  if (window["WebSocket"]) {
-    try {
-      conn = new WebSocket("ws://localhost:8081/ws?otp=" + otp);
-
-      conn.onopen = function (e) {
-        console.log("Connection established!");
-      };
-
-      conn.onmessage = function (e) {
-        const eventData = JSON.parse(e.data);
-        const event = Object.assign(new Event(), eventData);
-        routeEvent(event);
-        return conn;
-      };
-
-      conn.onclose = function (e) {
-        console.log("WebSocket closed unexpectedly");
-
-        setTimeout(function () {
-          connectWebSocket(otp);
-        }, 5000);
-      };
-
-      return conn;
-    } catch (error) {
-      console.error("WebSocket connection could not be established:", error);
-    }
-  } else {
-    alert("WebSockets are not supported in this browser.");
+export function closeWebSocket() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.close();
   }
 }
 
@@ -123,8 +100,8 @@ window.addEventListener("DOMContentLoaded", function () {
   const user = localStorage.getItem("user");
   if (user) {
     const userObj = JSON.parse(user);
-    if (userObj.otp !== "") {
-      connectWebSocket(userObj.otp);
+    if (userObj !== "") {
+      connectWebSocket(userObj);
     }
   }
 });

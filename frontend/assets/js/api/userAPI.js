@@ -1,8 +1,7 @@
-const USERS_API = "http://localhost:8081/api/users";
-const USER_API = "http://localhost:8081/api/user/";
+import { config } from "../config/config.js";
 
 export async function fetchUsers() {
-  return fetch(USERS_API, {
+  return fetch(config.api.users, {
     mode: "cors",
     credentials: "include",
   })
@@ -19,7 +18,7 @@ export async function fetchUsers() {
 }
 
 export async function fetchSingleUser(userID) {
-  return fetch(USER_API, {
+  return fetch(config.api.user, {
     method: "GET",
     mode: "cors",
     credentials: "include",

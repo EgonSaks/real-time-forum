@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -13,13 +12,7 @@ import (
 func Routes() http.Handler {
 	mux := http.NewServeMux()
 
-	rootCtx := context.Background()
-	ctx, cancel := context.WithCancel(rootCtx)
-	defer cancel()
-
-	manager := websockets.NewManager(ctx)
-
-	mux.HandleFunc("/ws", manager.ServeWS)
+	manager := websockets.NewManager()
 
 	mux.HandleFunc("/login", auth.Login(manager))
 	mux.HandleFunc("/logout", auth.Logout(manager))
@@ -31,6 +24,8 @@ func Routes() http.Handler {
 	mux.HandleFunc("/api/posts", handlers.Posts)
 	mux.HandleFunc("/api/post/", handlers.Post)
 	mux.HandleFunc("/api/comment", handlers.Comment)
+
+	mux.HandleFunc("/ws", manager.ServeWS)
 
 	mux.HandleFunc("/debug", func(w http.ResponseWriter, r *http.Request) {
 		numClients := len(manager.Clients)
