@@ -616,18 +616,17 @@ a.register-link {
 }
 
 .message-content{
-  background-color: #1e90ff;
-  width: 80%;
   padding: 0.3rem 0.3rem;
   border-radius: 0.3rem;
   display: inline-block;
+  width: 80%;
 }
 
 .message {
-  color: white;
   text-align: start;
   white-space: pre-wrap;
   word-wrap: break-word;
+  margin: 0.1rem 0;
 }
 
 .sender-message {
@@ -646,6 +645,16 @@ a.register-link {
   text-align: left;
   margin: 0.1rem 0;
   width: 95%;  
+}
+
+.sender-message .message-content {
+  background-color: #1e90ff; 
+  color: white; 
+}
+
+.recipient-message .message-content {
+  background-color: #F0F2F5; 
+  color: #65676B;
 }
 
 .date-container {
