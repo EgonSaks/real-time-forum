@@ -2,6 +2,7 @@ import { isLoggedIn } from "../utils/auth.js";
 import { sendEvent } from "../websocket/websocket.js";
 
 let messengerVisible = false;
+let previousDate = null;
 let activeChatUser = null;
 
 export function getMessengerVisibility() {
@@ -205,29 +206,44 @@ export function appendChatMessage(messageElement) {
   message.classList.add("message");
   message.textContent = formattedMsg;
 
+  const timeOptions = { hour: "numeric", minute: "numeric" };
+  const timeString = date.toLocaleTimeString([], timeOptions);
+
+  const timeContainer = document.createElement("div");
+  timeContainer.classList.add("time-container");
+  timeContainer.textContent = timeString;
+
+  const dateOptions = { year: "numeric", month: "long", day: "numeric" };
+  const dateString = date.toLocaleDateString([], dateOptions);
+
+  if (dateString !== previousDate) {
+    const dateContainer = document.createElement("div");
+    dateContainer.classList.add("date-container");
+    dateContainer.textContent = dateString;
+    chatMessages.appendChild(dateContainer);
+    previousDate = dateString; 
+  }
+
   const dateContainer = document.createElement("div");
   dateContainer.classList.add("date-container");
-  dateContainer.textContent = date.toLocaleString();
+  dateContainer.textContent = dateString;
 
   const messageContent = document.createElement("div");
   messageContent.classList.add("message-content");
-  messageContent.appendChild(message);
-
-  messageContainer.appendChild(messageContent);
-  messageContainer.appendChild(dateContainer);
+  messageContent.append(message);
+  messageContainer.append(messageContent, timeContainer);
 
   const user = isLoggedIn();
 
   if (messageElement.sender === user.username) {
-    console.log("Message from user", user.username);
+    // console.log("Message from user", user.username);
     messageContainer.classList.add("sender-message");
   } else if (messageElement.receiver === user.username) {
-    console.log("Message to user", user.username);
+    // console.log("Message to user", user.username);
     messageContainer.classList.add("recipient-message");
   }
 
   chatMessages.appendChild(messageContainer);
-
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 

@@ -40,7 +40,7 @@ export function connectWebSocket(user) {
 
 export function sendEvent(eventType, payload) {
   const msg = { type: eventType, payload };
-  console.log("Sending event:", msg);
+  // console.log("Sending event:", msg);
   ws.send(JSON.stringify(msg));
 }
 
