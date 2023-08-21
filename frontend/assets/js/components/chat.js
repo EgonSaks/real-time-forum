@@ -1,14 +1,14 @@
 import { isLoggedIn } from "../utils/auth.js";
-import { changeChat, sendEvent } from "../websocket/websocket.js";
+import { sendEvent } from "../websocket/websocket.js";
+
 let messengerVisible = false;
+let activeChatUser = null;
 
 export function getMessengerVisibility() {
   return messengerVisible;
 }
 
 export function updateUserStatus(username, online) {
-  // console.log("updateUserStatus", username, online);
-
   const chatsContainer = document.querySelector(".chats-container");
   if (chatsContainer) {
     const chats = chatsContainer.querySelectorAll(".chat");
@@ -83,11 +83,26 @@ export function createChats(users) {
     chatsContainer.append(chat);
 
     chat.addEventListener("click", () => {
-      changeChat(user);
+      const username = { username: user.username };
+      sendEvent("change_chat", username);
     });
   });
 
   return chatsContainer;
+}
+
+export function changeChat(user) {
+  if (activeChatUser !== user.username) {
+    activeChatUser = user.username;
+
+    if (getMessengerVisibility()) {
+      hideMessenger();
+    }
+    showMessenger(user);
+
+    const messageInput = document.querySelector(".messenger-input");
+    messageInput.setAttribute("data-recipient", user.username);
+  }
 }
 
 export function showMessenger(user) {

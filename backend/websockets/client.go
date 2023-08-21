@@ -20,7 +20,6 @@ type Client struct {
 	connection *websocket.Conn
 	manager    *Manager
 	egress     chan Event
-	chat       string
 	username   string
 	online     bool
 	lastSeen   time.Time
@@ -57,18 +56,23 @@ func (client *Client) readMessages() {
 	client.lastSeen = time.Now()
 
 	for {
-		_, payload, err := client.connection.ReadMessage()
+		_, message, err := client.connection.ReadMessage()
+		// timeReceive := time.Now()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error reading message: %v", err)
 			}
 			break
 		}
+
+		// fmt.Printf("Your message is: %s. Time received : %v", string(message), timeReceive)
+
 		var request Event
-		if err := json.Unmarshal(payload, &request); err != nil {
+		if err := json.Unmarshal(message, &request); err != nil {
 			log.Printf("error marshalling message: %v", err)
 			break
 		}
+
 		if err := client.manager.routeEvent(request, client); err != nil {
 			log.Println("Error handling Message: ", err)
 		}

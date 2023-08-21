@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -19,8 +18,6 @@ type Message struct {
 func CreateMessage(db *sql.DB, message Message) (string, error) {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-
-	log.Println("Creating message", message)
 
 	query := "INSERT INTO messages (id, message, sender, receiver, sent_at) VALUES (?, ?, ?, ?, ?)"
 	statement, err := db.PrepareContext(context, query)

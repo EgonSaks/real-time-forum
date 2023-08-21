@@ -1,15 +1,12 @@
 import {
   appendChatMessage,
-  getMessengerVisibility,
-  hideMessenger,
-  showMessenger,
+  changeChat,
   updateUserStatus,
 } from "../components/chat.js";
+
 import { config } from "../config/config.js";
-import { isLoggedIn } from "../utils/auth.js";
 
 let ws;
-let activeChatUser = null;
 
 export function connectWebSocket(user) {
   if (window["WebSocket"]) {
@@ -43,6 +40,7 @@ export function connectWebSocket(user) {
 
 export function sendEvent(eventType, payload) {
   const msg = { type: eventType, payload };
+  console.log("Sending event:", msg);
   ws.send(JSON.stringify(msg));
 }
 
@@ -50,43 +48,20 @@ function routeEvent(msg) {
   switch (msg.type) {
     case "new_message":
       const message = msg.payload;
-
       if (message.messages) {
         message.messages.forEach((message) => {
           appendChatMessage(message);
         });
       } else {
-        const user = isLoggedIn();
-        if (
-          (message.sender === user.username &&
-            message.receiver === activeChatUser) ||
-          (message.receiver === user.username &&
-            message.sender === activeChatUser)
-        ) {
-          appendChatMessage(message);
-        }
+        appendChatMessage(message);
       }
+      break;
+    case "change_chat":
+      changeChat(msg.payload);
       break;
     default:
       alert("unsupported message type");
       break;
-  }
-}
-
-export function changeChat(user) {
-  if (activeChatUser !== user.username) {
-    activeChatUser = user.username;
-
-    if (getMessengerVisibility()) {
-      hideMessenger();
-    }
-    showMessenger(user);
-
-    const messageInput = document.querySelector(".messenger-input");
-    messageInput.setAttribute("data-recipient", user.username);
-    const username = { username: user.username };
-    console.log(username);
-    sendEvent("change_chat", username);
   }
 }
 

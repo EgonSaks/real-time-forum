@@ -47,8 +47,8 @@ func NewManager() *Manager {
 }
 
 func (manager *Manager) setupEventHandlers() {
-	manager.Handlers[EventSendMessage] = SendMessage
-	manager.Handlers[EventChangeChat] = ChangeChat
+	manager.Handlers[EventSendMessage] = SendMessageHandler
+	manager.Handlers[EventChangeChat] = ChangeChatHandler
 }
 
 func (manager *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {

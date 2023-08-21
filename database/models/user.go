@@ -14,8 +14,8 @@ type User struct {
 	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
 	Age       string    `json:"age"`
-	Password  string    `json:"password"`
 	Gender    string    `json:"gender"`
+	Password  string    `json:"password"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -24,14 +24,14 @@ func CreateUser(db *sql.DB, user User) (string, error) {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO users (id, username, first_name, last_name, email, age, password, gender, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO users (id, username, first_name, last_name, email, age, gender, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	statement, err := db.PrepareContext(context, query)
 	if err != nil {
 		fmt.Printf("failed to prepare create user statement: %v", err)
 		return "", fmt.Errorf("failed to prepare create user statement: %v", err)
 	}
 
-	_, err = statement.ExecContext(context, user.ID, user.Username, user.FirstName, user.LastName, user.Email, user.Age, user.Password, user.Gender, time.Now().UTC(), time.Now().UTC())
+	_, err = statement.ExecContext(context, user.ID, user.Username, user.FirstName, user.LastName, user.Email, user.Age, user.Gender, user.Password, time.Now().UTC(), time.Now().UTC())
 	if err != nil {
 		fmt.Printf("failed to create user: %v", err)
 		return "", fmt.Errorf("failed to create user: %v", err)
@@ -46,7 +46,7 @@ func GetUser(db *sql.DB, userID string) (User, error) {
 
 	var user User
 	query := "SELECT * FROM users WHERE id = ?"
-	err := db.QueryRowContext(context, query, userID).Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.Email, &user.Age, &user.Password, &user.Gender, &user.CreatedAt, &user.UpdatedAt)
+	err := db.QueryRowContext(context, query, userID).Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.Email, &user.Age, &user.Gender, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return User{}, fmt.Errorf("user not found")
@@ -73,7 +73,7 @@ func GetAllUsers(db *sql.DB) ([]User, error) {
 
 	for rows.Next() {
 		var user User
-		err := rows.Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.Email, &user.Age, &user.Password, &user.Gender, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.Email, &user.Age, &user.Gender, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			fmt.Printf("failed to scan user row: %v", err)
 			return nil, fmt.Errorf("failed to scan user row: %v", err)
@@ -93,14 +93,14 @@ func UpdateUser(db *sql.DB, user User) error {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "UPDATE users SET username=?, first_name=?, last_name=?, email=?, age=?, password=?, gender=?, updated_at=? WHERE id=?"
+	query := "UPDATE users SET username=?, first_name=?, last_name=?, email=?, age=?, gender=?, password=?,updated_at=? WHERE id=?"
 	statement, err := db.PrepareContext(context, query)
 	if err != nil {
 		fmt.Printf("failed to prepare update user statement: %v", err)
 		return fmt.Errorf("failed to prepare update user statement: %v", err)
 	}
 
-	_, err = statement.ExecContext(context, user.Username, user.FirstName, user.LastName, user.Email, user.Age, user.Password, user.Gender, time.Now().UTC(), user.ID)
+	_, err = statement.ExecContext(context, user.Username, user.FirstName, user.LastName, user.Email, user.Age, user.Gender, user.Password, time.Now().UTC(), user.ID)
 	if err != nil {
 		fmt.Printf("failed to update user: %v", err)
 		return fmt.Errorf("failed to update user: %v", err)

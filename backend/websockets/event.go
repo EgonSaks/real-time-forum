@@ -32,7 +32,7 @@ const (
 	EventChangeChat  = "change_chat"
 )
 
-func SendMessage(event Event, client *Client) error {
+func SendMessageHandler(event Event, client *Client) error {
 	var chatMessage *models.Message
 	if err := json.Unmarshal(event.Payload, &chatMessage); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
@@ -68,7 +68,41 @@ func SendMessage(event Event, client *Client) error {
 	return nil
 }
 
-func GetPastMessages(client *Client, database *sqlite.Database, sender, receiver string) error {
+func ChangeChatHandler(event Event, client *Client) error {
+	var changeChat ChangeChatEvent
+	if err := json.Unmarshal(event.Payload, &changeChat); err != nil {
+		return fmt.Errorf("bad payload in request: %v", err)
+	}
+	
+	// Send the username back to the client as a response
+	response := ChangeChatEvent{Name: changeChat.Name}
+	responseData, err := json.Marshal(response)
+	if err != nil {
+		return fmt.Errorf("failed to marshal response: %v", err)
+	}
+
+	responseEvent := Event{
+		Type:    EventChangeChat,
+		Payload: responseData,
+	}
+
+	client.egress <- responseEvent
+
+	database, err := sqlite.OpenDatabase()
+	if err != nil {
+		return fmt.Errorf("failed to open database: %v", err)
+	}
+	defer database.DB.Close()
+
+	err = GetPastMessagesHandler(client, database, client.username, changeChat.Name)
+	if err != nil {
+		log.Printf("Failed to send previous messages: %v", err)
+	}
+
+	return nil
+}
+
+func GetPastMessagesHandler(client *Client, database *sqlite.Database, sender, receiver string) error {
 	messages, err := models.GetMessages(database.DB, sender, receiver)
 	if err != nil {
 		return fmt.Errorf("failed to fetch previous messages: %v", err)
@@ -86,26 +120,5 @@ func GetPastMessages(client *Client, database *sqlite.Database, sender, receiver
 	}
 
 	client.egress <- previousMessages
-	return nil
-}
-
-func ChangeChat(event Event, client *Client) error {
-	var changeChat ChangeChatEvent
-	if err := json.Unmarshal(event.Payload, &changeChat); err != nil {
-		return fmt.Errorf("bad payload in request: %v", err)
-	}
-	client.chat = changeChat.Name
-
-	database, err := sqlite.OpenDatabase()
-	if err != nil {
-		return fmt.Errorf("failed to open database: %v", err)
-	}
-	defer database.DB.Close()
-
-	err = GetPastMessages(client, database, client.username, changeChat.Name)
-	if err != nil {
-		log.Printf("Failed to send previous messages: %v", err)
-	}
-
 	return nil
 }
