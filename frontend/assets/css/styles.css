@@ -615,14 +615,19 @@ a.register-link {
   padding-bottom: 0.325rem;
 }
 
+.message-content{
+  background-color: #1e90ff;
+  width: 80%;
+  padding: 0.3rem 0.3rem;
+  border-radius: 0.3rem;
+  display: inline-block;
+}
+
 .message {
   color: white;
-  padding: 0.3rem 0.6rem;
-  border-radius: 0.3rem;
-  background-color: #1e90ff;
-  overflow-wrap: break-all;
-  hyphens: auto;
   text-align: start;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .sender-message {
@@ -640,12 +645,12 @@ a.register-link {
   align-items: flex-start; 
   text-align: left;
   margin: 0.1rem 0;
-  width: 95%;
+  width: 95%;  
 }
 
 .date-container {
   font-size: 0.6rem;
-  color: #d1d7dc;
+  color: #cfd0d1;
   margin-top: 0.2rem;
   margin-bottom: 0.3rem;
   border-radius: 0.3rem;
@@ -654,7 +659,7 @@ a.register-link {
 
 .time-container {
   font-size: 0.6rem;
-  color: #d1d7dc;
+  color: #cfd0d1;
   margin-top: 0.2rem;
   border-radius: 0.3rem;
 }
