@@ -20,7 +20,7 @@ export function connectWebSocket(user) {
 
       ws.onmessage = function (message) {
         const data = JSON.parse(message.data);
-        console.log("Received WebSocket data:", data);
+        // console.log("Received WebSocket data:", data);
         routeEvent(data);
       };
 
@@ -60,7 +60,6 @@ function routeEvent(msg) {
       break;
     case "status_update":
       const usersToUpdate = msg.payload;
-
       usersToUpdate.forEach((user) => {
         const { username, status, last_seen } = user;
         updateUserStatus(username, status, last_seen);

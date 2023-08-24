@@ -545,10 +545,10 @@ a.register-link {
 }
 
 .messenger-last-seen {
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: lighter;
   color: rgb(101, 103, 107);
-  margin-left: 0.5rem;
+  margin-left: 4.5rem;
 }
 
 .messenger-status {
@@ -702,7 +702,7 @@ a.register-link {
 }
 
 .chat-last-seen {
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: lighter;
   color: rgb(101, 103, 107);
   margin-left: 0.5rem;

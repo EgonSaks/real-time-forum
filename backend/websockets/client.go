@@ -98,7 +98,6 @@ func (client *Client) writeMessages() {
 			if err := client.connection.WriteMessage(websocket.TextMessage, data); err != nil {
 				log.Println(err)
 			}
-			log.Println("sent message")
 		case <-ticker.C:
 
 			client.manager.RLock()
@@ -108,10 +107,7 @@ func (client *Client) writeMessages() {
 			if !clientExists {
 				return
 			}
-			// Send the Ping message to the client
-			// log.Println("ping")
 			if err := client.connection.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-				log.Println("write message: ", err)
 				return
 			}
 		}
@@ -119,6 +115,5 @@ func (client *Client) writeMessages() {
 }
 
 func (client *Client) pongHandler(pongMsg string) error {
-	// log.Println("pong")
 	return client.connection.SetReadDeadline(time.Now().Add(pongWait))
 }

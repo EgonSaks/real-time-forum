@@ -24,7 +24,7 @@ export function updateUserStatus(username, online, lastSeen) {
         status.classList.add(onlineStatus);
         status.textContent = onlineStatus;
         const lastSeenElement = chat.querySelector(".chat-last-seen");
-        
+
         // Display last seen time only if the user is offline
         lastSeenElement.textContent = online ? "" : formatLastSeen(lastSeen) || "";
       }
@@ -41,9 +41,11 @@ export function updateUserStatus(username, online, lastSeen) {
       messengerStatus.classList.add(onlineStatus);
       messengerStatus.textContent = onlineStatus;
       const messengerLastSeen = messenger.querySelector(".messenger-last-seen");
-      
+
       // Display last seen time only if the user is offline
-      messengerLastSeen.textContent = online ? "" : formatLastSeen(lastSeen) || "";
+      messengerLastSeen.textContent = online
+        ? ""
+        : formatLastSeen(lastSeen) || "";
     }
   }
 }
@@ -121,7 +123,7 @@ export function showMessenger(user) {
   const statusElement = messengerHeader.querySelector(".messenger-status");
 
   nameElement.textContent = user.username;
-  lastSeenElement.textContent = user.last_seen || ""; 
+  lastSeenElement.textContent = user.last_seen || "";
 
   const onlineStatus = user.status === "online" ? "online" : "offline";
   statusElement.classList.remove("offline", "online");

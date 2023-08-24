@@ -24,6 +24,8 @@ var websocketUpgrader = websocket.Upgrader{
 	CheckOrigin:     checkOrigin,
 }
 
+const UserStatusesRoutineInterval = 5 * time.Second
+
 func checkOrigin(r *http.Request) bool {
 	origin := r.Header.Get("Origin")
 
@@ -77,7 +79,6 @@ func (manager *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
 	client := NewClient(connection, manager, user.Username)
 	manager.addClient(client)
 
-	// Set up a signal handler to catch shutdown signals
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
@@ -88,7 +89,6 @@ func (manager *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
 		os.Exit(0)
 	}()
 
-	// Start WebSocket connection handling routines
 	go manager.GetUserStatusesRoutine()
 	go client.readMessages()
 	go client.writeMessages()
@@ -167,7 +167,7 @@ func (manager *Manager) GetUserStatuses() error {
 }
 
 func (manager *Manager) GetUserStatusesRoutine() {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(UserStatusesRoutineInterval)
 	defer ticker.Stop()
 
 	for {
