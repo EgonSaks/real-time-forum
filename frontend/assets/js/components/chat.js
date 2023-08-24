@@ -1,38 +1,49 @@
 import { isLoggedIn } from "../utils/auth.js";
+import { formatLastSeen } from "../utils/timeConverter.js";
 import { sendEvent } from "../websocket/websocket.js";
 
 let messengerVisible = false;
 let previousDate = null;
-let activeChatUser = null;
 
 export function getMessengerVisibility() {
   return messengerVisible;
 }
 
-export function updateUserStatus(username, online) {
+export function updateUserStatus(username, online, lastSeen) {
+  const onlineStatus = online ? "online" : "offline";
+
+  // Updating chat elements
   const chatsContainer = document.querySelector(".chats-container");
   if (chatsContainer) {
     const chats = chatsContainer.querySelectorAll(".chat");
-
     chats.forEach((chat) => {
       const name = chat.querySelector(".chat-name");
       if (name.getAttribute("data-username") === username) {
         const status = chat.querySelector(".chat-status");
         status.classList.remove("offline", "online");
-        status.classList.add(online ? "online" : "offline");
-        status.textContent = online ? "online" : "offline";
+        status.classList.add(onlineStatus);
+        status.textContent = onlineStatus;
+        const lastSeenElement = chat.querySelector(".chat-last-seen");
+        
+        // Display last seen time only if the user is offline
+        lastSeenElement.textContent = online ? "" : formatLastSeen(lastSeen) || "";
       }
     });
   }
 
+  // Updating messenger elements
   const messenger = document.querySelector(".messenger");
   if (messenger) {
     const messengerName = messenger.querySelector(".messenger-name");
     if (messengerName.textContent === username) {
       const messengerStatus = messenger.querySelector(".messenger-status");
       messengerStatus.classList.remove("offline", "online");
-      messengerStatus.classList.add(online ? "online" : "offline");
-      messengerStatus.textContent = online ? "online" : "offline";
+      messengerStatus.classList.add(onlineStatus);
+      messengerStatus.textContent = onlineStatus;
+      const messengerLastSeen = messenger.querySelector(".messenger-last-seen");
+      
+      // Display last seen time only if the user is offline
+      messengerLastSeen.textContent = online ? "" : formatLastSeen(lastSeen) || "";
     }
   }
 }
@@ -63,12 +74,12 @@ export function createChats(users) {
 
     const name = document.createElement("h4");
     name.classList.add("chat-name");
-    name.textContent = user.username;
+    name.textContent = user.username || "Anonymous";
     name.setAttribute("data-username", user.username);
 
     const lastSeen = document.createElement("p");
     lastSeen.classList.add("chat-last-seen");
-    lastSeen.textContent = "user.last_seen";
+    lastSeen.textContent = user.last_seen || "";
 
     const status = document.createElement("p");
     status.classList.add(
@@ -93,17 +104,13 @@ export function createChats(users) {
 }
 
 export function changeChat(user) {
-  if (activeChatUser !== user.username) {
-    activeChatUser = user.username;
-
-    if (getMessengerVisibility()) {
-      hideMessenger();
-    }
-    showMessenger(user);
-
-    const messageInput = document.querySelector(".messenger-input");
-    messageInput.setAttribute("data-recipient", user.username);
+  if (getMessengerVisibility()) {
+    hideMessenger();
   }
+  showMessenger(user);
+
+  const messageInput = document.querySelector(".messenger-input");
+  messageInput.setAttribute("data-recipient", user.username);
 }
 
 export function showMessenger(user) {
@@ -114,14 +121,12 @@ export function showMessenger(user) {
   const statusElement = messengerHeader.querySelector(".messenger-status");
 
   nameElement.textContent = user.username;
-  lastSeenElement.textContent = "user.last_seen";
+  lastSeenElement.textContent = user.last_seen || ""; 
 
-  statusElement.classList.add(
-    "messenger-status",
-    user.status === "online" ? "online" : "offline"
-  );
-  statusElement.classList.add("messenger-status", "online");
-  statusElement.textContent = user.status || "offline";
+  const onlineStatus = user.status === "online" ? "online" : "offline";
+  statusElement.classList.remove("offline", "online");
+  statusElement.classList.add(onlineStatus);
+  statusElement.textContent = onlineStatus;
 
   messengerVisible = true;
   messenger.classList.remove("messenger-hidden");
@@ -179,12 +184,14 @@ export function hideMessenger() {
   chatsContainer.style.width = "90%";
 }
 
-function sendMessage(user) {
+function sendMessage() {
   const messageInput = document.querySelector(".messenger-input");
   const recipient = messageInput.getAttribute("data-recipient");
   const message = messageInput.value.trim();
 
   if (message !== null && message !== "") {
+    const user = isLoggedIn();
+    console.log("Logged in as " + user.username + ".");
     let outgoingMessage = {
       message,
       sender: user.username,
@@ -221,7 +228,7 @@ export function appendChatMessage(messageElement) {
     dateContainer.classList.add("date-container");
     dateContainer.textContent = dateString;
     chatMessages.appendChild(dateContainer);
-    previousDate = dateString; 
+    previousDate = dateString;
   }
 
   const dateContainer = document.createElement("div");
@@ -247,8 +254,8 @@ export function appendChatMessage(messageElement) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-export function createMessenger(user) {
-  console.log("Creating messenger for " + user.username + ".");
+export function createMessenger() {
+  // console.log("Creating messenger for " + user.username + ".");
   const messenger = document.createElement("div");
   messenger.classList.add("messenger");
 
@@ -308,7 +315,7 @@ export function createMessenger(user) {
       messengerInput.value += "\n";
     } else if (e.key === "Enter") {
       e.preventDefault();
-      sendMessage(user);
+      sendMessage();
     }
     handleTyping();
   });
@@ -320,7 +327,7 @@ export function createMessenger(user) {
   sendButton.textContent = "Send";
 
   sendButton.addEventListener("click", function () {
-    sendMessage(user);
+    sendMessage();
   });
 
   inputContainer.append(messengerInput, sendButton);
@@ -336,10 +343,8 @@ export function createChatContainer(users) {
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats");
 
-  const user = isLoggedIn();
-  console.log("Logged in as " + user.username + ".");
   const chat = createChats(users);
-  const messenger = createMessenger(user);
+  const messenger = createMessenger();
 
   chatsContainer.append(chat, messenger);
 

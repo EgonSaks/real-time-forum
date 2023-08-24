@@ -43,7 +43,6 @@ func NewClient(connection *websocket.Conn, manager *Manager, username string) *C
 func (client *Client) readMessages() {
 	defer func() {
 		client.manager.removeClient(client)
-		client.online = false
 	}()
 
 	client.connection.SetReadLimit(maxMessageSize)
@@ -53,19 +52,14 @@ func (client *Client) readMessages() {
 	}
 	client.connection.SetPongHandler(client.pongHandler)
 
-	client.lastSeen = time.Now()
-
 	for {
 		_, message, err := client.connection.ReadMessage()
-		// timeReceive := time.Now()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error reading message: %v", err)
 			}
 			break
 		}
-
-		// fmt.Printf("Your message is: %s. Time received : %v", string(message), timeReceive)
 
 		var request Event
 		if err := json.Unmarshal(message, &request); err != nil {
@@ -111,11 +105,7 @@ func (client *Client) writeMessages() {
 			_, clientExists := client.manager.Clients[client]
 			client.manager.RUnlock()
 
-			if clientExists {
-				client.online = true
-				client.lastSeen = time.Now()
-			} else {
-				client.online = false
+			if !clientExists {
 				return
 			}
 			// Send the Ping message to the client

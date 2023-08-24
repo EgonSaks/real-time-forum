@@ -619,7 +619,8 @@ a.register-link {
   padding: 0.3rem 0.3rem;
   border-radius: 0.3rem;
   display: inline-block;
-  width: 80%;
+  /* width: 80%; */
+  width: 10rem;
 }
 
 .message {

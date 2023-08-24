@@ -24,12 +24,19 @@ type ChangeChatEvent struct {
 	Name string `json:"username"`
 }
 
+type UsersStatusUpdateEvent struct {
+	Username string    `json:"username"`
+	Status   bool      `json:"status"`
+	LastSeen time.Time `json:"last_seen"`
+}
+
 type EventHandler func(event Event, removeClient *Client) error
 
 const (
-	EventSendMessage = "send_message"
-	EventNewMessage  = "new_message"
-	EventChangeChat  = "change_chat"
+	EventSendMessage      = "send_message"
+	EventNewMessage       = "new_message"
+	EventChangeChat       = "change_chat"
+	EventUserStatusUpdate = "status_update"
 )
 
 func SendMessageHandler(event Event, client *Client) error {
@@ -69,11 +76,12 @@ func SendMessageHandler(event Event, client *Client) error {
 }
 
 func ChangeChatHandler(event Event, client *Client) error {
+	// Get the username from the payload for the change chat
 	var changeChat ChangeChatEvent
 	if err := json.Unmarshal(event.Payload, &changeChat); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
 	}
-	
+
 	// Send the username back to the client as a response
 	response := ChangeChatEvent{Name: changeChat.Name}
 	responseData, err := json.Marshal(response)
@@ -121,4 +129,25 @@ func GetPastMessagesHandler(client *Client, database *sqlite.Database, sender, r
 
 	client.egress <- previousMessages
 	return nil
+}
+
+func UpdateUserStatus(client *Client, online bool) {
+
+	userStatus := models.UserStatus{
+		Username: client.username,
+		Status:   online,
+		LastSeen: time.Now().UTC(),
+	}
+
+	database, err := sqlite.OpenDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer database.DB.Close()
+
+	_, err = models.UpdateUserStatus(database.DB, userStatus)
+	if err != nil {
+		fmt.Printf("failed to update user status: %v", err)
+		return
+	}
 }

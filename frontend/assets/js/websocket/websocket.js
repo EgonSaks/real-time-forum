@@ -16,17 +16,16 @@ export function connectWebSocket(user) {
 
       ws.onopen = function (message) {
         console.log("Connection established!");
-        updateUserStatus(user.username, true);
       };
 
       ws.onmessage = function (message) {
         const data = JSON.parse(message.data);
+        console.log("Received WebSocket data:", data);
         routeEvent(data);
       };
 
       ws.onclose = function (message) {
         console.log("WebSocket closed unexpectedly");
-        updateUserStatus(user.username, false);
       };
 
       return ws;
@@ -40,7 +39,7 @@ export function connectWebSocket(user) {
 
 export function sendEvent(eventType, payload) {
   const msg = { type: eventType, payload };
-  // console.log("Sending event:", msg);
+  console.log("Sending event:", msg);
   ws.send(JSON.stringify(msg));
 }
 
@@ -58,6 +57,14 @@ function routeEvent(msg) {
       break;
     case "change_chat":
       changeChat(msg.payload);
+      break;
+    case "status_update":
+      const usersToUpdate = msg.payload;
+
+      usersToUpdate.forEach((user) => {
+        const { username, status, last_seen } = user;
+        updateUserStatus(username, status, last_seen);
+      });
       break;
     default:
       alert("unsupported message type");
