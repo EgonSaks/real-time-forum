@@ -180,7 +180,7 @@ func (manager *Manager) GetUserStatusesRoutine() {
 	}
 }
 
-func (manager *Manager) UpdateChatsOrder() error {
+func (manager *Manager) UpdateChatsOrder(sender, receiver string) error {
 	database, err := sqlite.OpenDatabase()
 	if err != nil {
 		return fmt.Errorf("failed to open database: %v", err)
@@ -206,7 +206,9 @@ func (manager *Manager) UpdateChatsOrder() error {
 	defer manager.RUnlock()
 
 	for client := range manager.Clients {
-		client.egress <- chatsOrderEvent
+		if client.username == sender || client.username == receiver {
+			client.egress <- chatsOrderEvent
+		}
 	}
 
 	return nil

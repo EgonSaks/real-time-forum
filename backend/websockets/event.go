@@ -74,7 +74,7 @@ func SendMessageHandler(event Event, client *Client) error {
 		}
 	}
 
-	err = client.manager.UpdateChatsOrder()
+	err = client.manager.UpdateChatsOrder(chatMessage.Sender, chatMessage.Receiver)
 	if err != nil {
 		log.Printf("Failed to update chats order: %v", err)
 	}
