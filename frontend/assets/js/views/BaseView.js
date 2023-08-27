@@ -1,29 +1,24 @@
-import { fetchUsers } from "../api/userAPI.js";
 import {
   createChatContainer,
   getMessengerVisibility,
 } from "../components/chat.js";
 import { createNavbar } from "../components/navbar.js";
 import { navigateTo } from "../router/router.js";
+import { isLoggedIn } from "../utils/auth.js";
 import { HomeView } from "../views/HomeView.js";
 import { Login } from "../views/Login.js";
 import { PostView } from "../views/PostView.js";
 import { Register } from "../views/Register.js";
 
-export async function createBaseView(params, matchedView, user) {
+export async function createBaseView(params, matchedView) {
   const appContainer = document.querySelector("#app");
   appContainer.innerHTML = "";
 
-  const allUsers = (await fetchUsers()) || [] || null;
-
-  const users = allUsers && allUsers.length > 0
-      ? allUsers.filter((otherUser) => otherUser.username !== user.username)
-      : [] || null;
-
+  const currentUser = isLoggedIn();
   const messengerVisible = getMessengerVisibility();
-  const userLoggedIn = user && user.isLoggedIn;
-  const chatContainer = createChatContainer(users);
-  const navbar = createNavbar(user);
+  const userLoggedIn = currentUser && currentUser.isLoggedIn;
+  const chatContainer = await createChatContainer(currentUser);
+  const navbar = createNavbar(currentUser);
 
   if (
     !userLoggedIn &&

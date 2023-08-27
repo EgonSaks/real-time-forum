@@ -1,6 +1,7 @@
 import {
   appendChatMessage,
   changeChat,
+  createChats,
   updateUserStatus,
 } from "../components/chat.js";
 
@@ -8,7 +9,7 @@ import { config } from "../config/config.js";
 
 let ws;
 
-export function connectWebSocket(user) {
+export function connectWebSocket(currentUser) {
   if (window["WebSocket"]) {
     try {
       const url = `ws://${window.location.hostname}:${config.wsPort}/ws`;
@@ -21,7 +22,7 @@ export function connectWebSocket(user) {
       ws.onmessage = function (message) {
         const data = JSON.parse(message.data);
         // console.log("Received WebSocket data:", data);
-        routeEvent(data);
+        routeEvent(data, currentUser);
       };
 
       ws.onclose = function (message) {
@@ -43,7 +44,7 @@ export function sendEvent(eventType, payload) {
   ws.send(JSON.stringify(msg));
 }
 
-function routeEvent(msg) {
+function routeEvent(msg, currentUser) {
   switch (msg.type) {
     case "new_message":
       const message = msg.payload;
@@ -54,6 +55,12 @@ function routeEvent(msg) {
       } else {
         appendChatMessage(message);
       }
+      break;
+    case "chat_list_update":
+      const chatToUpdate = msg.payload;
+      const updatedChats = chatToUpdate.filter((item) => item.User.username !== currentUser.username);
+      const usersList = updatedChats.map((item) => item.User);
+      createChats(usersList);
       break;
     case "change_chat":
       changeChat(msg.payload);
@@ -80,9 +87,9 @@ export function closeWebSocket() {
 window.addEventListener("DOMContentLoaded", function () {
   const user = localStorage.getItem("user");
   if (user) {
-    const userObj = JSON.parse(user);
-    if (userObj !== "") {
-      connectWebSocket(userObj);
+    const currentUser = JSON.parse(user);
+    if (currentUser !== "") {
+      connectWebSocket(currentUser);
     }
   }
 });

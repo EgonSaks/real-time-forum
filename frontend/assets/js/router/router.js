@@ -46,9 +46,7 @@ export const router = async () => {
   const matchedView = matchedRoute.route.view;
   const params = await getParams(matchedRoute);
 
-  const user = isLoggedIn();
-
-  createBaseView(params, matchedView, user);
+  createBaseView(params, matchedView);
 };
 
 window.addEventListener("popstate", () => {

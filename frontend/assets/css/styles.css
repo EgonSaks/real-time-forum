@@ -542,13 +542,17 @@ a.register-link {
 .messenger-name {
   font-weight: bold;
   font-size: 1rem;
+  margin-right: auto; 
 }
 
 .messenger-last-seen {
   font-size: 0.8rem;
   font-weight: lighter;
   color: rgb(101, 103, 107);
-  margin-left: 4.5rem;
+}
+
+.messenger-close-button {
+  margin-left: 0.5rem;
 }
 
 .messenger-status {
@@ -619,8 +623,7 @@ a.register-link {
   padding: 0.3rem 0.3rem;
   border-radius: 0.3rem;
   display: inline-block;
-  /* width: 80%; */
-  width: 10rem;
+  max-width: 10rem;
 }
 
 .message {

@@ -35,6 +35,7 @@ type EventHandler func(event Event, removeClient *Client) error
 const (
 	EventSendMessage      = "send_message"
 	EventNewMessage       = "new_message"
+	EventChatListUpdate   = "chat_list_update"
 	EventChangeChat       = "change_chat"
 	EventUserStatusUpdate = "status_update"
 )
@@ -72,6 +73,12 @@ func SendMessageHandler(event Event, client *Client) error {
 			c.egress <- outgoingEvent
 		}
 	}
+
+	err = client.manager.UpdateChatsOrder()
+	if err != nil {
+		log.Printf("Failed to update chats order: %v", err)
+	}
+
 	return nil
 }
 
@@ -132,7 +139,6 @@ func GetPastMessagesHandler(client *Client, database *sqlite.Database, sender, r
 }
 
 func UpdateUserStatus(client *Client, online bool) {
-
 	userStatus := models.UserStatus{
 		Username: client.username,
 		Status:   online,

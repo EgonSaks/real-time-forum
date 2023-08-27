@@ -71,7 +71,8 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer database.DB.Close()
 
-	users, err := models.GetAllUsers(database.DB)
+	// users, err := models.GetAllUsers(database.DB)
+	users, err := models.OrganizeChats(database.DB)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Println(err)

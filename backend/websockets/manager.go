@@ -24,7 +24,7 @@ var websocketUpgrader = websocket.Upgrader{
 	CheckOrigin:     checkOrigin,
 }
 
-const UserStatusesRoutineInterval = 5 * time.Second
+const UserStatusesRoutineInterval = 10 * time.Millisecond
 
 func checkOrigin(r *http.Request) bool {
 	origin := r.Header.Get("Origin")
@@ -174,10 +174,42 @@ func (manager *Manager) GetUserStatusesRoutine() {
 		select {
 		case <-ticker.C:
 			if err := manager.GetUserStatuses(); err != nil {
-				log.Printf("Failed to get and broadcast user statuses: %v", err)
+				log.Printf("Failed to get and update user statuses: %v", err)
 			}
 		}
 	}
+}
+
+func (manager *Manager) UpdateChatsOrder() error {
+	database, err := sqlite.OpenDatabase()
+	if err != nil {
+		return fmt.Errorf("failed to open database: %v", err)
+	}
+	defer database.DB.Close()
+
+	chatsOrder, err := models.OrganizeChats(database.DB)
+	if err != nil {
+		return fmt.Errorf("failed to get user statuses: %v", err)
+	}
+
+	chatsOrderJSON, err := json.Marshal(chatsOrder)
+	if err != nil {
+		return fmt.Errorf("failed to marshal user statuses: %v", err)
+	}
+
+	chatsOrderEvent := Event{
+		Type:    EventChatListUpdate,
+		Payload: json.RawMessage(chatsOrderJSON),
+	}
+
+	manager.RLock()
+	defer manager.RUnlock()
+
+	for client := range manager.Clients {
+		client.egress <- chatsOrderEvent
+	}
+
+	return nil
 }
 
 func (manager *Manager) CleanupAndShutdown() {

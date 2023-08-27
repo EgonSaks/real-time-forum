@@ -1,3 +1,4 @@
+import { fetchUsers } from "../api/userAPI.js";
 import { isLoggedIn } from "../utils/auth.js";
 import { formatLastSeen } from "../utils/timeConverter.js";
 import { sendEvent } from "../websocket/websocket.js";
@@ -51,8 +52,14 @@ export function updateUserStatus(username, online, lastSeen) {
 }
 
 export function createChats(users) {
-  const chatsContainer = document.createElement("div");
-  chatsContainer.classList.add("chats-container");
+  let chatsContainer = document.querySelector(".chats-container");
+
+  if (chatsContainer) {
+    chatsContainer.innerHTML = "";
+  } else {
+    chatsContainer = document.createElement("div");
+    chatsContainer.classList.add("chats-container");
+  }
 
   const header = document.createElement("div");
   header.classList.add("chats-header");
@@ -122,7 +129,7 @@ export function showMessenger(user) {
   const lastSeenElement = messengerHeader.querySelector(".messenger-last-seen");
   const statusElement = messengerHeader.querySelector(".messenger-status");
 
-  nameElement.textContent = user.username;
+  nameElement.textContent = user.username || "Anonymous";
   lastSeenElement.textContent = user.last_seen || "";
 
   const onlineStatus = user.status === "online" ? "online" : "offline";
@@ -341,11 +348,36 @@ export function createMessenger() {
   return messenger;
 }
 
-export function createChatContainer(users) {
+async function filteredChatUsers() {
+  const currentUser = isLoggedIn();
+
+  const allUsers = (await fetchUsers()) || [] || null;
+  console.log(allUsers);
+
+  let users = [];
+  for (const item of allUsers) {
+    if (item.User && item.LastMessage) {
+      users.push(item.User);
+    }
+  }
+
+  const filteredUsers =
+    users && users.length > 0
+      ? users.filter((otherUser) => otherUser.username !== currentUser.username)
+      : [] || null;
+
+  console.log(filteredUsers);
+
+  return filteredUsers;
+}
+
+export async function createChatContainer() {
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats");
 
-  const chat = createChats(users);
+  const filteredUsers = await filteredChatUsers();
+
+  const chat = createChats(filteredUsers);
   const messenger = createMessenger();
 
   chatsContainer.append(chat, messenger);
