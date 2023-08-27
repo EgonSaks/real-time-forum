@@ -1,9 +1,9 @@
 -- DROP TABLE IF EXISTS users;
 -- DROP TABLE IF EXISTS posts;
 -- DROP TABLE IF EXISTS comments;
-DROP TABLE IF EXISTS messages;
+-- DROP TABLE IF EXISTS messages;
 -- DROP TABLE IF EXISTS sessions;
-DROP TABLE IF EXISTS user_status;
+-- DROP TABLE IF EXISTS user_status;
 
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
