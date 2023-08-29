@@ -58,8 +58,10 @@ function routeEvent(msg, currentUser) {
       break;
     case "chat_list_update":
       const chatToUpdate = msg.payload;
+      console.log("chatToUpdate", chatToUpdate);
       const updatedChats = chatToUpdate.filter((item) => item.User.username !== currentUser.username);
       const usersList = updatedChats.map((item) => item.User);
+      console.log("usersList", usersList);
       createChats(usersList);
       break;
     case "change_chat":

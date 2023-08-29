@@ -21,6 +21,8 @@ func Routes() http.Handler {
 	mux.HandleFunc("/api/users", handlers.Users)
 	mux.HandleFunc("/api/user/", handlers.User)
 
+	mux.HandleFunc("/api/chats", handlers.Chats)
+
 	mux.HandleFunc("/api/posts", handlers.Posts)
 	mux.HandleFunc("/api/post/", handlers.Post)
 	mux.HandleFunc("/api/comment", handlers.Comment)

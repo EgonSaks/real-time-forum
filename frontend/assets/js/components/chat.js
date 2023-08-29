@@ -1,4 +1,4 @@
-import { fetchUsers } from "../api/userAPI.js";
+import { fetchChats } from "../api/usersChatsAPI.js";
 import { isLoggedIn } from "../utils/auth.js";
 import { formatLastSeen } from "../utils/timeConverter.js";
 import { sendEvent } from "../websocket/websocket.js";
@@ -264,7 +264,6 @@ export function appendChatMessage(messageElement) {
 }
 
 export function createMessenger() {
-  // console.log("Creating messenger for " + user.username + ".");
   const messenger = document.createElement("div");
   messenger.classList.add("messenger");
 
@@ -351,7 +350,7 @@ export function createMessenger() {
 async function filteredChatUsers() {
   const currentUser = isLoggedIn();
 
-  const allUsers = (await fetchUsers()) || [] || null;
+  const allUsers = (await fetchChats()) || [] || null;
   console.log(allUsers);
 
   let users = [];

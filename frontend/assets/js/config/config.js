@@ -6,6 +6,7 @@ export const config = {
     logout: "http://localhost:8081/logout",
     users: "http://localhost:8081/api/users",
     user: "http://localhost:8081/api/user/",
+    chats: "http://localhost:8081/api/chats",
     post: "http://localhost:8081/api/post/",
     posts: "http://localhost:8081/api/posts",
     comment: "http://localhost:8081/api/comment",
