@@ -53,7 +53,8 @@ func GetMessages(db *sql.DB, sender, receiver string) ([]Message, error) {
         OR
         (sender = ? AND receiver = ?)
     ORDER BY
-        sent_at ASC
+		sent_at DESC
+	LIMIT 10 OFFSET 0
     `
 
 	rows, err := db.QueryContext(context, query, sender, receiver, receiver, sender)
@@ -71,7 +72,8 @@ func GetMessages(db *sql.DB, sender, receiver string) ([]Message, error) {
 			fmt.Printf("failed receiver scan row: %v", err)
 			return nil, fmt.Errorf("failed receiver scan row: %v", err)
 		}
-		messages = append(messages, message)
+		// messages = append(messages, message)
+		messages = append([]Message{message}, messages...)
 	}
 
 	if err := rows.Err(); err != nil {

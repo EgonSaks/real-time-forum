@@ -44,24 +44,29 @@ export function sendEvent(eventType, payload) {
   ws.send(JSON.stringify(msg));
 }
 
+// routeEvent is called when a message is received from the server
 function routeEvent(msg, currentUser) {
   switch (msg.type) {
     case "new_message":
       const message = msg.payload;
-      if (message.messages) {
-        message.messages.forEach((message) => {
+      console.log("new_message:", message);
+      appendChatMessage(message);
+      break;
+    case "past_messages":
+      const messages = msg.payload;
+      console.log("past_messages:", messages);
+      if (messages.messages) {
+        messages.messages.forEach((message) => {
           appendChatMessage(message);
         });
-      } else {
-        appendChatMessage(message);
       }
       break;
     case "chat_list_update":
       const chatToUpdate = msg.payload;
-      console.log("chatToUpdate", chatToUpdate);
-      const updatedChats = chatToUpdate.filter((item) => item.User.username !== currentUser.username);
+      const updatedChats = chatToUpdate.filter(
+        (item) => item.User.username !== currentUser.username
+      );
       const usersList = updatedChats.map((item) => item.User);
-      console.log("usersList", usersList);
       createChats(usersList);
       break;
     case "change_chat":

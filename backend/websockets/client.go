@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/real-time-forum/database/sqlite"
 )
 
 const (
@@ -67,7 +68,14 @@ func (client *Client) readMessages() {
 			break
 		}
 
-		if err := client.manager.routeEvent(request, client); err != nil {
+		database, err := sqlite.OpenDatabase()
+		if err != nil {
+			log.Println("Failed to open database:", err)
+			return
+		}
+		defer database.DB.Close()
+
+		if err := client.manager.routeEvent(request, client, database); err != nil {
 			log.Println("Error handling Message: ", err)
 		}
 	}

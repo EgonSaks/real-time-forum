@@ -58,6 +58,7 @@ func NewManager() *Manager {
 
 func (manager *Manager) setupEventHandlers() {
 	manager.Handlers[EventSendMessage] = SendMessageHandler
+	manager.Handlers[EventPastMessages] = GetPastMessagesHandler
 	manager.Handlers[EventChangeChat] = ChangeChatHandler
 }
 
@@ -115,9 +116,9 @@ func (manager *Manager) removeClient(client *Client) {
 	}
 }
 
-func (manager *Manager) routeEvent(event Event, client *Client) error {
+func (manager *Manager) routeEvent(event Event, client *Client, database *sqlite.Database) error {
 	if handler, ok := manager.Handlers[event.Type]; ok {
-		if err := handler(event, client); err != nil {
+		if err := handler(event, client, database); err != nil {
 			return err
 		}
 		return nil

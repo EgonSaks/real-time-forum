@@ -17,6 +17,12 @@ func GetAllUsersWithLastMessages(db *sql.DB) ([]UserWithLastMessage, error) {
 	context, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	tx, err := db.BeginTx(context, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
 	query := "SELECT * FROM users"
 	rows, err := db.QueryContext(context, query)
 	if err != nil {
@@ -63,6 +69,10 @@ func GetAllUsersWithLastMessages(db *sql.DB) ([]UserWithLastMessage, error) {
 	if err := rows.Err(); err != nil {
 		fmt.Printf("error while iterating through rows: %v", err)
 		return nil, fmt.Errorf("error while iterating through rows: %v", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	return usersWithLastMessages, nil

@@ -27,7 +27,9 @@ export function updateUserStatus(username, online, lastSeen) {
         const lastSeenElement = chat.querySelector(".chat-last-seen");
 
         // Display last seen time only if the user is offline
-        lastSeenElement.textContent = online ? "" : formatLastSeen(lastSeen) || "";
+        lastSeenElement.textContent = online
+          ? ""
+          : formatLastSeen(lastSeen) || "";
       }
     });
   }
@@ -200,7 +202,6 @@ function sendMessage() {
 
   if (message !== null && message !== "") {
     const user = isLoggedIn();
-    console.log("Logged in as " + user.username + ".");
     let outgoingMessage = {
       message,
       sender: user.username,
@@ -300,6 +301,21 @@ export function createMessenger() {
   const chatMessages = document.createElement("p");
   chatMessages.classList.add("chat-messages");
   messengerBody.append(chatMessages);
+
+  chatMessages.addEventListener("scroll", function () {
+    const scrollPosition = chatMessages.scrollTop;
+
+    if (scrollPosition === 0) {
+      console.log("Scrolled to the top of chat");
+      const user = isLoggedIn();
+      const requestMoreMessages = {
+        extraMessages: true,
+        sender: user.username, 
+        receiver: name.textContent
+      };
+      sendEvent("past_messages", requestMoreMessages);
+    }
+  });
 
   const inputContainer = document.createElement("div");
   inputContainer.classList.add("input-container");
