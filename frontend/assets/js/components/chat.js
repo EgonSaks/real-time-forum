@@ -212,7 +212,7 @@ function sendMessage() {
   }
 }
 
-export function appendChatMessage(messageElement) {
+export function appendChatMessage(messageElement, prepend = false) {
   const chatMessages = document.querySelector(".chat-messages");
   const messageContainer = document.createElement("div");
 
@@ -233,11 +233,17 @@ export function appendChatMessage(messageElement) {
   const dateOptions = { year: "numeric", month: "long", day: "numeric" };
   const dateString = date.toLocaleDateString([], dateOptions);
 
-  if (dateString !== previousDate) {
+  if (dateString !== previousDate || previousDate === null) {
     const dateContainer = document.createElement("div");
     dateContainer.classList.add("date-container");
     dateContainer.textContent = dateString;
-    chatMessages.appendChild(dateContainer);
+
+    if (prepend) {
+      chatMessages.prepend(dateContainer);
+    } else {
+      chatMessages.appendChild(dateContainer);
+    }
+
     previousDate = dateString;
   }
 
@@ -247,6 +253,7 @@ export function appendChatMessage(messageElement) {
 
   const messageContent = document.createElement("div");
   messageContent.classList.add("message-content");
+  messageContent.setAttribute("data-message-id", messageElement.id);
   messageContent.append(message);
   messageContainer.append(messageContent, timeContainer);
 
@@ -260,8 +267,30 @@ export function appendChatMessage(messageElement) {
     messageContainer.classList.add("recipient-message");
   }
 
-  chatMessages.appendChild(messageContainer);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  // Step 1: Calculate old scroll height
+  const oldScrollHeight = chatMessages.scrollHeight;
+
+  // Step 2: Capture old scrollTop
+  const oldScrollTop = chatMessages.scrollTop;
+
+  // Step 3: Append or prepend the message
+  if (prepend) {
+    chatMessages.prepend(messageContainer);
+  } else {
+    chatMessages.appendChild(messageContainer);
+  }
+
+  // Step 4: Calculate new scroll height
+  const newScrollHeight = chatMessages.scrollHeight;
+
+  // Step 5: Adjust scrollTop
+  if (prepend) {
+    // Maintain scroll position
+    chatMessages.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
+  } else {
+    // Scroll to latest message
+    chatMessages.scrollTop = newScrollHeight;
+  }
 }
 
 export function createMessenger() {
@@ -308,11 +337,20 @@ export function createMessenger() {
     if (scrollPosition === 0) {
       console.log("Scrolled to the top of chat");
       const user = isLoggedIn();
+      const lastMessageId = parseInt(
+        document
+          .querySelector(".message-content:first-child")
+          .getAttribute("data-message-id")
+      );
+
       const requestMoreMessages = {
         extraMessages: true,
-        sender: user.username, 
-        receiver: name.textContent
+        sender: user.username,
+        receiver: name.textContent,
+        lastMessageId: lastMessageId,
+        prepend: true
       };
+      console.log("requestMoreMessages", requestMoreMessages);
       sendEvent("past_messages", requestMoreMessages);
     }
   });

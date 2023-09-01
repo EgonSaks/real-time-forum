@@ -6,7 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/real-time-forum/database/models"
 	"github.com/real-time-forum/database/sqlite"
 )
@@ -21,9 +20,10 @@ type PastMessages struct {
 }
 
 type MorePastMessages struct {
-	MoreMessages bool   `json:"extraMessages"`
-	Sender       string `json:"sender"`
-	Receiver     string `json:"receiver"`
+	MoreMessages  bool   `json:"extraMessages"`
+	Sender        string `json:"sender"`
+	Receiver      string `json:"receiver"`
+	LastMessageID int    `json:"lastMessageID"`
 }
 
 type ChangeChatEvent struct {
@@ -52,7 +52,6 @@ func SendMessageHandler(event Event, client *Client, database *sqlite.Database) 
 	if err := json.Unmarshal(event.Payload, &chatMessage); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
 	}
-	chatMessage.ID = uuid.New().String()
 	chatMessage.Sent = time.Now().UTC()
 
 	_, err := models.CreateMessage(database.DB, *chatMessage)
@@ -126,29 +125,18 @@ func GetPastMessagesHandler(event Event, client *Client, database *sqlite.Databa
 	if err := json.Unmarshal(event.Payload, &morePastMessages); err != nil {
 		return fmt.Errorf("failed to unmarshal payload: %v", err)
 	}
-
-	fmt.Println("More past messages: ", morePastMessages)
-
 	extraMessages := morePastMessages.MoreMessages
-
-	fmt.Println("Extra messages: ", extraMessages)
 
 	if extraMessages {
 		fmt.Println("Fetching extra messages")
-		fmt.Println("Sender: ", sender)
-		fmt.Println("Receiver: ", receiver)
-		messages, err := models.GetMessages(database.DB, morePastMessages.Sender, morePastMessages.Receiver)
+		messages, err := models.GetMessagesAfterID(database.DB, morePastMessages.Sender, morePastMessages.Receiver, morePastMessages.LastMessageID)
 		if err != nil {
 			return fmt.Errorf("failed to fetch previous messages: %v", err)
 		}
 
-		fmt.Println("Extra messages: ", messages)
-
 		extraPastMessages := PastMessages{
 			Messages: messages,
 		}
-
-		fmt.Println("Extra extraPastMessages: ", extraPastMessages)
 
 		extraPastMessagesJSON, err := json.Marshal(extraPastMessages)
 		if err != nil {
@@ -166,8 +154,6 @@ func GetPastMessagesHandler(event Event, client *Client, database *sqlite.Databa
 	} else {
 		// Fetch the initial batch of messages
 		fmt.Println("Fetching initial 10 messages")
-		fmt.Println("Sender: ", sender)
-		fmt.Println("Receiver: ", receiver)
 		messages, err := models.GetMessages(database.DB, sender, receiver)
 		if err != nil {
 			return fmt.Errorf("failed to fetch previous messages: %v", err)

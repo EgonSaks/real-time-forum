@@ -8,31 +8,37 @@ import (
 )
 
 type Message struct {
-	ID       string    `json:"id"`
+	ID       int       `json:"id"`
 	Message  string    `json:"message"`
 	Sender   string    `json:"sender"`
 	Receiver string    `json:"receiver"`
 	Sent     time.Time `json:"sent_at"`
 }
 
-func CreateMessage(db *sql.DB, message Message) (string, error) {
+func CreateMessage(db *sql.DB, message Message) (int, error) {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO messages (id, message, sender, receiver, sent_at) VALUES (?, ?, ?, ?, ?)"
+	query := "INSERT INTO messages (message, sender, receiver, sent_at) VALUES (?, ?, ?, ?)"
 	statement, err := db.PrepareContext(context, query)
 	if err != nil {
-		fmt.Printf("failed receiver prepare create message statement: %v", err)
-		return message.ID, fmt.Errorf("failed receiver prepare create message statement: %v", err)
+		fmt.Printf("failed to prepare create message statement: %v", err)
+		return message.ID, fmt.Errorf("failed to prepare create message statement: %v", err)
 	}
 
-	_, err = statement.ExecContext(context, &message.ID, &message.Message, &message.Sender, &message.Receiver, time.Now().UTC())
+	res, err := statement.ExecContext(context, &message.Message, &message.Sender, &message.Receiver, time.Now().UTC())
 	if err != nil {
-		fmt.Printf("failed receiver create message: %v", err)
-		return message.ID, fmt.Errorf("failed receiver create message: %v", err)
+		fmt.Printf("failed to create message: %v", err)
+		return message.ID, fmt.Errorf("failed to create message: %v", err)
 	}
 
-	return message.ID, nil
+	lastInsertedID, err := res.LastInsertId()
+	if err != nil {
+		fmt.Printf("failed to get last inserted ID: %v", err)
+		return message.ID, fmt.Errorf("failed to get last inserted ID: %v", err)
+	}
+
+	return int(lastInsertedID), nil
 }
 
 func GetMessages(db *sql.DB, sender, receiver string) ([]Message, error) {
@@ -59,8 +65,8 @@ func GetMessages(db *sql.DB, sender, receiver string) ([]Message, error) {
 
 	rows, err := db.QueryContext(context, query, sender, receiver, receiver, sender)
 	if err != nil {
-		fmt.Printf("failed receiver execute query: %v", err)
-		return nil, fmt.Errorf("failed receiver execute query: %v", err)
+		fmt.Printf("failed to execute query: %v", err)
+		return nil, fmt.Errorf("failed to execute query: %v", err)
 	}
 	defer rows.Close()
 
@@ -69,16 +75,63 @@ func GetMessages(db *sql.DB, sender, receiver string) ([]Message, error) {
 		var message Message
 		err := rows.Scan(&message.ID, &message.Message, &message.Sender, &message.Receiver, &message.Sent)
 		if err != nil {
-			fmt.Printf("failed receiver scan row: %v", err)
-			return nil, fmt.Errorf("failed receiver scan row: %v", err)
+			fmt.Printf("failed to scan row: %v", err)
+			return nil, fmt.Errorf("failed to scan row: %v", err)
 		}
-		// messages = append(messages, message)
-		messages = append([]Message{message}, messages...)
+		messages = append(messages, message)
 	}
 
 	if err := rows.Err(); err != nil {
-		fmt.Printf("failed receiver retrieve rows: %v", err)
-		return nil, fmt.Errorf("failed receiver retrieve rows: %v", err)
+		fmt.Printf("failed to retrieve rows: %v", err)
+		return nil, fmt.Errorf("failed to retrieve rows: %v", err)
+	}
+
+	return messages, nil
+}
+
+func GetMessagesAfterID(db *sql.DB, sender, receiver string, lastMessageID int) ([]Message, error) {
+	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            id,
+            message,
+            sender,
+            receiver,
+            sent_at
+        FROM
+            messages
+        WHERE
+            ((sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?))
+            AND
+            id < ?
+        ORDER BY
+            sent_at DESC
+        LIMIT 10
+    `
+
+	rows, err := db.QueryContext(context, query, sender, receiver, receiver, sender, lastMessageID)
+	if err != nil {
+		fmt.Printf("failed to execute query: %v", err)
+		return nil, fmt.Errorf("failed to execute query: %v", err)
+	}
+	defer rows.Close()
+
+	messages := make([]Message, 0)
+	for rows.Next() {
+		var message Message
+		err := rows.Scan(&message.ID, &message.Message, &message.Sender, &message.Receiver, &message.Sent)
+		if err != nil {
+			fmt.Printf("failed to scan row: %v", err)
+			return nil, fmt.Errorf("failed to scan row: %v", err)
+		}
+		messages = append(messages, message)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Printf("failed to retrieve rows: %v", err)
+		return nil, fmt.Errorf("failed to retrieve rows: %v", err)
 	}
 
 	return messages, nil

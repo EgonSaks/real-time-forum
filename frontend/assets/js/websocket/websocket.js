@@ -57,7 +57,7 @@ function routeEvent(msg, currentUser) {
       console.log("past_messages:", messages);
       if (messages.messages) {
         messages.messages.forEach((message) => {
-          appendChatMessage(message);
+          appendChatMessage(message, true);
         });
       }
       break;
