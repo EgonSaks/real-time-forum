@@ -2,6 +2,7 @@ import {
   appendChatMessage,
   changeChat,
   createChats,
+  messagesCount,
   updateUserStatus,
 } from "../components/chat.js";
 
@@ -21,7 +22,6 @@ export function connectWebSocket(currentUser) {
 
       ws.onmessage = function (message) {
         const data = JSON.parse(message.data);
-        // console.log("Received WebSocket data:", data);
         routeEvent(data, currentUser);
       };
 
@@ -54,9 +54,8 @@ function routeEvent(msg, currentUser) {
       break;
     case "past_messages":
       const messages = msg.payload;
-      console.log("past_messages:", messages);
       if (messages.messages) {
-        messages.messages.forEach((message) => {
+        messages.messages.reverse().forEach((message) => {
           appendChatMessage(message, true);
         });
       }
@@ -70,7 +69,12 @@ function routeEvent(msg, currentUser) {
       createChats(usersList);
       break;
     case "change_chat":
-      changeChat(msg.payload);
+      const chat = msg.payload;
+      changeChat(chat);
+      if (chat.count_of_messages > 0) {
+        const countOfMessages = chat.count_of_messages;
+        messagesCount(countOfMessages);
+      }
       break;
     case "status_update":
       const usersToUpdate = msg.payload;

@@ -43,7 +43,7 @@ func GetAllUsersWithLastMessages(db *sql.DB) ([]UserWithLastMessage, error) {
 
 		var lastMessage Message
 		lastMessageQuery := `
-            SELECT id, message, sender, receiver, sent_at FROM messages
+            SELECT * FROM messages
             WHERE (sender = ? OR receiver = ?)
             ORDER BY sent_at DESC
             LIMIT 1
@@ -85,7 +85,7 @@ func SortUsers(usersWithLastMessages []UserWithLastMessage) []UserWithLastMessag
 	usersWithoutMessages := make([]UserWithLastMessage, 0)
 
 	for _, userWithLastMessage := range usersWithLastMessages {
-		if userWithLastMessage.LastMessage.ID != 0 { 
+		if userWithLastMessage.LastMessage.ID != "" {
 			usersWithMessages = append(usersWithMessages, userWithLastMessage)
 		} else {
 			usersWithoutMessages = append(usersWithoutMessages, userWithLastMessage)

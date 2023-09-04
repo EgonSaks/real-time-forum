@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/real-time-forum/database/models"
 	"github.com/real-time-forum/database/sqlite"
 )
@@ -20,14 +21,16 @@ type PastMessages struct {
 }
 
 type MorePastMessages struct {
-	MoreMessages  bool   `json:"extraMessages"`
-	Sender        string `json:"sender"`
-	Receiver      string `json:"receiver"`
-	LastMessageID int    `json:"lastMessageID"`
+	MoreMessages bool   `json:"extraMessages"`
+	Sender       string `json:"sender"`
+	Receiver     string `json:"receiver"`
+	Offset       int    `json:"offset"`
+	Limit        int    `json:"limit"`
 }
 
 type ChangeChatEvent struct {
-	Name string `json:"username"`
+	Name            string `json:"username"`
+	CountOfMessages int    `json:"count_of_messages"`
 }
 
 type UsersStatusUpdateEvent struct {
@@ -52,6 +55,7 @@ func SendMessageHandler(event Event, client *Client, database *sqlite.Database) 
 	if err := json.Unmarshal(event.Payload, &chatMessage); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
 	}
+	chatMessage.ID = uuid.New().String()
 	chatMessage.Sent = time.Now().UTC()
 
 	_, err := models.CreateMessage(database.DB, *chatMessage)
@@ -83,15 +87,20 @@ func SendMessageHandler(event Event, client *Client, database *sqlite.Database) 
 }
 
 func ChangeChatHandler(event Event, client *Client, database *sqlite.Database) error {
-	// Get the username from the payload for the change chat
 	var changeChat ChangeChatEvent
 	if err := json.Unmarshal(event.Payload, &changeChat); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
 	}
+	sender, receiver := client.username, changeChat.Name
 
-	// Send the username back to the client as a response
+	totalCount, err := models.GetTotalMessageCount(database.DB, sender, receiver)
+	if err != nil {
+		return fmt.Errorf("failed to fetch total message count: %v", err)
+	}
+
 	response := ChangeChatEvent{
-		Name: changeChat.Name,
+		Name:            changeChat.Name,
+		CountOfMessages: totalCount,
 	}
 
 	responseData, err := json.Marshal(response)
@@ -125,11 +134,23 @@ func GetPastMessagesHandler(event Event, client *Client, database *sqlite.Databa
 	if err := json.Unmarshal(event.Payload, &morePastMessages); err != nil {
 		return fmt.Errorf("failed to unmarshal payload: %v", err)
 	}
+
 	extraMessages := morePastMessages.MoreMessages
+	extraMessageSender := morePastMessages.Sender
+	extraMessageReceiver := morePastMessages.Receiver
+	extraMessageLimit := morePastMessages.Limit
+	extraMessageOffset := morePastMessages.Offset
+
+	totalCount, err := models.GetTotalMessageCount(database.DB, extraMessageSender, extraMessageReceiver)
+	if err != nil {
+		return fmt.Errorf("failed to fetch total message count: %v", err)
+	}
 
 	if extraMessages {
 		fmt.Println("Fetching extra messages")
-		messages, err := models.GetMessagesAfterID(database.DB, morePastMessages.Sender, morePastMessages.Receiver, morePastMessages.LastMessageID)
+		fmt.Println("Offset in extra messages: ", extraMessageOffset)
+
+		messages, err := models.GetMessages(database.DB, extraMessageSender, extraMessageReceiver, extraMessageLimit, extraMessageOffset)
 		if err != nil {
 			return fmt.Errorf("failed to fetch previous messages: %v", err)
 		}
@@ -148,13 +169,24 @@ func GetPastMessagesHandler(event Event, client *Client, database *sqlite.Databa
 			Payload: json.RawMessage(extraPastMessagesJSON),
 		}
 
-		fmt.Println("Sending extra messages")
-
 		client.egress <- pastMessages
+
+		if extraMessageOffset >= totalCount {
+			morePastMessages.MoreMessages = false
+
+			endOfMessages := Event{
+				Type:    EventPastMessages,
+				Payload: json.RawMessage(`"No more messages available."`),
+			}
+			client.egress <- endOfMessages
+		}
+
+		extraMessageOffset += extraMessageLimit
 	} else {
-		// Fetch the initial batch of messages
-		fmt.Println("Fetching initial 10 messages")
-		messages, err := models.GetMessages(database.DB, sender, receiver)
+		fmt.Println("Fetching initial 10 messages for:", sender, "and", receiver)
+		offset := 0
+		limit := 10
+		messages, err := models.GetMessages(database.DB, sender, receiver, limit, offset)
 		if err != nil {
 			return fmt.Errorf("failed to fetch previous messages: %v", err)
 		}
@@ -174,6 +206,9 @@ func GetPastMessagesHandler(event Event, client *Client, database *sqlite.Databa
 		}
 
 		client.egress <- previousMessages
+
+		offset += limit
+
 	}
 
 	return nil

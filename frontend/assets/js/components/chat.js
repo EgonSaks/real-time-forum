@@ -6,6 +6,14 @@ import { sendEvent } from "../websocket/websocket.js";
 let messengerVisible = false;
 let previousDate = null;
 
+let totalMessagesCount = 0;
+let limit = 10;
+let offset = 0;
+
+export function messagesCount(totalMessages) {
+  totalMessagesCount = totalMessages;
+}
+
 export function getMessengerVisibility() {
   return messengerVisible;
 }
@@ -114,36 +122,40 @@ export function createChats(users) {
   return chatsContainer;
 }
 
-export function changeChat(user) {
+export function changeChat(receiver) {
+  offset = 0;
+  totalMessagesCount = 0;
+
   if (getMessengerVisibility()) {
     hideMessenger();
   }
-  showMessenger(user);
+  showMessenger(receiver);
 
   const messageInput = document.querySelector(".messenger-input");
-  messageInput.setAttribute("data-recipient", user.username);
+  messageInput.setAttribute("data-recipient", receiver.username);
 }
 
-export function showMessenger(user) {
+export function showMessenger(receiver) {
   const messenger = document.querySelector(".messenger");
   const messengerHeader = messenger.querySelector(".messenger-header");
-  const nameElement = messengerHeader.querySelector(".messenger-name");
-  const lastSeenElement = messengerHeader.querySelector(".messenger-last-seen");
-  const statusElement = messengerHeader.querySelector(".messenger-status");
+  const name = messengerHeader.querySelector(".messenger-name");
+  const lastSeen = messengerHeader.querySelector(".messenger-last-seen");
+  const status = messengerHeader.querySelector(".messenger-status");
 
-  nameElement.textContent = user.username || "Anonymous";
-  lastSeenElement.textContent = user.last_seen || "";
+  name.textContent = receiver.username || "Anonymous";
+  lastSeen.textContent = receiver.last_seen || "";
 
-  const onlineStatus = user.status === "online" ? "online" : "offline";
-  statusElement.classList.remove("offline", "online");
-  statusElement.classList.add(onlineStatus);
-  statusElement.textContent = onlineStatus;
+  const onlineStatus = receiver.status === "online" ? "online" : "offline";
+  status.classList.remove("offline", "online");
+  status.classList.add(onlineStatus);
+  status.textContent = onlineStatus;
 
   messengerVisible = true;
   messenger.classList.remove("messenger-hidden");
 
   const messengerBody = messenger.querySelector(".messenger-body");
   const inputContainer = messenger.querySelector(".input-container");
+  const chatMessages = messenger.querySelector(".chat-messages");
 
   messenger.style.display = "block";
   messengerHeader.style.display = "block";
@@ -153,6 +165,10 @@ export function showMessenger(user) {
   inputContainer.style.borderTop = "1px solid #000";
 
   messengerBody.querySelector(".chat-messages").textContent = "";
+
+  // chatMessages.addEventListener("scroll", chatScroll);
+
+  chatMessages.addEventListener("scroll", debounce(chatScroll, 100));
 
   const contentContainer = document.getElementById("content-container");
   contentContainer.style.width = "60%";
@@ -167,6 +183,40 @@ export function showMessenger(user) {
   inputContainer.style.display = "flex";
   messengerHeader.style.borderBottom = "1px solid #000";
   inputContainer.style.borderTop = "1px solid #000";
+}
+
+function chatScroll() {
+  const chatMessages = document.querySelector(".chat-messages");
+  const scrollPosition = chatMessages.scrollTop;
+
+  if (scrollPosition === 0 && offset < totalMessagesCount) {
+    const user = isLoggedIn();
+
+    const messagesToRetrieve = Math.min(limit, totalMessagesCount - offset);
+
+    offset += messagesToRetrieve;
+
+    const requestMoreMessages = {
+      extraMessages: true,
+      sender: user.username,
+      receiver: document.querySelector(".messenger-name").textContent,
+      prepend: true,
+      offset: offset,
+      limit: limit,
+    };
+
+    sendEvent("past_messages", requestMoreMessages);
+  }
+}
+
+function debounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
 }
 
 export function hideMessenger() {
@@ -253,42 +303,31 @@ export function appendChatMessage(messageElement, prepend = false) {
 
   const messageContent = document.createElement("div");
   messageContent.classList.add("message-content");
-  messageContent.setAttribute("data-message-id", messageElement.id);
   messageContent.append(message);
   messageContainer.append(messageContent, timeContainer);
 
   const user = isLoggedIn();
 
   if (messageElement.sender === user.username) {
-    // console.log("Message from user", user.username);
     messageContainer.classList.add("sender-message");
   } else if (messageElement.receiver === user.username) {
-    // console.log("Message to user", user.username);
     messageContainer.classList.add("recipient-message");
   }
 
-  // Step 1: Calculate old scroll height
   const oldScrollHeight = chatMessages.scrollHeight;
 
-  // Step 2: Capture old scrollTop
   const oldScrollTop = chatMessages.scrollTop;
 
-  // Step 3: Append or prepend the message
   if (prepend) {
     chatMessages.prepend(messageContainer);
   } else {
     chatMessages.appendChild(messageContainer);
   }
 
-  // Step 4: Calculate new scroll height
   const newScrollHeight = chatMessages.scrollHeight;
-
-  // Step 5: Adjust scrollTop
   if (prepend) {
-    // Maintain scroll position
     chatMessages.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
   } else {
-    // Scroll to latest message
     chatMessages.scrollTop = newScrollHeight;
   }
 }
@@ -330,30 +369,6 @@ export function createMessenger() {
   const chatMessages = document.createElement("p");
   chatMessages.classList.add("chat-messages");
   messengerBody.append(chatMessages);
-
-  chatMessages.addEventListener("scroll", function () {
-    const scrollPosition = chatMessages.scrollTop;
-
-    if (scrollPosition === 0) {
-      console.log("Scrolled to the top of chat");
-      const user = isLoggedIn();
-      const lastMessageId = parseInt(
-        document
-          .querySelector(".message-content:first-child")
-          .getAttribute("data-message-id")
-      );
-
-      const requestMoreMessages = {
-        extraMessages: true,
-        sender: user.username,
-        receiver: name.textContent,
-        lastMessageId: lastMessageId,
-        prepend: true
-      };
-      console.log("requestMoreMessages", requestMoreMessages);
-      sendEvent("past_messages", requestMoreMessages);
-    }
-  });
 
   const inputContainer = document.createElement("div");
   inputContainer.classList.add("input-container");
