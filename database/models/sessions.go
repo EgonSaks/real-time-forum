@@ -35,7 +35,7 @@ func CreateSession(db *sql.DB, session Session) (string, error) {
 
 func GetSessionByID(db *sql.DB, id string) (Session, error) {
 	var session Session
-	query := "SELECT id, user_id, otp, created_at, expires_at FROM sessions WHERE id = ?"
+	query := "SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?"
 	err := db.QueryRow(query, id).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
 	if err != nil {
 		if err == sql.ErrNoRows {

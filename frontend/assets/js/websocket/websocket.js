@@ -53,11 +53,16 @@ function routeEvent(msg, currentUser) {
       appendChatMessage(message);
       break;
     case "past_messages":
+      console.log("past_messages:", msg.payload);
       const messages = msg.payload;
       if (messages.messages) {
         messages.messages.reverse().forEach((message) => {
           appendChatMessage(message, true);
         });
+      }
+      if (messages.count_of_messages > 0) {
+        const countOfMessages = messages.count_of_messages;
+        messagesCount(countOfMessages);
       }
       break;
     case "chat_list_update":
@@ -71,10 +76,6 @@ function routeEvent(msg, currentUser) {
     case "change_chat":
       const chat = msg.payload;
       changeChat(chat);
-      if (chat.count_of_messages > 0) {
-        const countOfMessages = chat.count_of_messages;
-        messagesCount(countOfMessages);
-      }
       break;
     case "status_update":
       const usersToUpdate = msg.payload;

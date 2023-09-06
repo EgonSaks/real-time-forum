@@ -188,7 +188,7 @@ func (manager *Manager) UpdateChatsOrder(sender, receiver string) error {
 	}
 	defer database.DB.Close()
 
-	chatsOrder, err := models.OrganizeChats(database.DB)
+	chatsOrder, err := models.GetChatInfo(database.DB, sender)
 	if err != nil {
 		return fmt.Errorf("failed to get user statuses: %v", err)
 	}

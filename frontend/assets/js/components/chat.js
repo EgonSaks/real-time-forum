@@ -166,9 +166,7 @@ export function showMessenger(receiver) {
 
   messengerBody.querySelector(".chat-messages").textContent = "";
 
-  // chatMessages.addEventListener("scroll", chatScroll);
-
-  chatMessages.addEventListener("scroll", debounce(chatScroll, 100));
+  chatMessages.addEventListener("scroll", chatScroll, 100);
 
   const contentContainer = document.getElementById("content-container");
   contentContainer.style.width = "60%";
@@ -192,7 +190,8 @@ function chatScroll() {
   if (scrollPosition === 0 && offset < totalMessagesCount) {
     const user = isLoggedIn();
 
-    const messagesToRetrieve = Math.min(limit, totalMessagesCount - offset);
+    const remainingMessagesCount = totalMessagesCount - offset;
+    const messagesToRetrieve = Math.min(limit, remainingMessagesCount);
 
     offset += messagesToRetrieve;
 
@@ -202,21 +201,11 @@ function chatScroll() {
       receiver: document.querySelector(".messenger-name").textContent,
       prepend: true,
       offset: offset,
-      limit: limit,
+      limit: messagesToRetrieve,
     };
 
     sendEvent("past_messages", requestMoreMessages);
   }
-}
-
-function debounce(func, delay) {
-  let timeoutId;
-  return function (...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      func(...args);
-    }, delay);
-  };
 }
 
 export function hideMessenger() {
@@ -263,6 +252,9 @@ function sendMessage() {
 }
 
 export function appendChatMessage(messageElement, prepend = false) {
+  if (!prepend) {
+    offset++;
+  }
   const chatMessages = document.querySelector(".chat-messages");
   const messageContainer = document.createElement("div");
 
@@ -416,36 +408,13 @@ export function createMessenger() {
   return messenger;
 }
 
-async function filteredChatUsers() {
-  const currentUser = isLoggedIn();
-
-  const allUsers = (await fetchChats()) || [] || null;
-  console.log(allUsers);
-
-  let users = [];
-  for (const item of allUsers) {
-    if (item.User && item.LastMessage) {
-      users.push(item.User);
-    }
-  }
-
-  const filteredUsers =
-    users && users.length > 0
-      ? users.filter((otherUser) => otherUser.username !== currentUser.username)
-      : [] || null;
-
-  console.log(filteredUsers);
-
-  return filteredUsers;
-}
-
 export async function createChatContainer() {
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats");
 
-  const filteredUsers = await filteredChatUsers();
+  const users = (await fetchChats()) || [];
 
-  const chat = createChats(filteredUsers);
+  const chat = createChats(users);
   const messenger = createMessenger();
 
   chatsContainer.append(chat, messenger);

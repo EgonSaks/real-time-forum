@@ -1,4 +1,3 @@
-import { isLoggedIn } from "../utils/auth.js";
 import { createBaseView } from "../views/BaseView.js";
 import { routes } from "./routes.js";
 

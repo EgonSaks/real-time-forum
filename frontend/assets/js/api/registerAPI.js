@@ -1,6 +1,5 @@
 import { config } from "../config/config.js";
 import { navigateTo } from "../router/router.js";
-// const REGISTER_API = "http://localhost:8081/register";
 
 export async function registerUser(user) {
   try {

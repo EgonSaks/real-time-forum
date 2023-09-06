@@ -10,6 +10,8 @@ import { Login } from "../views/Login.js";
 import { PostView } from "../views/PostView.js";
 import { Register } from "../views/Register.js";
 
+const chatContainerPromise = createChatContainer();
+
 export async function createBaseView(params, matchedView) {
   const appContainer = document.querySelector("#app");
   appContainer.innerHTML = "";
@@ -17,7 +19,6 @@ export async function createBaseView(params, matchedView) {
   const currentUser = isLoggedIn();
   const messengerVisible = getMessengerVisibility();
   const userLoggedIn = currentUser && currentUser.isLoggedIn;
-  const chatContainer = await createChatContainer(currentUser);
   const navbar = createNavbar(currentUser);
 
   if (
@@ -39,16 +40,13 @@ export async function createBaseView(params, matchedView) {
   }
 
   if (userLoggedIn) {
-    if (matchedView === HomeView) {
+    if (matchedView === HomeView || matchedView === PostView) {
+      const chatContainer = await chatContainerPromise
       matchedView(params, messengerVisible);
-    } else if (matchedView === PostView) {
-      matchedView(params, messengerVisible);
+      appContainer.append(navbar, chatContainer);
     }
-    appContainer.append(navbar, chatContainer);
   } else {
-    if (matchedView === Register) {
-      matchedView();
-    } else if (matchedView === Login) {
+    if (matchedView === Register || matchedView === Login) {
       matchedView();
     }
   }
