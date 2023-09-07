@@ -1,4 +1,4 @@
-import { fetchChats } from "../api/usersChatsAPI.js";
+// import { fetchChats } from "../api/usersChatsAPI.js";
 import { isLoggedIn } from "../utils/auth.js";
 import { formatLastSeen } from "../utils/timeConverter.js";
 import { sendEvent } from "../websocket/websocket.js";
@@ -408,11 +408,9 @@ export function createMessenger() {
   return messenger;
 }
 
-export async function createChatContainer() {
+export async function createChatContainer(users) {
   const chatsContainer = document.createElement("div");
   chatsContainer.classList.add("chats");
-
-  const users = (await fetchChats()) || [];
 
   const chat = createChats(users);
   const messenger = createMessenger();

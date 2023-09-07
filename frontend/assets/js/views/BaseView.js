@@ -1,3 +1,4 @@
+import { fetchChats } from "../api/usersChatsAPI.js";
 import {
   createChatContainer,
   getMessengerVisibility,
@@ -9,8 +10,6 @@ import { HomeView } from "../views/HomeView.js";
 import { Login } from "../views/Login.js";
 import { PostView } from "../views/PostView.js";
 import { Register } from "../views/Register.js";
-
-const chatContainerPromise = createChatContainer();
 
 export async function createBaseView(params, matchedView) {
   const appContainer = document.querySelector("#app");
@@ -41,7 +40,12 @@ export async function createBaseView(params, matchedView) {
 
   if (userLoggedIn) {
     if (matchedView === HomeView || matchedView === PostView) {
-      const chatContainer = await chatContainerPromise
+      const chats = await fetchChats();
+      
+      console.log("chats:", chats);
+
+      const chatContainer = await createChatContainer(chats);
+
       matchedView(params, messengerVisible);
       appContainer.append(navbar, chatContainer);
     }

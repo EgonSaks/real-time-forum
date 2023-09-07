@@ -1,3 +1,4 @@
+import { fetchChats } from "../api/usersChatsAPI.js";
 import {
   appendChatMessage,
   changeChat,
@@ -45,7 +46,7 @@ export function sendEvent(eventType, payload) {
 }
 
 // routeEvent is called when a message is received from the server
-function routeEvent(msg, currentUser) {
+async function routeEvent(msg, currentUser) {
   switch (msg.type) {
     case "new_message":
       const message = msg.payload;
@@ -66,12 +67,9 @@ function routeEvent(msg, currentUser) {
       }
       break;
     case "chat_list_update":
-      const chatToUpdate = msg.payload;
-      const updatedChats = chatToUpdate.filter(
-        (item) => item.User.username !== currentUser.username
-      );
-      const usersList = updatedChats.map((item) => item.User);
-      createChats(usersList);
+      // const chats = msg.payload;
+      const chats = await fetchChats();
+      createChats(chats);
       break;
     case "change_chat":
       const chat = msg.payload;

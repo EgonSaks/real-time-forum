@@ -26,7 +26,7 @@ func (nt NullTime) Value() (driver.Value, error) {
 }
 
 type UserChatInfo struct {
-	Username        string         `json:"username"`
+	Sender          string         `json:"username"`
 	LastMessageSent NullTime       `json:"last_message_sent"`
 	Receiver        sql.NullString `json:"receiver"`
 }
@@ -34,6 +34,9 @@ type UserChatInfo struct {
 func GetChatInfo(db *sql.DB, currentUser string) ([]UserChatInfo, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+
+	fmt.Println("Getting chat info")
+	fmt.Printf("Current User: %s\n", currentUser)
 
 	var chatInfo []UserChatInfo
 
@@ -62,7 +65,7 @@ func GetChatInfo(db *sql.DB, currentUser string) ([]UserChatInfo, error) {
 
 	for rows.Next() {
 		var info UserChatInfo
-		err := rows.Scan(&info.Username, &info.LastMessageSent, &info.Receiver)
+		err := rows.Scan(&info.Sender, &info.LastMessageSent, &info.Receiver)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %v", err)
 		}
@@ -72,6 +75,11 @@ func GetChatInfo(db *sql.DB, currentUser string) ([]UserChatInfo, error) {
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error while iterating through rows: %v", err)
+	}
+
+	fmt.Printf("Chat Info:\n")
+	for i, info := range chatInfo {
+		fmt.Printf("%d. Sender: %s, Last Message Sent: %v, Receiver: %s\n", i+1, info.Sender, info.LastMessageSent, info.Receiver.String)
 	}
 
 	return chatInfo, nil
