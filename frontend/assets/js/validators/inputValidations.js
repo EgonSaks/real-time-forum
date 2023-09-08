@@ -5,7 +5,7 @@ import { registerUser } from "../api/registerAPI.js";
 import { createCommentComponent } from "../components/comment.js";
 import { updatePostsView } from "../components/post.js";
 
-export async function validatePostInput(titleInput, contentInput, errorMsg) {
+export async function validatePostInput(titleInput, contentInput, selectedCategories, errorMsg, categoriesContainer) {
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
 
@@ -21,6 +21,9 @@ export async function validatePostInput(titleInput, contentInput, errorMsg) {
   } else if (content.length > 1000) {
     errorMsg.innerHTML = "Content cannot exceed 1000 characters";
     errorMsg.style.display = "block";
+  } else if (selectedCategories.length === 0) {
+    errorMsg.innerHTML = "At least one category has to be selected";
+    errorMsg.style.display = "block";
   } else {
     errorMsg.innerHTML = "";
     errorMsg.style.display = "none";
@@ -28,12 +31,14 @@ export async function validatePostInput(titleInput, contentInput, errorMsg) {
     const post = {
       title: title,
       content: content,
+      categories: selectedCategories,
     };
 
     const createdPostData = await createPostToDatabase(post);
 
     if (createdPostData) {
       const updatedPosts = await fetchPosts();
+      console.log(updatedPosts);
       updatePostsView(updatedPosts);
     } else {
       console.error("Failed to create the post.");
@@ -41,8 +46,13 @@ export async function validatePostInput(titleInput, contentInput, errorMsg) {
 
     titleInput.value = "";
     contentInput.value = "";
+    selectedCategories = [];
+    categoriesContainer.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+      box.checked = false;
+    });
   }
 }
+
 
 export function validateUpdatedData(title, content, postContainer) {
   if (title === "") {

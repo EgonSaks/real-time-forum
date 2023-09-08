@@ -256,6 +256,71 @@ button:focus {
   cursor: pointer;
 }
 
+/* Post categories */
+.categories-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 0.625rem;
+}
+
+.categories-container input[type="checkbox"]:first-child {
+  appearance: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  margin-block: 0;
+  margin-inline: 0 0.4rem;
+}
+
+.categories-container input[type="checkbox"]:not(:first-child) {
+  appearance: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  margin-block: 0;
+  margin-inline: 0.4rem;
+}
+
+.categories-container input[type="checkbox"]:checked {
+  background-color: rgb(25, 195, 125);
+}
+
+input[type="checkbox"].disabled + label {
+  color: #A9A9A9; 
+  cursor: not-allowed;
+}
+
+input[type="checkbox"].disabled {
+  cursor: not-allowed;
+}
+
+.post-categories-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.category-label:first-child {
+  border-radius: 0.2rem;
+  margin-inline: 0 0.4rem;
+  margin-bottom: 0.625rem;
+  background-color: rgb(25, 195, 125);
+  padding: 0.2rem;
+  color: white;
+}
+
+.category-label:not(:first-child) {
+  border-radius: 0.2rem;
+  margin-inline: 0.4rem;
+  margin-bottom: 0.625rem;
+  background-color: rgb(25, 195, 125);
+  padding: 0.2rem;
+  color: white;
+}
+
 /* General styles */
 h1 {
   font-size: 2rem;

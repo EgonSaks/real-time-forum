@@ -1,9 +1,9 @@
-// import { fetchChats } from "../api/usersChatsAPI.js";
 import { isLoggedIn } from "../utils/auth.js";
 import { formatLastSeen } from "../utils/timeConverter.js";
 import { sendEvent } from "../websocket/websocket.js";
 
 let messengerVisible = false;
+let visibleMessengerUser = null;
 let previousDate = null;
 
 let totalMessagesCount = 0;
@@ -125,6 +125,7 @@ export function createChats(users) {
 export function changeChat(receiver) {
   offset = 0;
   totalMessagesCount = 0;
+  visibleMessengerUser = receiver.username;
 
   if (getMessengerVisibility()) {
     hideMessenger();
@@ -252,6 +253,13 @@ function sendMessage() {
 }
 
 export function appendChatMessage(messageElement, prepend = false) {
+  if (
+    visibleMessengerUser !== messageElement.sender &&
+    visibleMessengerUser !== messageElement.receiver
+  ) {
+    return;
+  }
+
   if (!prepend) {
     offset++;
   }

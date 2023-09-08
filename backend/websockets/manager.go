@@ -188,19 +188,13 @@ func (manager *Manager) UpdateChatsOrder(sender, receiver string) error {
 	}
 	defer database.DB.Close()
 
-	chatsOrder, err := models.GetChatInfo(database.DB, sender)
+	_, err = models.GetChatInfo(database.DB, sender)
 	if err != nil {
 		return fmt.Errorf("failed to get user statuses: %v", err)
 	}
 
-	chatsOrderJSON, err := json.Marshal(chatsOrder)
-	if err != nil {
-		return fmt.Errorf("failed to marshal user statuses: %v", err)
-	}
-
 	chatsOrderEvent := Event{
-		Type:    EventChatListUpdate,
-		Payload: json.RawMessage(chatsOrderJSON),
+		Type: EventChatListUpdate,
 	}
 
 	manager.RLock()

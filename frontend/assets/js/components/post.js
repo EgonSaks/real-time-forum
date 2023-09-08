@@ -42,13 +42,58 @@ export function createPostFormComponent() {
   postButton.setAttribute("type", "submit");
   postButton.textContent = "Post";
 
-  postButton.addEventListener("click", function (e) {
-    e.preventDefault();
-    validatePostInput(inputTitle, inputContent, errorMsg);
-    charCountSpan.textContent = "";
+  const categoriesContainer = document.createElement("div");
+  categoriesContainer.classList.add("categories-container");
+
+  const categories = ["Tech", "Finance", "Health", "Startup", "Innovation"];
+  const maxCategories = 3;
+  let selectedCount = 0;
+  let selectedCategories = [];
+
+  categories.forEach((category) => {
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "category";
+    checkbox.value = category;
+    checkbox.id = category;
+
+    const label = document.createElement("label");
+    label.htmlFor = category;
+    label.appendChild(document.createTextNode(category));
+
+    checkbox.addEventListener("change", function () {
+      if (this.checked) {
+        selectedCount++;
+        selectedCategories.push(this.value);
+      } else {
+        selectedCount--;
+        const index = selectedCategories.indexOf(this.value);
+        if (index > -1) {
+          selectedCategories.splice(index, 1);
+        }
+      }
+
+      categoriesContainer.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+        if (selectedCount >= maxCategories && !box.checked) {
+          box.disabled = true;
+          box.classList.add("disabled");
+        } else {
+          box.disabled = false;
+          box.classList.remove("disabled");
+        }
+      });
+    });
+
+    categoriesContainer.append(checkbox, label);
   });
 
-  form.append(inputTitle, inputContent, errorMsg);
+  postButton.addEventListener("click", async function (e) {
+    e.preventDefault();
+    await validatePostInput(inputTitle, inputContent, selectedCategories, errorMsg, categoriesContainer);
+    charCountSpan.textContent = "";
+  });
+  
+  form.append(inputTitle, inputContent, categoriesContainer, errorMsg);
   formContainer.append(form, postButton, charCountSpan);
 
   return formContainer;
@@ -73,6 +118,16 @@ export function createPostComponent(post) {
   const postContent = document.createElement("p");
   postContent.classList.add("post-content");
   postContent.textContent = post.content;
+
+  const categoriesContainer = document.createElement("div");
+  categoriesContainer.classList.add("post-categories-container");
+
+  post.categories.forEach(category => {
+    const categoryLabel = document.createElement("span");
+    categoryLabel.classList.add("category-label");
+    categoryLabel.textContent = category;
+    categoriesContainer.appendChild(categoryLabel);
+  });
 
   const createdAt = document.createElement("p");
   createdAt.classList.add("created-at");
@@ -99,6 +154,7 @@ export function createPostComponent(post) {
     author,
     postTitle,
     postContent,
+    categoriesContainer,
     createdAt,
     editButton,
     deleteButton
@@ -248,7 +304,8 @@ export function updatePostsView(posts) {
     "form-and-post-container"
   );
 
-  const existingPostContainers = formAndPostContainer.querySelectorAll(".post-container");
+  const existingPostContainers =
+    formAndPostContainer.querySelectorAll(".post-container");
 
   const updatedPostIds = new Set(posts.map((post) => post.id));
 

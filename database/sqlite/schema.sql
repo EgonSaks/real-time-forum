@@ -17,19 +17,18 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS user_status (
     username TEXT PRIMARY KEY,
     status BOOLEAN NOT NULL,
     last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
 CREATE TABLE IF NOT EXISTS posts (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
+    categories TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -61,7 +60,6 @@ CREATE TABLE IF NOT EXISTS sessions (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT session_unique UNIQUE (user_id) ON CONFLICT REPLACE
 );
-
 --  dummy data:
 -- INSERT INTO messages (id, message, sender, receiver, sent_at)
 -- VALUES ('message_id_1', 'Hey, see message yesterday?', 'Egon', 'Jeff', '2023-08-15 10:00:00');
