@@ -35,9 +35,6 @@ func GetChatInfo(db *sql.DB, currentUser string) ([]UserChatInfo, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	fmt.Println("Getting chat info")
-	fmt.Printf("Current User: %s\n", currentUser)
-
 	var chatInfo []UserChatInfo
 
 	query := `
@@ -77,10 +74,10 @@ func GetChatInfo(db *sql.DB, currentUser string) ([]UserChatInfo, error) {
 		return nil, fmt.Errorf("error while iterating through rows: %v", err)
 	}
 
-	fmt.Printf("Chat Info:\n")
-	for i, info := range chatInfo {
-		fmt.Printf("%d. Sender: %s, Last Message Sent: %v, Receiver: %s\n", i+1, info.Sender, info.LastMessageSent, info.Receiver.String)
-	}
+	// fmt.Printf("Chat Info:\n")
+	// for i, info := range chatInfo {
+	// 	fmt.Printf("%d. Sender: %s, Last Message Sent: %v, Receiver: %s\n", i+1, info.Sender, info.LastMessageSent, info.Receiver.String)
+	// }
 
 	return chatInfo, nil
 }

@@ -11,47 +11,58 @@ import { Login } from "../views/Login.js";
 import { PostView } from "../views/PostView.js";
 import { Register } from "../views/Register.js";
 
+let navbar = null;
+let chatContainer = null;
+
+async function populateChatContainer() {
+  if (!chatContainer) {
+    const chats = await fetchChats();
+    chatContainer = await createChatContainer(chats);
+  }
+}
+
+function populateNavbar(currentUser) {
+  if (!navbar) {
+    navbar = createNavbar(currentUser);
+  }
+}
+
 export async function createBaseView(params, matchedView) {
   const appContainer = document.querySelector("#app");
   appContainer.innerHTML = "";
 
   const currentUser = isLoggedIn();
-  const messengerVisible = getMessengerVisibility();
   const userLoggedIn = currentUser && currentUser.isLoggedIn;
-  const navbar = createNavbar(currentUser);
+  const messengerVisible = getMessengerVisibility();
 
-  if (
-    !userLoggedIn &&
-    window.location.pathname !== "/login" &&
-    window.location.pathname !== "/register"
-  ) {
-    navigateTo("/login");
-    return;
-  }
-
-  if (
-    userLoggedIn &&
-    (window.location.pathname === "/login" ||
-      window.location.pathname === "/register")
-  ) {
-    navigateTo("/");
-    return;
-  }
-
-  if (userLoggedIn) {
-    if (matchedView === HomeView || matchedView === PostView) {
-      const chats = await fetchChats();
-      
-      console.log("chats:", chats);
-
-      const chatContainer = await createChatContainer(chats);
-
-      matchedView(params, messengerVisible);
-      appContainer.append(navbar, chatContainer);
+  if (!userLoggedIn) {
+    if (
+      window.location.pathname !== "/login" &&
+      window.location.pathname !== "/register"
+    ) {
+      navigateTo("/login");
+      return;
     }
   } else {
-    if (matchedView === Register || matchedView === Login) {
-      matchedView();
+    if (
+      window.location.pathname === "/login" ||
+      window.location.pathname === "/register"
+    ) {
+      navigateTo("/");
+      return;
     }
+
+    populateNavbar(currentUser);
+    await populateChatContainer();
+  }
+
+  if (userLoggedIn && (matchedView === HomeView || matchedView === PostView)) {
+    matchedView(params, messengerVisible);
+    appContainer.append(navbar, chatContainer);
+  } else if (
+    !userLoggedIn &&
+    (matchedView === Register || matchedView === Login)
+  ) {
+    matchedView();
   }
 }

@@ -11,7 +11,7 @@ import { config } from "../config/config.js";
 
 let ws;
 
-export function connectWebSocket(currentUser) {
+export function connectWebSocket() {
   if (window["WebSocket"]) {
     try {
       const url = `ws://${window.location.hostname}:${config.wsPort}/ws`;
@@ -23,7 +23,7 @@ export function connectWebSocket(currentUser) {
 
       ws.onmessage = function (message) {
         const data = JSON.parse(message.data);
-        routeEvent(data, currentUser);
+        routeEvent(data);
       };
 
       ws.onclose = function (message) {
@@ -46,7 +46,7 @@ export function sendEvent(eventType, payload) {
 }
 
 // routeEvent is called when a message is received from the server
-async function routeEvent(msg, currentUser) {
+async function routeEvent(msg) {
   switch (msg.type) {
     case "new_message":
       const message = msg.payload;
@@ -67,7 +67,6 @@ async function routeEvent(msg, currentUser) {
       }
       break;
     case "chat_list_update":
-      // const chats = msg.payload;
       const chats = await fetchChats();
       createChats(chats);
       break;
@@ -95,11 +94,5 @@ export function closeWebSocket() {
 }
 
 window.addEventListener("DOMContentLoaded", function () {
-  const user = localStorage.getItem("user");
-  if (user) {
-    const currentUser = JSON.parse(user);
-    if (currentUser !== "") {
-      connectWebSocket(currentUser);
-    }
-  }
+  connectWebSocket();
 });

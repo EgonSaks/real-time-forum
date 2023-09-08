@@ -1,3 +1,4 @@
+import { isLoggedIn } from "../utils/auth.js";
 import { convertTime } from "../utils/timeConverter.js";
 import { validateCommentInput } from "../validators/inputValidations.js";
 
@@ -33,6 +34,7 @@ export function createCommentFormComponent(postID, author) {
 }
 
 export function createCommentComponent(comment) {
+  const currentUser = isLoggedIn();
   const commentComponent = document.createElement("div");
   commentComponent.classList.add("comment-component");
 
@@ -42,7 +44,7 @@ export function createCommentComponent(comment) {
 
   const author = document.createElement("p");
   author.classList.add("author");
-  author.textContent = comment.author;
+  author.textContent = comment.author || currentUser.username;
   commentComponent.append(author);
 
   const commentContent = document.createElement("p");
