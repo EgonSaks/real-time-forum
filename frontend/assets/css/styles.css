@@ -217,6 +217,7 @@ button:focus {
 
 .error-msg {
   color: red;
+  margin-bottom: 0.625rem;
 }
 
 /* Post design */

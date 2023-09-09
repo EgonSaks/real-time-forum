@@ -105,6 +105,7 @@ func GetPostByID(db *sql.DB, postID string) (*Post, error) {
 			users.username,
 			posts.title,
 			posts.content,
+			posts.categories,
 			posts.created_at,
 			posts.updated_at
 		FROM
@@ -119,7 +120,9 @@ func GetPostByID(db *sql.DB, postID string) (*Post, error) {
 	row := db.QueryRowContext(context, query, postID)
 
 	var post Post
-	err := row.Scan(&post.ID, &post.UserID, &post.Author, &post.Title, &post.Content, &post.CreatedAt, &post.UpdatedAt)
+	var categoriesStr string // A new variable to hold the categories as a comma-separated string
+
+	err := row.Scan(&post.ID, &post.UserID, &post.Author, &post.Title, &post.Content, &categoriesStr, &post.CreatedAt, &post.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("post not found")
@@ -128,22 +131,26 @@ func GetPostByID(db *sql.DB, postID string) (*Post, error) {
 		return nil, fmt.Errorf("failed to scan row: %v", err)
 	}
 
+	post.Categories = strings.Split(categoriesStr, ",") // Convert the comma-separated string to a slice
 	return &post, nil
 }
 
-// updated_at timestamp.
 func UpdatePost(db *sql.DB, post Post) error {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "UPDATE posts SET title = ?, content = ?, updated_at = ? WHERE id = ?"
+	query := "UPDATE posts SET title = ?, content = ?, categories = ?, updated_at = ? WHERE id = ?"
 	statement, err := db.PrepareContext(context, query)
 	if err != nil {
 		fmt.Printf("failed to prepare update post statement: %v", err)
 		return fmt.Errorf("failed to prepare update post statement: %v", err)
 	}
 
-	_, err = statement.ExecContext(context, &post.Title, &post.Content, time.Now().UTC(), &post.ID)
+	// Serialize the Categories slice to a string
+	categoriesStr := strings.Join(post.Categories, ",")
+
+	// Update the ExecContext call to include the serialized Categories
+	_, err = statement.ExecContext(context, &post.Title, &post.Content, &categoriesStr, time.Now().UTC(), &post.ID)
 	if err != nil {
 		fmt.Printf("failed to update post: %v", err)
 		return fmt.Errorf("failed to update post: %v", err)

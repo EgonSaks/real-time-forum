@@ -22,8 +22,21 @@ export function formatLastSeen(lastSeen) {
   const now = new Date();
   const seenTime = new Date(lastSeen);
 
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
   const timeDiff = Math.floor((now - seenTime) / 1000);
 
@@ -37,11 +50,11 @@ export function formatLastSeen(lastSeen) {
   if (seenTime.toDateString() === now.toDateString()) {
     const hours = seenTime.getHours();
     const minutes = seenTime.getMinutes();
-    const ampm = hours >= 12 ? 'pm' : 'am';
+    const ampm = hours >= 12 ? "pm" : "am";
     const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
-    return `${formattedHours}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
+    return `${formattedHours}:${minutes < 10 ? "0" : ""}${minutes} ${ampm}`;
   }
-  
+
   // If it's the same week
   const daysDiff = Math.floor(timeDiff / (24 * 3600));
   if (daysDiff >= 0 && daysDiff < 7 && seenTime <= now) {
@@ -61,4 +74,3 @@ export function formatLastSeen(lastSeen) {
   const dayOfMonth = seenTime.getDate();
   return `${month} ${dayOfMonth}, ${year}`;
 }
-

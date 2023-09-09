@@ -5,7 +5,13 @@ import { registerUser } from "../api/registerAPI.js";
 import { createCommentComponent } from "../components/comment.js";
 import { updatePostsView } from "../components/post.js";
 
-export async function validatePostInput(titleInput, contentInput, selectedCategories, errorMsg, categoriesContainer) {
+export async function validatePostInput(
+  titleInput,
+  contentInput,
+  selectedCategories,
+  errorMsg,
+  categoriesContainer
+) {
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
 
@@ -47,14 +53,21 @@ export async function validatePostInput(titleInput, contentInput, selectedCatego
     titleInput.value = "";
     contentInput.value = "";
     selectedCategories = [];
-    categoriesContainer.querySelectorAll('input[type="checkbox"]').forEach((box) => {
-      box.checked = false;
-    });
+    categoriesContainer
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach((box) => {
+        box.checked = false;
+      });
   }
 }
 
-
-export function validateUpdatedData(title, content, postContainer) {
+export function validateUpdatedData(
+  title,
+  content,
+  selectedCategories,
+  errorMsg,
+  postContainer
+) {
   if (title === "") {
     const errorMsg = postContainer.querySelector(".error-msg");
     errorMsg.innerHTML = "Title cannot be empty";
@@ -73,6 +86,10 @@ export function validateUpdatedData(title, content, postContainer) {
   } else if (content.length > 1000) {
     const errorMsg = postContainer.querySelector(".error-msg");
     errorMsg.innerHTML = "Content cannot exceed 1000 characters";
+    errorMsg.style.display = "block";
+    return false;
+  } else if (selectedCategories.length === 0) {
+    errorMsg.innerHTML = "At least one category has to be selected";
     errorMsg.style.display = "block";
     return false;
   } else {
