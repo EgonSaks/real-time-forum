@@ -1,8 +1,4 @@
-export function countCharacters() {
-  const maxCharCount = 1000;
-
-  const charCountSpan = document.querySelector(".character-count");
-  const textarea = document.querySelector(".input-content");
+export function countCharacters(charCountSpan, textarea, maxCharCount) {
 
   const text = textarea.value;
   const charCount = text.length;

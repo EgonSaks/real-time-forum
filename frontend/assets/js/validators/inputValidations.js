@@ -113,8 +113,8 @@ export async function validateCommentInput(
     errorMsg.style.display = "block";
     errorMsg.style.marginTop = "0.625rem";
     errorMsg.style.marginLeft = "0.625rem";
-  } else if (commentContent.length > 200) {
-    errorMsg.innerHTML = "Comment cannot exceed 200 characters";
+  } else if (commentContent.length > 250) {
+    errorMsg.innerHTML = "Comment cannot exceed 250 characters";
     errorMsg.style.display = "block";
     errorMsg.style.marginTop = "0.625rem";
     errorMsg.style.marginLeft = "0.625rem";

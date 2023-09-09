@@ -4,14 +4,20 @@ import {
   updatePostData,
 } from "../api/postAPI.js";
 import { navigateTo } from "../router/router.js";
-import { countCharacters } from "../utils/characterCount.js";
+import { countCharacters } from "../utils/characterCounter.js";
 import { convertTime } from "../utils/timeConverter.js";
 import {
   validatePostInput,
   validateUpdatedData,
 } from "../validators/inputValidations.js";
 
-const categories = ["Tech", "Finance", "Health", "Startup", "Innovation"];
+const categories = [
+  { name: "Tech", color: "rgb(25, 195, 125)" },
+  { name: "Finance", color: "rgb(240, 128, 128)" },
+  { name: "Health", color: "rgb(135, 206, 250)" },
+  { name: "Startup", color: "rgb(255, 165, 0)" },
+  { name: "Innovation", color: "rgb(147, 112, 219)" },
+];
 
 export function createPostFormComponent() {
   const formContainer = document.createElement("div");
@@ -29,11 +35,12 @@ export function createPostFormComponent() {
   inputContent.classList.add("input-content");
   inputContent.setAttribute("rows", "5");
   inputContent.setAttribute("placeholder", "What is happening?!");
-  inputContent.addEventListener("input", countCharacters);
+  inputContent.addEventListener("input", () =>
+    countCharacters(charCountSpan, inputContent, 1000)
+  );
 
   const charCountSpan = document.createElement("span");
   charCountSpan.classList.add("character-count");
-  charCountSpan.textContent = "";
 
   const errorMsg = document.createElement("p");
   errorMsg.classList.add("error-msg");
@@ -55,12 +62,13 @@ export function createPostFormComponent() {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.name = "category";
-    checkbox.value = category;
-    checkbox.id = category;
+    checkbox.value = category.name;
+    checkbox.id = category.name;
 
     const label = document.createElement("label");
-    label.htmlFor = category;
-    label.appendChild(document.createTextNode(category));
+    label.appendChild(document.createTextNode(category.name));
+    label.style.backgroundColor = category.color;
+    label.classList.add("category-label");
 
     checkbox.addEventListener("change", function () {
       if (this.checked) {
@@ -131,10 +139,17 @@ export function createPostComponent(post) {
   const categoriesContainer = document.createElement("div");
   categoriesContainer.classList.add("post-categories-container");
 
-  post.categories.forEach((category) => {
+  post.categories.forEach((category, index) => {
     const categoryLabel = document.createElement("span");
     categoryLabel.classList.add("category-label");
+    categoryLabel.classList.add(`category-label-${index}`);
     categoryLabel.textContent = category;
+
+    const categoryInfo = categories.find((cat) => cat.name === category);
+    if (categoryInfo) {
+      categoryLabel.style.backgroundColor = categoryInfo.color;
+    }
+
     categoriesContainer.appendChild(categoryLabel);
   });
 
@@ -220,12 +235,18 @@ export function editPost(postId) {
   inputContent.classList.add("input-content");
   inputContent.setAttribute("rows", "3");
   inputContent.textContent = content;
+  inputContent.addEventListener("input", () =>
+    countCharacters(charCountSpan, inputContent, 1000)
+  );
 
   const categoriesForm = createCategoriesForm(existingCategories);
 
   const errorMsg = document.createElement("p");
   errorMsg.classList.add("error-msg");
   errorMsg.style.display = "none";
+
+  const charCountSpan = document.createElement("span");
+  charCountSpan.classList.add("character-count");
 
   const updateButton = document.createElement("button");
   updateButton.classList.add("update-button");
@@ -247,10 +268,14 @@ export function editPost(postId) {
     postContainer.innerHTML = "";
     const restoredCategoriesContainer = document.createElement("div");
     restoredCategoriesContainer.classList.add("post-categories-container");
-
+  
     existingCategories.forEach((category) => {
       const categoryLabel = document.createElement("span");
+      const color = getColorByCategoryName(category);
       categoryLabel.classList.add("category-label");
+      if (color) {
+        categoryLabel.style.backgroundColor = color;
+      }
       categoryLabel.textContent = category;
       restoredCategoriesContainer.appendChild(categoryLabel);
     });
@@ -267,48 +292,16 @@ export function editPost(postId) {
   });
 
   form.append(inputTitle, inputContent, categoriesForm, errorMsg);
-  postContainer.append(author, form, createdAt, updateButton, discardButton);
+  postContainer.append(
+    author,
+    form,
+    createdAt,
+    updateButton,
+    discardButton,
+    charCountSpan
+  );
 }
 
-// export function updatePostElement(post, postContainer) {
-//   const author = postContainer.querySelector(".author");
-//   const createdAt = postContainer.querySelector(".created-at");
-
-//   const postTitle = document.createElement("h2");
-//   postTitle.classList.add("post-title");
-//   postTitle.textContent = post.title;
-//   postTitle.addEventListener("click", () => {
-//     navigateTo("/post/" + post.id);
-//   });
-
-//   const postContent = document.createElement("p");
-//   postContent.classList.add("post-content");
-//   postContent.textContent = post.content;
-
-//   postContainer.innerHTML = "";
-//   postContainer.append(author, postTitle, postContent, createdAt);
-
-//   const editButton = document.createElement("button");
-//   editButton.classList.add("edit-button");
-//   editButton.textContent = "Edit";
-//   editButton.addEventListener("click", () => {
-//     const postId = post.id;
-//     editPost(postId);
-//   });
-
-//   const deleteButton = document.createElement("button");
-//   deleteButton.classList.add("delete-button");
-//   deleteButton.textContent = "Delete";
-//   deleteButton.addEventListener("click", () => {
-//     const postId = post.id;
-//     deletePostFromDatabase(postId);
-//     postContainer.remove();
-
-//     navigateTo("/");
-//   });
-
-//   postContainer.append(editButton, deleteButton);
-// }
 export function updatePostElement(post, postContainer) {
   const author = postContainer.querySelector(".author");
   const createdAt = postContainer.querySelector(".created-at");
@@ -326,9 +319,18 @@ export function updatePostElement(post, postContainer) {
 
   const categoriesContainer = document.createElement("div");
   categoriesContainer.classList.add("post-categories-container");
-  post.categories.forEach((category) => {
+
+  post.categories.forEach((category, index) => {
     const categoryLabel = document.createElement("span");
     categoryLabel.classList.add("category-label");
+    categoryLabel.classList.add(`category-label-${index}`);
+
+    const categoryObj = categories.find((cat) => cat.name === category);
+
+    if (categoryObj) {
+      categoryLabel.style.backgroundColor = categoryObj.color;
+    }
+
     categoryLabel.textContent = category;
     categoriesContainer.appendChild(categoryLabel);
   });
@@ -422,25 +424,25 @@ function createCategoriesForm(selectedCategories = []) {
   const categoriesContainer = document.createElement("div");
   categoriesContainer.classList.add("categories-container");
 
-  const maxCategories = 3;
   let selectedCount = selectedCategories.length;
 
-  categories.forEach((category) => {
+  categories.forEach(({ name, color }) => {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.name = "category";
-    checkbox.value = category;
-    checkbox.id = category;
+    checkbox.value = name;
+    checkbox.id = name;
 
     const label = document.createElement("label");
-    label.htmlFor = category;
-    label.appendChild(document.createTextNode(category));
+    label.appendChild(document.createTextNode(name));
+    label.style.backgroundColor = color;
+    label.classList.add("category-label");
 
-    if (selectedCategories.includes(category)) {
+    if (selectedCategories.includes(name)) {
       checkbox.checked = true;
     }
 
-    if (selectedCount >= maxCategories && !checkbox.checked) {
+    if (selectedCount >= 3 && !checkbox.checked) {
       checkbox.disabled = true;
       checkbox.classList.add("disabled");
     }
@@ -455,7 +457,7 @@ function createCategoriesForm(selectedCategories = []) {
       categoriesContainer
         .querySelectorAll('input[type="checkbox"]')
         .forEach((box) => {
-          if (selectedCount >= maxCategories && !box.checked) {
+          if (selectedCount >= 3 && !box.checked) {
             box.disabled = true;
             box.classList.add("disabled");
           } else {
@@ -469,4 +471,9 @@ function createCategoriesForm(selectedCategories = []) {
   });
 
   return categoriesContainer;
+}
+
+function getColorByCategoryName(name) {
+  const category = categories.find((cat) => cat.name === name);
+  return category ? category.color : null;
 }

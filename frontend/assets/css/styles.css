@@ -304,22 +304,20 @@ input[type="checkbox"].disabled {
   flex-wrap: wrap;
 }
 
-.category-label:first-child {
+/* Common styles for all labels */
+.category-label {
   border-radius: 0.2rem;
-  margin-inline: 0 0.4rem;
   margin-bottom: 0.625rem;
-  background-color: rgb(25, 195, 125);
   padding: 0.2rem;
   color: white;
 }
 
+.category-label:first-child {
+  margin-inline: 0 0.4rem;
+}
+
 .category-label:not(:first-child) {
-  border-radius: 0.2rem;
   margin-inline: 0.4rem;
-  margin-bottom: 0.625rem;
-  background-color: rgb(25, 195, 125);
-  padding: 0.2rem;
-  color: white;
 }
 
 /* General styles */
@@ -517,11 +515,12 @@ a.register-link {
   padding: 0.4rem;
   resize: none;
   overflow: auto;
+  margin-bottom: 0.625rem;
 }
 
 .comment-button {
   font-size: 0.8rem;
-  margin: 0.4rem 1rem 0.4rem 1rem;
+  margin: 0rem 1rem 0rem 0.2rem;
   float: right;
   cursor: pointer;
 }

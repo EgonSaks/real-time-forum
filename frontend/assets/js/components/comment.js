@@ -1,4 +1,5 @@
 import { isLoggedIn } from "../utils/auth.js";
+import { countCharacters } from "../utils/characterCounter.js";
 import { convertTime } from "../utils/timeConverter.js";
 import { validateCommentInput } from "../validators/inputValidations.js";
 
@@ -14,6 +15,13 @@ export function createCommentFormComponent(postID, author) {
   commentContent.setAttribute("type", "text");
   commentContent.setAttribute("rows", "3");
 
+  const charCountSpan = document.createElement("span");
+  charCountSpan.classList.add("character-count");
+
+  commentContent.addEventListener("input", () =>
+    countCharacters(charCountSpan, commentContent, 250)
+  );
+
   const errorMsg = document.createElement("p");
   errorMsg.classList.add("error-msg");
   errorMsg.style.display = "none";
@@ -22,13 +30,16 @@ export function createCommentFormComponent(postID, author) {
   commentButton.classList.add("comment-button");
   commentButton.textContent = "Comment";
   commentButton.addEventListener("click", (e) => {
-    e.preventDefault;
+    e.preventDefault();
     validateCommentInput(commentContent, errorMsg, postID, author);
+    charCountSpan.textContent = "";
   });
 
   form.append(commentContent, errorMsg);
 
-  commentContainer.append(form, commentButton);
+  commentContainer.append(form, commentButton, charCountSpan);
+
+
 
   return commentContainer;
 }
