@@ -12,6 +12,7 @@ type Message struct {
 	Message  string    `json:"message"`
 	Sender   string    `json:"sender"`
 	Receiver string    `json:"receiver"`
+	IsRead   bool      `json:"is_read"`
 	Sent     time.Time `json:"sent_at"`
 }
 
@@ -19,14 +20,14 @@ func CreateMessage(db *sql.DB, message Message) (string, error) {
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO messages (id, message, sender, receiver, sent_at) VALUES (?, ?, ?, ?, ?)"
+	query := "INSERT INTO messages (id, message, sender, receiver, is_read, sent_at) VALUES (?, ?, ?, ?, ?, ?)"
 	statement, err := db.PrepareContext(context, query)
 	if err != nil {
 		fmt.Printf("failed receiver prepare create message statement: %v", err)
 		return message.ID, fmt.Errorf("failed receiver prepare create message statement: %v", err)
 	}
 
-	_, err = statement.ExecContext(context, &message.ID, &message.Message, &message.Sender, &message.Receiver, time.Now().UTC())
+	_, err = statement.ExecContext(context, &message.ID, &message.Message, &message.Sender, &message.Receiver, &message.IsRead, time.Now().UTC())
 	if err != nil {
 		fmt.Printf("failed receiver create message: %v", err)
 		return message.ID, fmt.Errorf("failed receiver create message: %v", err)
@@ -45,6 +46,7 @@ func GetMessages(db *sql.DB, sender, receiver string, limit, offset int) ([]Mess
         message,
         sender,
         receiver,
+		is_read,
         sent_at
     FROM
         messages
@@ -67,7 +69,7 @@ func GetMessages(db *sql.DB, sender, receiver string, limit, offset int) ([]Mess
 	messages := make([]Message, 0)
 	for rows.Next() {
 		var message Message
-		err := rows.Scan(&message.ID, &message.Message, &message.Sender, &message.Receiver, &message.Sent)
+		err := rows.Scan(&message.ID, &message.Message, &message.Sender, &message.Receiver, &message.IsRead, &message.Sent)
 		if err != nil {
 			fmt.Printf("failed receiver scan row: %v", err)
 			return nil, fmt.Errorf("failed receiver scan row: %v", err)
@@ -100,4 +102,25 @@ func GetTotalMessageCount(db *sql.DB, sender, receiver string) (int, error) {
 	}
 
 	return totalCount, nil
+}
+
+func UpdateMessageReadStatus(db *sql.DB, messageID string, isRead bool) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := "UPDATE messages SET is_read = ? WHERE id = ? AND is_read = false"
+	statement, err := db.PrepareContext(ctx, query)
+	if err != nil {
+		fmt.Printf("Failed to prepare update message statement: %v", err)
+		return fmt.Errorf("failed to prepare update message statement: %v", err)
+	}
+	defer statement.Close()
+
+	_, err = statement.ExecContext(ctx, isRead, messageID)
+	if err != nil {
+		fmt.Printf("Failed to update message: %v", err)
+		return fmt.Errorf("failed to update message: %v", err)
+	}
+
+	return nil
 }

@@ -281,7 +281,6 @@ export async function validateLoginFormInput(
   const password = passwordInput.value.trim();
   const errorMsg = document.querySelector(".error-msg");
 
-  // Validate the data
   if (usernameOrEmail === "") {
     errorMsg.innerHTML = "Username or email cannot be empty";
     errorMsg.style.marginBottom = "0.625rem";

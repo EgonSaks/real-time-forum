@@ -176,6 +176,15 @@ func GetPastMessagesHandler(event Event, client *Client, database *sqlite.Databa
 			return fmt.Errorf("failed to fetch previous messages: %v", err)
 		}
 
+		for _, message := range messages {
+			if message.Receiver == client.username {
+				err = models.UpdateMessageReadStatus(database.DB, message.ID, true)
+				if err != nil {
+					return fmt.Errorf("failed to update read status: %v", err)
+				}
+			}
+		}
+
 		totalCount, err := models.GetTotalMessageCount(database.DB, sender, receiver)
 		if err != nil {
 			return fmt.Errorf("failed to fetch total message count: %v", err)

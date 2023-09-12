@@ -39,8 +39,6 @@ export function createCommentFormComponent(postID, author) {
 
   commentContainer.append(form, commentButton, charCountSpan);
 
-
-
   return commentContainer;
 }
 

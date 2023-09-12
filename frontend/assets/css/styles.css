@@ -261,7 +261,6 @@ button:focus {
 .categories-container {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 0.625rem;
 }
 
 .categories-container input[type="checkbox"]:first-child {
@@ -271,7 +270,7 @@ button:focus {
   border: 1px solid #ccc;
   border-radius: 0.3rem;
   cursor: pointer;
-  margin-block: 0;
+  margin-block: 0.3rem;
   margin-inline: 0 0.4rem;
 }
 
@@ -282,16 +281,16 @@ button:focus {
   border: 1px solid #ccc;
   border-radius: 0.3rem;
   cursor: pointer;
-  margin-block: 0;
+  margin-block: 0.3rem;
   margin-inline: 0.4rem;
 }
 
 .categories-container input[type="checkbox"]:checked {
-  background-color: rgb(25, 195, 125);
+  background-color: rgb(204, 204, 204);
 }
 
 input[type="checkbox"].disabled + label {
-  color: #A9A9A9; 
+  color: #cccaca;
   cursor: not-allowed;
 }
 
@@ -578,6 +577,27 @@ a.register-link {
   bottom : 0rem;
   right: 0rem;
   overflow-y: auto;
+}
+
+/* Notifications */
+.chat {
+  position: relative;
+}
+
+.count {
+  position: absolute;
+  top: -0.525rem;
+  right: -0.3125rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  line-height: 1.5rem; 
+  background-color: red;
+  color: white;
+  padding: 0 0.2rem;
+  font-weight: lighter;
+  font-size: small;
+  text-align: center;
 }
 
 .messenger {

@@ -13,10 +13,10 @@ import {
 
 const categories = [
   { name: "Tech", color: "rgb(25, 195, 125)" },
-  { name: "Finance", color: "rgb(240, 128, 128)" },
-  { name: "Health", color: "rgb(135, 206, 250)" },
-  { name: "Startup", color: "rgb(255, 165, 0)" },
-  { name: "Innovation", color: "rgb(147, 112, 219)" },
+  { name: "Finance", color: "rgb(255, 85, 85)" },
+  { name: "Health", color: "rgb(30, 144, 255)" },
+  { name: "Startup", color: "rgb(255, 215, 0)" },
+  { name: "Innovation", color: "rgb(148,0,211)" },
 ];
 
 export function createPostFormComponent() {
@@ -66,7 +66,7 @@ export function createPostFormComponent() {
     checkbox.id = category.name;
 
     const label = document.createElement("label");
-    label.appendChild(document.createTextNode(category.name));
+    label.append(document.createTextNode(category.name));
     label.style.backgroundColor = category.color;
     label.classList.add("category-label");
 
@@ -139,18 +139,19 @@ export function createPostComponent(post) {
   const categoriesContainer = document.createElement("div");
   categoriesContainer.classList.add("post-categories-container");
 
-  post.categories.forEach((category, index) => {
+  post.categories.forEach((category) => {
     const categoryLabel = document.createElement("span");
     categoryLabel.classList.add("category-label");
-    categoryLabel.classList.add(`category-label-${index}`);
     categoryLabel.textContent = category;
 
-    const categoryInfo = categories.find((cat) => cat.name === category);
-    if (categoryInfo) {
-      categoryLabel.style.backgroundColor = categoryInfo.color;
+    const foundCategory = categories.find(
+      (currentCategory) => currentCategory.name === category
+    );
+    if (foundCategory) {
+      categoryLabel.style.backgroundColor = foundCategory.color;
     }
 
-    categoriesContainer.appendChild(categoryLabel);
+    categoriesContainer.append(categoryLabel);
   });
 
   const createdAt = document.createElement("p");
@@ -268,7 +269,7 @@ export function editPost(postId) {
     postContainer.innerHTML = "";
     const restoredCategoriesContainer = document.createElement("div");
     restoredCategoriesContainer.classList.add("post-categories-container");
-  
+
     existingCategories.forEach((category) => {
       const categoryLabel = document.createElement("span");
       const color = getColorByCategoryName(category);
@@ -277,7 +278,7 @@ export function editPost(postId) {
         categoryLabel.style.backgroundColor = color;
       }
       categoryLabel.textContent = category;
-      restoredCategoriesContainer.appendChild(categoryLabel);
+      restoredCategoriesContainer.append(categoryLabel);
     });
 
     postContainer.append(
@@ -320,19 +321,19 @@ export function updatePostElement(post, postContainer) {
   const categoriesContainer = document.createElement("div");
   categoriesContainer.classList.add("post-categories-container");
 
-  post.categories.forEach((category, index) => {
+  post.categories.forEach((category) => {
     const categoryLabel = document.createElement("span");
     categoryLabel.classList.add("category-label");
-    categoryLabel.classList.add(`category-label-${index}`);
 
-    const categoryObj = categories.find((cat) => cat.name === category);
-
-    if (categoryObj) {
-      categoryLabel.style.backgroundColor = categoryObj.color;
+    const foundCategory = categories.find(
+      (currentCategory) => currentCategory.name === category
+    );
+    if (foundCategory) {
+      categoryLabel.style.backgroundColor = foundCategory.color;
     }
 
     categoryLabel.textContent = category;
-    categoriesContainer.appendChild(categoryLabel);
+    categoriesContainer.append(categoryLabel);
   });
 
   const editButton = document.createElement("button");
@@ -434,7 +435,7 @@ function createCategoriesForm(selectedCategories = []) {
     checkbox.id = name;
 
     const label = document.createElement("label");
-    label.appendChild(document.createTextNode(name));
+    label.append(document.createTextNode(name));
     label.style.backgroundColor = color;
     label.classList.add("category-label");
 
@@ -474,6 +475,8 @@ function createCategoriesForm(selectedCategories = []) {
 }
 
 function getColorByCategoryName(name) {
-  const category = categories.find((cat) => cat.name === name);
+  const category = categories.find(
+    (currentCategory) => currentCategory.name === name
+  );
   return category ? category.color : null;
 }

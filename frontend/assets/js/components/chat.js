@@ -91,7 +91,7 @@ export function createChats(users) {
     const userDiv = document.createElement("div");
     userDiv.classList.add("chat-name-with-last-seen");
 
-    const name = document.createElement("h4");
+    const name = document.createElement("div");
     name.classList.add("chat-name");
     name.textContent = user.username || "Anonymous";
     name.setAttribute("data-username", user.username);
@@ -108,7 +108,9 @@ export function createChats(users) {
     status.classList.add("chat-status", "online");
     status.textContent = user.status || "offline";
 
-    userDiv.append(name, lastSeen);
+    const notification = createNotification(user.unread_messages);
+
+    userDiv.append(name, notification, lastSeen);
     chat.append(userDiv, status);
 
     chatsContainer.append(chat);
@@ -130,6 +132,12 @@ export function changeChat(receiver) {
   if (getMessengerVisibility()) {
     hideMessenger();
   }
+
+  const notificationElement = document.querySelector(".notification .count");
+  if (notificationElement) {
+    notificationElement.remove();
+  }
+
   showMessenger(receiver);
 
   const messageInput = document.querySelector(".messenger-input");
@@ -426,4 +434,18 @@ export async function createChatContainer(users) {
   chatsContainer.append(chat, messenger);
 
   return chatsContainer;
+}
+
+export function createNotification(unreadMessages) {
+  const notification = document.createElement("div");
+  notification.className = "notification";
+
+  if (unreadMessages > 0) {
+    const count = document.createElement("span");
+    count.className = "count";
+    count.textContent = unreadMessages > 9 ? "9+" : unreadMessages.toString();
+    notification.append(count);
+  }
+
+  return notification;
 }
