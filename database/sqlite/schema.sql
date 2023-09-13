@@ -61,6 +61,20 @@ CREATE TABLE IF NOT EXISTS sessions (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT session_unique UNIQUE (user_id) ON CONFLICT REPLACE
 );
+
+-- Inserting 10 rows of dummy data into the users table
+-- INSERT INTO users (id, username, first_name, last_name, email, age, gender, password) VALUES 
+-- ('1', 'jeffbezos', 'Jeff', 'Bezos', 'jeff.bezos@example.com', 58, 'Male', 'password123'),
+-- ('2', 'elonmusk', 'Elon', 'Musk', 'elon.musk@example.com', 50, 'Male', 'password123'),
+-- ('3', 'warrenbuffet', 'Warren', 'Buffett', 'warren.buffett@example.com', 91, 'Male', 'password123'),
+-- ('4', 'billgates', 'Bill', 'Gates', 'bill.gates@example.com', 65, 'Male', 'password123'),
+-- ('5', 'markzuckerberg', 'Mark', 'Zuckerberg', 'mark.zuckerberg@example.com', 37, 'Male', 'password123'),
+-- ('6', 'larryellison', 'Larry', 'Ellison', 'larry.ellison@example.com', 77, 'Male', 'password123'),
+-- ('7', 'larrypage', 'Larry', 'Page', 'larry.page@example.com', 48, 'Male', 'password123'),
+-- ('8', 'sergeybrin', 'Sergey', 'Brin', 'sergey.brin@example.com', 48, 'Male', 'password123'),
+-- ('9', 'bernardarnault', 'Bernard', 'Arnault', 'bernard.arnault@example.com', 72, 'Male', 'password123'),
+-- ('10', 'mukeshambani', 'Mukesh', 'Ambani', 'mukesh.ambani@example.com', 64, 'Male', 'password123');
+
 --  dummy data:
 -- INSERT INTO messages (id, message, sender, receiver, sent_at)
 -- VALUES ('message_id_1', 'Hey, see message yesterday?', 'Egon', 'Jeff', '2023-08-15 10:00:00');

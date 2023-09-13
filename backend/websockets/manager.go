@@ -68,14 +68,11 @@ func (manager *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Connection established")
 	connection, err := websocketUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-
-	log.Printf("Connection from %s\n", connection.RemoteAddr().String())
 
 	client := NewClient(connection, manager, user.Username)
 	manager.addClient(client)

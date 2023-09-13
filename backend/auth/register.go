@@ -23,18 +23,18 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	user.ID = uuid.New().String()
 
-	fmt.Println("Creating user...")
-
-	// if err := validateUser(user); err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	fmt.Println("Invalid user data:", err)
-	// 	return
-	// }
-
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Failed to decode request body:", err)
+		return
+	}
+
+	validationErrors := utils.ValidateRegisterFormData(user)
+	if len(validationErrors) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(validationErrors)
 		return
 	}
 

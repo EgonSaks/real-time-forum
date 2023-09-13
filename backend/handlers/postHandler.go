@@ -61,6 +61,13 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer database.DB.Close()
 
+	validationErrors := utils.ValidatePostInput(post)
+	if len(validationErrors) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(validationErrors)
+		return
+	}
+
 	_, err = models.CreatePost(database.DB, post, user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -155,6 +162,13 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	defer database.DB.Close()
+
+	validationErrors := utils.ValidateUpdatedData(post)
+	if len(validationErrors) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(validationErrors)
+		return
+	}
 
 	err = models.UpdatePost(database.DB, post)
 	if err != nil {

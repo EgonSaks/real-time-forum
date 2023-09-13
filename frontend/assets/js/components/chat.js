@@ -133,10 +133,7 @@ export function changeChat(receiver) {
     hideMessenger();
   }
 
-  const notificationElement = document.querySelector(".notification .count");
-  if (notificationElement) {
-    notificationElement.remove();
-  }
+  removeNotificationElement()
 
   showMessenger(receiver);
 
@@ -407,6 +404,10 @@ export function createMessenger() {
 
   messengerInput.addEventListener("input", handleTyping);
 
+  messengerInput.addEventListener("focus", function() {
+    removeNotificationElement()
+  });
+
   const sendButton = document.createElement("button");
   sendButton.classList.add("message-send-button");
   sendButton.textContent = "Send";
@@ -448,4 +449,11 @@ export function createNotification(unreadMessages) {
   }
 
   return notification;
+}
+
+function removeNotificationElement() {
+  const notificationElement = document.querySelector(".notification .count");
+  if (notificationElement) {
+    notificationElement.remove();
+  }
 }

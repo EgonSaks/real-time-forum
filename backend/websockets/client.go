@@ -36,8 +36,6 @@ func NewClient(connection *websocket.Conn, manager *Manager, username string) *C
 		lastSeen:   time.Now(),
 	}
 
-	log.Println("New client created:", client.username)
-
 	return client
 }
 

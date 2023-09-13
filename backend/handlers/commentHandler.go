@@ -41,6 +41,13 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	validationErrors := utils.ValidateCommentInput(comment)
+	if len(validationErrors) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(validationErrors)
+		return
+	}
+
 	database, err := sqlite.OpenDatabase()
 	if err != nil {
 		log.Fatal(err)

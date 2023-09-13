@@ -39,6 +39,17 @@ func Login(manager *websockets.Manager) http.HandlerFunc {
 		}
 		defer database.DB.Close()
 
+		usernameOrEmail := creds.Username
+		if usernameOrEmail == "" {
+			usernameOrEmail = creds.Email
+		}
+
+		validationErrors := utils.ValidateLoginFormInput(usernameOrEmail, creds.Password)
+		if len(validationErrors) > 0 {
+			http.Error(w, "Invalid form input", http.StatusBadRequest)
+			return
+		}
+
 		user, err := models.GetUserDetails(database.DB, creds)
 		if err != nil {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
