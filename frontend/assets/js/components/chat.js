@@ -5,10 +5,15 @@ import { sendEvent } from "../websocket/websocket.js";
 let messengerVisible = false;
 let visibleMessengerUser = null;
 let previousDate = null;
+let lastMessageID = null;
 
 let totalMessagesCount = 0;
 let limit = 10;
 let offset = 0;
+
+export function getLastMessageID(messageID) {
+  lastMessageID = messageID;
+}
 
 export function messagesCount(totalMessages) {
   totalMessagesCount = totalMessages;
@@ -133,7 +138,7 @@ export function changeChat(receiver) {
     hideMessenger();
   }
 
-  removeNotificationElement()
+  removeNotificationElement();
 
   showMessenger(receiver);
 
@@ -189,12 +194,12 @@ export function showMessenger(receiver) {
   inputContainer.style.borderTop = "1px solid #000";
 }
 
-function chatScroll() {
+async function chatScroll() {
   const chatMessages = document.querySelector(".chat-messages");
   const scrollPosition = chatMessages.scrollTop;
 
   if (scrollPosition === 0 && offset < totalMessagesCount) {
-    const user = isLoggedIn();
+    const user = await isLoggedIn();
 
     const remainingMessagesCount = totalMessagesCount - offset;
     const messagesToRetrieve = Math.min(limit, remainingMessagesCount);
@@ -240,13 +245,13 @@ export function hideMessenger() {
   chatsContainer.style.width = "90%";
 }
 
-function sendMessage() {
+async function sendMessage() {
   const messageInput = document.querySelector(".messenger-input");
   const recipient = messageInput.getAttribute("data-recipient");
   const message = messageInput.value.trim();
 
   if (message !== null && message !== "") {
-    const user = isLoggedIn();
+    const user = await isLoggedIn();
     let outgoingMessage = {
       message,
       sender: user.username,
@@ -257,7 +262,7 @@ function sendMessage() {
   }
 }
 
-export function appendChatMessage(messageElement, prepend = false) {
+export async function appendChatMessage(messageElement, prepend = false) {
   if (
     visibleMessengerUser !== messageElement.sender &&
     visibleMessengerUser !== messageElement.receiver
@@ -308,10 +313,11 @@ export function appendChatMessage(messageElement, prepend = false) {
 
   const messageContent = document.createElement("div");
   messageContent.classList.add("message-content");
+  messageContent.dataset.id = messageElement.id;
   messageContent.append(message);
   messageContainer.append(messageContent, timeContainer);
 
-  const user = isLoggedIn();
+  const user = await isLoggedIn();
 
   if (messageElement.sender === user.username) {
     messageContainer.classList.add("sender-message");
@@ -404,8 +410,8 @@ export function createMessenger() {
 
   messengerInput.addEventListener("input", handleTyping);
 
-  messengerInput.addEventListener("focus", function() {
-    removeNotificationElement()
+  messengerInput.addEventListener("focus", function () {
+    removeNotificationElement();
   });
 
   const sendButton = document.createElement("button");
@@ -454,6 +460,7 @@ export function createNotification(unreadMessages) {
 function removeNotificationElement() {
   const notificationElement = document.querySelector(".notification .count");
   if (notificationElement) {
+    sendEvent("update_read_status", lastMessageID);
     notificationElement.remove();
   }
 }

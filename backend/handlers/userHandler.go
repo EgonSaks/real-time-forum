@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/real-time-forum/database/models"
 	"github.com/real-time-forum/database/sqlite"
@@ -29,7 +28,7 @@ func Users(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUser(w http.ResponseWriter, r *http.Request) {
-	userID := strings.TrimPrefix(r.URL.Path, "/api/user/")
+	userID := r.Header.Get("X-Requested-With")
 	if userID == "" {
 		http.NotFound(w, r)
 		return

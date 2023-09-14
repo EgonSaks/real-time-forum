@@ -58,6 +58,7 @@ func NewManager() *Manager {
 
 func (manager *Manager) setupEventHandlers() {
 	manager.Handlers[EventSendMessage] = SendMessageHandler
+	manager.Handlers[EventUpdateReadStatus] = UpdateMessageReadStatusHandler
 	manager.Handlers[EventPastMessages] = GetPastMessagesHandler
 	manager.Handlers[EventChangeChat] = ChangeChatHandler
 }

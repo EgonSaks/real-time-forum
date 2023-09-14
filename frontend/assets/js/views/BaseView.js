@@ -31,7 +31,7 @@ export async function createBaseView(params, matchedView) {
   const appContainer = document.querySelector("#app");
   appContainer.innerHTML = "";
 
-  const currentUser = isLoggedIn();
+  const currentUser = await isLoggedIn();
   const userLoggedIn = currentUser && currentUser.isLoggedIn;
   const messengerVisible = getMessengerVisibility();
 

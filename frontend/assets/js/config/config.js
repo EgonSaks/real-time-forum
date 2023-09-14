@@ -10,5 +10,6 @@ export const config = {
     post: "http://localhost:8081/api/post/",
     posts: "http://localhost:8081/api/posts",
     comment: "http://localhost:8081/api/comment",
+    session: "http://localhost:8081/api/session/",
   },
 };

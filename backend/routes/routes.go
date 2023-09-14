@@ -27,6 +27,8 @@ func Routes() http.Handler {
 	mux.HandleFunc("/api/post/", handlers.Post)
 	mux.HandleFunc("/api/comment", handlers.Comment)
 
+	mux.HandleFunc("/api/session/", handlers.Session)
+
 	mux.HandleFunc("/ws", manager.ServeWS)
 
 	mux.HandleFunc("/debug", func(w http.ResponseWriter, r *http.Request) {

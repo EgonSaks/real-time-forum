@@ -19,11 +19,6 @@ export async function loginUser(credentials) {
       return response.json();
     })
     .then((data) => {
-      const expiryTime = new Date();
-      expiryTime.setHours(expiryTime.getHours() + 2);
-      const userData = { ...data, expiresAt: expiryTime.getTime() };
-      localStorage.setItem("user", JSON.stringify(userData));
-
       connectWebSocket(data);
       navigateTo("/");
       return data;

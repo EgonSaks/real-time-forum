@@ -3,6 +3,7 @@ import {
   appendChatMessage,
   changeChat,
   createChats,
+  getLastMessageID,
   messagesCount,
   updateUserStatus,
 } from "../components/chat.js";
@@ -45,6 +46,7 @@ async function routeEvent(msg) {
   switch (msg.type) {
     case "new_message":
       const message = msg.payload;
+      getLastMessageID(message.id);
       appendChatMessage(message);
       break;
     case "past_messages":

@@ -44,6 +44,7 @@ type EventHandler func(event Event, client *Client, database *sqlite.Database) e
 const (
 	EventSendMessage      = "send_message"
 	EventNewMessage       = "new_message"
+	EventUpdateReadStatus = "update_read_status"
 	EventPastMessages     = "past_messages"
 	EventChatListUpdate   = "chat_list_update"
 	EventChangeChat       = "change_chat"
@@ -232,4 +233,18 @@ func UpdateUserStatus(client *Client, online bool) {
 		fmt.Printf("failed to update user status: %v", err)
 		return
 	}
+}
+
+func UpdateMessageReadStatusHandler(event Event, client *Client, database *sqlite.Database) error {
+	var messageID string
+	if err := json.Unmarshal(event.Payload, &messageID); err != nil {
+		return fmt.Errorf("bad payload in request: %v", err)
+	}
+
+	err := models.UpdateMessageReadStatus(database.DB, messageID, true)
+	if err != nil {
+		return fmt.Errorf("failed to update read status: %v", err)
+	}
+
+	return nil
 }
