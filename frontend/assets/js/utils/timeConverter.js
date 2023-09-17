@@ -74,3 +74,28 @@ export function formatLastSeen(lastSeen) {
   const dayOfMonth = seenTime.getDate();
   return `${month} ${dayOfMonth}, ${year}`;
 }
+
+function isThisWeek(date) {
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  return date >= startOfWeek;
+}
+
+export function formatDateTime(date) {
+  if (isThisWeek(date)) {
+    const options = { weekday: "short", hour: "numeric", minute: "numeric" };
+    return date.toLocaleDateString("en-US", options);
+  } else {
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    };
+    return date.toLocaleDateString("en-US", options);
+  }
+}

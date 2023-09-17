@@ -1,5 +1,7 @@
 # real-time-forum
 
+![real-time-forum](/img/real-time-forum.webp)
+
 ## Objectives
 
 On this project you will have to focus on a few points:
@@ -94,3 +96,7 @@ This project will help you learn about:
 
 > run frontend: cd frontend/ -> go run frontend.go
 > run backend: cd backend/ -> go run backend.go
+
+> GO_ENV=prod go run backend.go
+> GO_ENV=test go run backend.go
+> GO_ENV=dev go run backend.go

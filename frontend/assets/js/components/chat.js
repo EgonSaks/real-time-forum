@@ -1,10 +1,8 @@
-import { isLoggedIn } from "../utils/auth.js";
-import { formatLastSeen } from "../utils/timeConverter.js";
-import { sendEvent } from "../websocket/websocket.js";
+import { formatDateTime, formatLastSeen } from "../utils/timeConverter.js";
+import { currentUser, sendEvent } from "../websocket/websocket.js";
 
 let messengerVisible = false;
 let visibleMessengerUser = null;
-let previousDate = null;
 let lastMessageID = null;
 
 let totalMessagesCount = 0;
@@ -137,9 +135,6 @@ export function changeChat(receiver) {
   if (getMessengerVisibility()) {
     hideMessenger();
   }
-
-  removeNotificationElement();
-
   showMessenger(receiver);
 
   const messageInput = document.querySelector(".messenger-input");
@@ -177,10 +172,11 @@ export function showMessenger(receiver) {
 
   messengerBody.querySelector(".chat-messages").textContent = "";
 
+  chatMessages.removeEventListener("scroll", chatScroll);
   chatMessages.addEventListener("scroll", chatScroll, 100);
 
   const contentContainer = document.getElementById("content-container");
-  contentContainer.style.width = "60%";
+  contentContainer.style.width = "53%";
 
   const chats = document.querySelector(".chats");
   chats.style.width = "40%";
@@ -199,8 +195,6 @@ async function chatScroll() {
   const scrollPosition = chatMessages.scrollTop;
 
   if (scrollPosition === 0 && offset < totalMessagesCount) {
-    const user = await isLoggedIn();
-
     const remainingMessagesCount = totalMessagesCount - offset;
     const messagesToRetrieve = Math.min(limit, remainingMessagesCount);
 
@@ -208,7 +202,7 @@ async function chatScroll() {
 
     const requestMoreMessages = {
       extraMessages: true,
-      sender: user.username,
+      sender: currentUser.username,
       receiver: document.querySelector(".messenger-name").textContent,
       prepend: true,
       offset: offset,
@@ -236,7 +230,7 @@ export function hideMessenger() {
   messenger.classList.add("messenger-hidden");
 
   const contentContainer = document.getElementById("content-container");
-  contentContainer.style.width = "80%";
+  contentContainer.style.width = "73%";
 
   const chats = document.querySelector(".chats");
   chats.style.width = "20%";
@@ -251,10 +245,9 @@ async function sendMessage() {
   const message = messageInput.value.trim();
 
   if (message !== null && message !== "") {
-    const user = await isLoggedIn();
     let outgoingMessage = {
       message,
-      sender: user.username,
+      sender: currentUser.username,
       receiver: recipient,
     };
     sendEvent("send_message", outgoingMessage);
@@ -263,6 +256,10 @@ async function sendMessage() {
 }
 
 export async function appendChatMessage(messageElement, prepend = false) {
+  if (!currentUser || !currentUser.username) {
+    return;
+  }
+
   if (
     visibleMessengerUser !== messageElement.sender &&
     visibleMessengerUser !== messageElement.receiver
@@ -273,43 +270,29 @@ export async function appendChatMessage(messageElement, prepend = false) {
   if (!prepend) {
     offset++;
   }
-  const chatMessages = document.querySelector(".chat-messages");
-  const messageContainer = document.createElement("div");
 
+  const chatMessages = document.querySelector(".chat-messages");
+
+  const isScrolledToBottom =
+    chatMessages.scrollHeight - chatMessages.clientHeight <=
+    chatMessages.scrollTop + 1;
+
+  const isCurrentUserSender = messageElement.sender === currentUser.username;
+
+  const oldScrollHeight = chatMessages.scrollHeight;
+  const oldScrollTop = chatMessages.scrollTop;
+
+  const messageContainer = document.createElement("div");
   const date = new Date(messageElement.sent_at);
   const formattedMsg = `${messageElement.message}`;
-
   const message = document.createElement("p");
+
   message.classList.add("message");
   message.textContent = formattedMsg;
 
-  const timeOptions = { hour: "numeric", minute: "numeric" };
-  const timeString = date.toLocaleTimeString([], timeOptions);
-
   const timeContainer = document.createElement("div");
   timeContainer.classList.add("time-container");
-  timeContainer.textContent = timeString;
-
-  const dateOptions = { year: "numeric", month: "long", day: "numeric" };
-  const dateString = date.toLocaleDateString([], dateOptions);
-
-  if (dateString !== previousDate || previousDate === null) {
-    const dateContainer = document.createElement("div");
-    dateContainer.classList.add("date-container");
-    dateContainer.textContent = dateString;
-
-    if (prepend) {
-      chatMessages.prepend(dateContainer);
-    } else {
-      chatMessages.appendChild(dateContainer);
-    }
-
-    previousDate = dateString;
-  }
-
-  const dateContainer = document.createElement("div");
-  dateContainer.classList.add("date-container");
-  dateContainer.textContent = dateString;
+  timeContainer.textContent = formatDateTime(date);
 
   const messageContent = document.createElement("div");
   messageContent.classList.add("message-content");
@@ -317,29 +300,26 @@ export async function appendChatMessage(messageElement, prepend = false) {
   messageContent.append(message);
   messageContainer.append(messageContent, timeContainer);
 
-  const user = await isLoggedIn();
-
-  if (messageElement.sender === user.username) {
+  if (messageElement.sender === currentUser.username) {
     messageContainer.classList.add("sender-message");
-  } else if (messageElement.receiver === user.username) {
+  } else if (messageElement.receiver === currentUser.username) {
     messageContainer.classList.add("recipient-message");
   }
-
-  const oldScrollHeight = chatMessages.scrollHeight;
-
-  const oldScrollTop = chatMessages.scrollTop;
 
   if (prepend) {
     chatMessages.prepend(messageContainer);
   } else {
-    chatMessages.appendChild(messageContainer);
+    chatMessages.append(messageContainer);
   }
 
   const newScrollHeight = chatMessages.scrollHeight;
+
   if (prepend) {
     chatMessages.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
   } else {
-    chatMessages.scrollTop = newScrollHeight;
+    if (isScrolledToBottom || isCurrentUserSender) {
+      chatMessages.scrollTop = newScrollHeight;
+    }
   }
 }
 
@@ -458,8 +438,12 @@ export function createNotification(unreadMessages) {
 }
 
 function removeNotificationElement() {
-  const notificationElement = document.querySelector(".notification .count");
-  if (notificationElement) {
+  const activeChatName = document.querySelector(".messenger-name").textContent;
+  const notificationElement = document.querySelector(
+    `[data-username="${activeChatName}"]`
+  ).nextElementSibling;
+
+  if (activeChatName && notificationElement) {
     sendEvent("update_read_status", lastMessageID);
     notificationElement.remove();
   }

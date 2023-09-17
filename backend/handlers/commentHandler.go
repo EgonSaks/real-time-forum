@@ -3,14 +3,12 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/real-time-forum/backend/logger"
 	"github.com/real-time-forum/backend/utils"
 	"github.com/real-time-forum/database/models"
-	"github.com/real-time-forum/database/sqlite"
 )
 
 func Comment(w http.ResponseWriter, r *http.Request) {
@@ -29,77 +27,72 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 
 	user, ok := utils.GetUserFromSession(r)
 	if !ok {
+		logger.ErrorLogger.Println("User not found in session")
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("User not found in session")
 		return
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
+		logger.ErrorLogger.Printf("Failed to decode comment from request body: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
 		return
 	}
 
 	validationErrors := utils.ValidateCommentInput(comment)
 	if len(validationErrors) > 0 {
+		logger.WarnLogger.Println("Comment input validation failed")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(validationErrors)
+		if err := json.NewEncoder(w).Encode(validationErrors); err != nil {
+			logger.ErrorLogger.Printf("Failed to encode validation errors: %v", err)
+		}
 		return
 	}
 
-	database, err := sqlite.OpenDatabase()
+	_, err = models.CreateComment(comment, user)
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer database.DB.Close()
-
-	_, err = models.CreateComment(database.DB, comment, user)
-	if err != nil {
+		logger.ErrorLogger.Printf("Failed to create comment: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
 		return
 	}
 
 	data, err := json.Marshal(comment)
 	if err != nil {
+		logger.ErrorLogger.Printf("Failed to marshal comment: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(data)
+	if _, err := w.Write(data); err != nil {
+		logger.ErrorLogger.Printf("Failed to write response data: %v", err)
+	}
 }
 
 func getComment(w http.ResponseWriter, r *http.Request) {
 	postID := r.Header.Get("X-Requested-With")
 
-	database, err := sqlite.OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer database.DB.Close()
-
-	comment, err := models.GetCommentsByPostID(database.DB, postID)
+	comment, err := models.GetCommentsByPostID(postID)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			logger.WarnLogger.Printf("No comments found for post ID %s", postID)
 			http.NotFound(w, r)
 			return
 		}
-
+		logger.ErrorLogger.Printf("Failed to fetch comments for post ID %s: %v", postID, err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
 		return
 	}
 
 	data, err := json.Marshal(comment)
 	if err != nil {
+		logger.ErrorLogger.Printf("Failed to marshal comments: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(data)
+	if _, err := w.Write(data); err != nil {
+		logger.ErrorLogger.Printf("Failed to write response data: %v", err)
+	}
 }

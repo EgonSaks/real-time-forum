@@ -6,6 +6,7 @@ import (
 
 	"github.com/real-time-forum/backend/auth"
 	"github.com/real-time-forum/backend/handlers"
+	"github.com/real-time-forum/backend/logger"
 	"github.com/real-time-forum/backend/websockets"
 )
 
@@ -35,7 +36,7 @@ func Routes() http.Handler {
 		numClients := len(manager.Clients)
 		responseText := fmt.Sprintf("Number of connected clients: %d", numClients)
 		fmt.Fprint(w, responseText)
-		fmt.Println(responseText)
+		logger.InfoLogger.Println(responseText)
 	})
 
 	return mux

@@ -3,12 +3,10 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
+	"github.com/real-time-forum/backend/logger"
 	"github.com/real-time-forum/database/models"
-	"github.com/real-time-forum/database/sqlite"
 )
 
 func Session(w http.ResponseWriter, r *http.Request) {
@@ -22,35 +20,32 @@ func Session(w http.ResponseWriter, r *http.Request) {
 func getSession(w http.ResponseWriter, r *http.Request) {
 	sessionID := r.Header.Get("X-Requested-With")
 	if sessionID == "" {
+		logger.WarnLogger.Printf("Missing session ID in request header")
 		http.NotFound(w, r)
 		return
 	}
 
-	database, err := sqlite.OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer database.DB.Close()
-
-	session, err := models.GetSessionByID(database.DB, sessionID)
+	session, err := models.GetSessionByID(sessionID)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			logger.WarnLogger.Printf("Session not found for ID: %s", sessionID)
 			http.NotFound(w, r)
 			return
 		}
-
+		logger.ErrorLogger.Printf("Failed to get session by ID: %s, Error: %v", sessionID, err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
 		return
 	}
 
 	data, err := json.Marshal(session)
 	if err != nil {
+		logger.ErrorLogger.Printf("Failed to marshal session data: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(data)
+	if _, err := w.Write(data); err != nil {
+		logger.ErrorLogger.Printf("Failed to write response data: %v", err)
+	}
 }

@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/real-time-forum/backend/logger"
 	"github.com/real-time-forum/backend/utils"
 	"github.com/real-time-forum/database/models"
-	"github.com/real-time-forum/database/sqlite"
 )
 
 var websocketUpgrader = websocket.Upgrader{
@@ -88,7 +88,7 @@ func (manager *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
 		os.Exit(0)
 	}()
 
-	go manager.GetUserStatusesRoutine()
+	go manager.GetUserStatusesRoutine(user.Username)
 	go client.readMessages()
 	go client.writeMessages()
 }
@@ -98,10 +98,7 @@ func (manager *Manager) addClient(client *Client) {
 	defer manager.Unlock()
 
 	manager.Clients[client] = true
-
 	UpdateUserStatus(client, true)
-
-	log.Printf("%v is online\n", client.username)
 }
 
 func (manager *Manager) removeClient(client *Client) {
@@ -114,9 +111,10 @@ func (manager *Manager) removeClient(client *Client) {
 	}
 }
 
-func (manager *Manager) routeEvent(event Event, client *Client, database *sqlite.Database) error {
+func (manager *Manager) routeEvent(event Event, client *Client) error {
 	if handler, ok := manager.Handlers[event.Type]; ok {
-		if err := handler(event, client, database); err != nil {
+		if err := handler(event, client); err != nil {
+			logger.ErrorLogger.Printf("Failed to handle event: %v", err)
 			return err
 		}
 		return nil
@@ -125,15 +123,10 @@ func (manager *Manager) routeEvent(event Event, client *Client, database *sqlite
 	}
 }
 
-func (manager *Manager) GetUserStatuses() error {
-	database, err := sqlite.OpenDatabase()
+func (manager *Manager) GetUserStatuses(currentUsername string) error {
+	userStatuses, err := models.GetAllUserStatuses(currentUsername)
 	if err != nil {
-		return fmt.Errorf("failed to open database: %v", err)
-	}
-	defer database.DB.Close()
-
-	userStatuses, err := models.GetAllUserStatuses(database.DB)
-	if err != nil {
+		logger.ErrorLogger.Printf("Failed to get user statuses: %v", err)
 		return fmt.Errorf("failed to get user statuses: %v", err)
 	}
 
@@ -147,6 +140,7 @@ func (manager *Manager) GetUserStatuses() error {
 
 	userStatusesJSON, err := json.Marshal(userStatuses)
 	if err != nil {
+		logger.ErrorLogger.Printf("Failed to marshal user statuses: %v", err)
 		return fmt.Errorf("failed to marshal user statuses: %v", err)
 	}
 
@@ -165,29 +159,22 @@ func (manager *Manager) GetUserStatuses() error {
 	return nil
 }
 
-func (manager *Manager) GetUserStatusesRoutine() {
+func (manager *Manager) GetUserStatusesRoutine(currentUsername string) {
 	ticker := time.NewTicker(UserStatusesRoutineInterval)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			if err := manager.GetUserStatuses(); err != nil {
-				log.Printf("Failed to get and update user statuses: %v", err)
-			}
+	for range ticker.C {
+		if err := manager.GetUserStatuses(currentUsername); err != nil {
+			logger.ErrorLogger.Printf("Failed to get and update user statuses: %v", err)
+			log.Printf("Failed to get and update user statuses: %v", err)
 		}
 	}
 }
 
 func (manager *Manager) UpdateChatsOrder(sender, receiver string) error {
-	database, err := sqlite.OpenDatabase()
+	_, err := models.GetChatInfo(sender)
 	if err != nil {
-		return fmt.Errorf("failed to open database: %v", err)
-	}
-	defer database.DB.Close()
-
-	_, err = models.GetChatInfo(database.DB, sender)
-	if err != nil {
+		logger.ErrorLogger.Printf("Failed to get user statuses: %v", err)
 		return fmt.Errorf("failed to get user statuses: %v", err)
 	}
 
@@ -227,7 +214,6 @@ func (manager *Manager) CloseWebSocket(username string) {
 			UpdateUserStatus(client, false)
 
 			delete(manager.Clients, client)
-			log.Printf("%v is offline\n", client.username)
 		}
 	}
 }

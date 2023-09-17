@@ -2,13 +2,12 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/real-time-forum/backend/logger"
 	"github.com/real-time-forum/backend/utils"
 	"github.com/real-time-forum/database/models"
-	"github.com/real-time-forum/database/sqlite"
 )
 
 func Register(w http.ResponseWriter, r *http.Request) {
@@ -26,53 +25,51 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println("Failed to decode request body:", err)
+		logger.ErrorLogger.Printf("Failed to decode request body: %v", err)
 		return
 	}
 
 	validationErrors := utils.ValidateRegisterFormData(user)
 	if len(validationErrors) > 0 {
 		w.WriteHeader(http.StatusBadRequest)
+		logger.WarnLogger.Println("Validation errors in user registration form")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(validationErrors)
+		if err := json.NewEncoder(w).Encode(validationErrors); err != nil {
+			logger.ErrorLogger.Printf("Failed to encode validation errors: %v", err)
+		}
 		return
 	}
 
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Failed to hash the password:", err)
+		logger.ErrorLogger.Printf("Failed to hash the password: %v", err)
 		return
 	}
 
 	user.Password = string(hashedPassword)
 
-	database, err := sqlite.OpenDatabase()
+	_, err = models.CreateUser(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Failed to open database:", err)
-		return
-	}
-	defer database.DB.Close()
-
-	_, err = models.CreateUser(database.DB, user)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		logger.ErrorLogger.Printf("Username or email already exists: %v", err)
 		w.Header().Set("Content-Type", "application/json")
 		errorMsg := map[string]string{"error": "Username or email already exists."}
-		json.NewEncoder(w).Encode(errorMsg)
+		if err := json.NewEncoder(w).Encode(errorMsg); err != nil {
+			logger.ErrorLogger.Printf("Failed to encode error message: %v", err)
+		}
 		return
 	}
 
 	data, err := json.Marshal(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("Failed to marshal user data:", err)
+		logger.ErrorLogger.Printf("Failed to marshal user data: %v", err)
 		return
 	}
-
-	fmt.Println("User created successfully!")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write(data)
+	if _, err := w.Write(data); err != nil {
+		logger.ErrorLogger.Printf("Failed to write response data: %v", err)
+	}
 }

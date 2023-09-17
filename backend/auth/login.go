@@ -2,27 +2,23 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
+	"github.com/real-time-forum/backend/logger"
 	"github.com/real-time-forum/backend/utils"
 	"github.com/real-time-forum/backend/websockets"
 	"github.com/real-time-forum/database/models"
-	"github.com/real-time-forum/database/sqlite"
 )
 
 type LoginResponse struct {
-	Message  string `json:"message"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Session  string `json:"session"`
+	Message string `json:"message"`
 }
 
 func Login(manager *websockets.Manager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+			logger.ErrorLogger.Println("Invalid request method")
 			return
 		}
 
@@ -30,14 +26,9 @@ func Login(manager *websockets.Manager) http.HandlerFunc {
 		err := json.NewDecoder(r.Body).Decode(&creds)
 		if err != nil {
 			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			logger.ErrorLogger.Printf("Error decoding request body: %v", err)
 			return
 		}
-
-		database, err := sqlite.OpenDatabase()
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer database.DB.Close()
 
 		usernameOrEmail := creds.Username
 		if usernameOrEmail == "" {
@@ -47,29 +38,27 @@ func Login(manager *websockets.Manager) http.HandlerFunc {
 		validationErrors := utils.ValidateLoginFormInput(usernameOrEmail, creds.Password)
 		if len(validationErrors) > 0 {
 			http.Error(w, "Invalid form input", http.StatusBadRequest)
+			logger.ErrorLogger.Printf("Validation errors: %v", validationErrors)
 			return
 		}
 
-		user, err := models.GetUserDetails(database.DB, creds)
+		user, err := models.GetUserDetails(creds)
 		if err != nil {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+			logger.ErrorLogger.Println("Invalid credentials")
 			return
 		}
 
 		if (user.Username == creds.Username || user.Email == creds.Email) && utils.ComparePasswords(user.Password, creds.Password) {
-
-			session, err := utils.SetSession(w, r, user.UserID)
+			_, err := utils.SetSession(w, r, user.UserID)
 			if err != nil {
-				fmt.Println("Error setting session:", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				logger.ErrorLogger.Printf("Error setting session: %v", err)
 				return
 			}
 
 			response := LoginResponse{
-				Message:  "Login successful",
-				Username: user.Username,
-				Email:    user.Email,
-				Session:  session.Value,
+				Message: "Login successful",
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -77,10 +66,12 @@ func Login(manager *websockets.Manager) http.HandlerFunc {
 			err = json.NewEncoder(w).Encode(response)
 			if err != nil {
 				http.Error(w, "Error encoding JSON response", http.StatusInternalServerError)
+				logger.ErrorLogger.Printf("Error encoding JSON: %v", err)
 				return
 			}
 		} else {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+			logger.ErrorLogger.Println("Invalid credentials")
 			return
 		}
 	}

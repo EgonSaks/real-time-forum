@@ -1,12 +1,12 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/real-time-forum/backend/logger"
 	"github.com/real-time-forum/database/models"
 	"github.com/real-time-forum/database/sqlite"
 )
@@ -16,18 +16,9 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 		ID: id,
 	}
 
-	database, err := sqlite.OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer database.DB.Close()
-
 	cookie, err := r.Cookie("session")
-	fmt.Println("Looking for an active session...")
-
 	if err != nil {
 
-		fmt.Println("Didn't find active session. Creating a new session")
 		cookie = &http.Cookie{
 			Name:     "session",
 			Value:    uuid.New().String(),
@@ -45,21 +36,19 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 			ExpiresAt: cookie.Expires,
 		}
 
-		_, err = models.CreateSession(database.DB, session)
+		_, err = models.CreateSession(session)
 		if err != nil {
-			log.Fatal(err)
+			logger.FatalLogger.Println("Error creating session:", err)
+			return nil, err
 		}
-
 	} else {
-
-		fmt.Println("Getting active session", cookie)
-
-		session, err := models.GetSessionByID(database.DB, cookie.Value)
+		session, err := models.GetSessionByID(cookie.Value)
 		if err != nil {
-			fmt.Println("No matching session found in the database, delete the cookie")
-			DeleteSession(w, r)
+			if _, err := DeleteSession(w, r); err != nil {
+				logger.ErrorLogger.Println("Error deleting session:", err)
+				return nil, err
+			}
 
-			// Create a new session cookie for the current user
 			cookie = &http.Cookie{
 				Name:     "session",
 				Value:    uuid.New().String(),
@@ -78,16 +67,16 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 				ExpiresAt: cookie.Expires,
 			}
 
-			_, err = models.CreateSession(database.DB, session)
+			_, err = models.CreateSession(session)
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("Created new session for user", user.ID)
 		} else if session.UserID != user.ID {
-			fmt.Println("Session belongs to a different user, delete the cookie")
-			DeleteSession(w, r)
+			if _, err := DeleteSession(w, r); err != nil {
+				logger.ErrorLogger.Println("Error deleting session:", err)
+				return nil, err
+			}
 
-			// Create a new session cookie for the current user
 			cookie = &http.Cookie{
 				Name:     "session",
 				Value:    uuid.New().String(),
@@ -105,12 +94,11 @@ func SetSession(w http.ResponseWriter, r *http.Request, id string) (*http.Cookie
 				ExpiresAt: cookie.Expires,
 			}
 
-			_, err = models.CreateSession(database.DB, session)
+			_, err = models.CreateSession(session)
 			if err != nil {
-				fmt.Println("Error with creating session:", err)
+				logger.FatalLogger.Println("Error creating session:", err)
 				log.Fatal(err)
 			}
-			fmt.Println("Created new session for user", user.ID)
 		}
 	}
 
@@ -123,11 +111,12 @@ func GetUserFromSession(r *http.Request) (models.User, bool) {
 		return models.User{}, false
 	}
 
-	database, err := sqlite.OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
+	database := sqlite.GetDatabaseInstance()
+	if database == nil || database.DB == nil {
+		logger.ErrorLogger.Printf("Database connection error")
+		log.Fatal("Database connection error")
+		return models.User{}, false
 	}
-	defer database.DB.Close()
 
 	var userID string
 	err = database.DB.QueryRow(`SELECT user_id FROM sessions WHERE id = ? AND expires_at > ?`, cookie.Value, time.Now()).Scan(&userID)
@@ -138,28 +127,22 @@ func GetUserFromSession(r *http.Request) (models.User, bool) {
 	var user models.User
 	err = database.DB.QueryRow(`SELECT id, username, first_name, last_name, email, age, password, gender, created_at, updated_at FROM users WHERE id = ?`, userID).Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.Email, &user.Age, &user.Password, &user.Gender, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
+		logger.WarnLogger.Println("User not found in database for the session.")
 		return models.User{}, false
 	}
-	// fmt.Println("Logged in", user.ID)
 	return user, true
 }
 
 func DeleteSession(w http.ResponseWriter, r *http.Request) (*http.Cookie, error) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		fmt.Println("No cookie found")
+		logger.WarnLogger.Println("No session cookie found.")
 		return nil, nil
-
 	}
 
-	database, err := sqlite.OpenDatabase()
+	err = models.DeleteSession(cookie.Value)
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer database.DB.Close()
-
-	err = models.DeleteSession(database.DB, cookie.Value)
-	if err != nil {
+		logger.ErrorLogger.Println("Failed to delete session:", err)
 		return nil, err
 	}
 

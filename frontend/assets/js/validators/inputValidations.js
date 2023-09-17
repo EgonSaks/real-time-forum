@@ -220,7 +220,6 @@ export async function validatePostInput(
 
     if (createdPostData) {
       const updatedPosts = await fetchPosts();
-      console.log(updatedPosts);
       updatePostsView(updatedPosts);
     } else {
       console.error("Failed to create the post.");

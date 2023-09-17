@@ -22,6 +22,14 @@ export function createCommentFormComponent(postID, author) {
     countCharacters(charCountSpan, commentContent, 250)
   );
 
+  commentContent.addEventListener("focus", () => {
+    charCountSpan.style.display = "inline";
+  });
+
+  commentContent.addEventListener("blur", () => {
+    charCountSpan.style.display = "none";
+  });
+
   const errorMsg = document.createElement("p");
   errorMsg.classList.add("error-msg");
   errorMsg.style.display = "none";

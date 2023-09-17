@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /backend/
+Disallow: /database/
+Disallow: /configs/
+Allow: /frontend/assets/
+Allow: /

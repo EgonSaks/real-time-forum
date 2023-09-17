@@ -4,7 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
+
+	"github.com/real-time-forum/backend/logger"
+	"github.com/real-time-forum/database/sqlite"
 )
 
 type Session struct {
@@ -14,73 +18,98 @@ type Session struct {
 	ExpiresAt time.Time `json:"expires_at"`
 }
 
-func CreateSession(db *sql.DB, session Session) (string, error) {
+func CreateSession(session Session) (string, error) {
+	database := sqlite.GetDatabaseInstance()
+	if database == nil || database.DB == nil {
+		logger.ErrorLogger.Printf("Database connection error")
+		log.Fatal("Database connection error")
+		return session.ID, fmt.Errorf("database connection error")
+	}
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	query := "INSERT INTO sessions (id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)"
-	statement, err := db.PrepareContext(context, query)
+	statement, err := database.DB.PrepareContext(context, query)
 	if err != nil {
+		logger.ErrorLogger.Printf("Failed to prepare session statement for User ID: %s. Error: %v", session.UserID, err)
 		return session.ID, fmt.Errorf("failed to prepare session statement: %v", err)
 	}
 
 	_, err = statement.ExecContext(context, session.ID, session.UserID, time.Now(), session.ExpiresAt)
 	if err != nil {
-		fmt.Printf("failed to create session: %v", err)
+		logger.ErrorLogger.Printf("Failed to create session for User ID: %s. Error: %v", session.UserID, err)
 		return session.ID, err
 	}
 
 	return session.ID, nil
 }
 
-func GetSessionByID(db *sql.DB, id string) (Session, error) {
+func GetSessionByID(id string) (Session, error) {
+	database := sqlite.GetDatabaseInstance()
+	if database == nil || database.DB == nil {
+		logger.ErrorLogger.Printf("Database connection error")
+		log.Fatal("Database connection error")
+		return Session{}, fmt.Errorf("database connection error")
+	}
 	var session Session
 	query := "SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?"
-	err := db.QueryRow(query, id).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
+	err := database.DB.QueryRow(query, id).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return Session{}, nil
 		}
-		fmt.Printf("failed to get session: %v", err)
+		logger.ErrorLogger.Printf("Failed to fetch session with ID: %s. Error: %v", id, err)
 		return Session{}, err
 	}
 	return session, nil
 }
 
-func UpdateSession(db *sql.DB, session Session) error {
+func UpdateSession(session Session) error {
+	database := sqlite.GetDatabaseInstance()
+	if database == nil || database.DB == nil {
+		logger.ErrorLogger.Printf("Database connection error")
+		log.Fatal("Database connection error")
+		return fmt.Errorf("database connection error")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	query := "UPDATE sessions SET user_id=?, expires_at=? WHERE id=?"
-	stmt, err := db.PrepareContext(ctx, query)
+	stmt, err := database.DB.PrepareContext(ctx, query)
 	if err != nil {
-		fmt.Printf("failed to prepare update session statement: %v", err)
+		logger.ErrorLogger.Printf("Failed to prepare update session statement for ID: %s. Error: %v", session.ID, err)
 		return err
 	}
 
 	_, err = stmt.ExecContext(ctx, &session.UserID, &session.ExpiresAt, &session.ID)
 	if err != nil {
-		fmt.Printf("failed to update session: %v", err)
+		logger.ErrorLogger.Printf("Failed to update session with ID: %s. Error: %v", session.ID, err)
 		return err
 	}
 
 	return nil
 }
 
-func DeleteSession(db *sql.DB, id string) error {
+func DeleteSession(id string) error {
+	database := sqlite.GetDatabaseInstance()
+	if database == nil || database.DB == nil {
+		logger.ErrorLogger.Printf("Database connection error")
+		log.Fatal("Database connection error")
+		return fmt.Errorf("database connection error")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	query := "DELETE FROM sessions WHERE id = ?"
-	stmt, err := db.PrepareContext(ctx, query)
+	stmt, err := database.DB.PrepareContext(ctx, query)
 	if err != nil {
-		fmt.Printf("failed to prepare delete session statement: %v", err)
+		logger.ErrorLogger.Printf("Failed to prepare delete session statement for ID: %s. Error: %v", id, err)
 		return err
 	}
 
 	_, err = stmt.ExecContext(ctx, id)
 	if err != nil {
-		fmt.Printf("failed to delete session: %v", err)
+		logger.ErrorLogger.Printf("Failed to delete session with ID: %s. Error: %v", id, err)
 		return err
 	}
 

@@ -5,7 +5,11 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"log"
 	"time"
+
+	"github.com/real-time-forum/backend/logger"
+	"github.com/real-time-forum/database/sqlite"
 )
 
 type NullTime struct {
@@ -32,7 +36,14 @@ type UserChatInfo struct {
 	CountUnreadMessages int            `json:"unread_messages"`
 }
 
-func GetChatInfo(db *sql.DB, currentUser string) ([]UserChatInfo, error) {
+func GetChatInfo(currentUser string) ([]UserChatInfo, error) {
+	database := sqlite.GetDatabaseInstance()
+	if database == nil || database.DB == nil {
+		logger.ErrorLogger.Printf("Database connection error")
+		log.Fatal("Database connection error")
+		return nil, fmt.Errorf("database connection error")
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -56,8 +67,9 @@ func GetChatInfo(db *sql.DB, currentUser string) ([]UserChatInfo, error) {
         u.username ASC;
     `
 
-	rows, err := db.QueryContext(ctx, query, currentUser, currentUser, currentUser, currentUser, currentUser)
+	rows, err := database.DB.QueryContext(ctx, query, currentUser, currentUser, currentUser, currentUser, currentUser)
 	if err != nil {
+		logger.ErrorLogger.Printf("Failed to execute query: %v", err)
 		return nil, fmt.Errorf("failed to execute query: %v", err)
 	}
 	defer rows.Close()
@@ -66,6 +78,7 @@ func GetChatInfo(db *sql.DB, currentUser string) ([]UserChatInfo, error) {
 		var info UserChatInfo
 		err := rows.Scan(&info.Sender, &info.LastMessageSent, &info.Receiver, &info.CountUnreadMessages)
 		if err != nil {
+			logger.ErrorLogger.Printf("Failed to scan row: %v", err)
 			return nil, fmt.Errorf("failed to scan row: %v", err)
 		}
 
@@ -73,6 +86,7 @@ func GetChatInfo(db *sql.DB, currentUser string) ([]UserChatInfo, error) {
 	}
 
 	if err := rows.Err(); err != nil {
+		logger.ErrorLogger.Printf("Error while iterating through rows: %v", err)
 		return nil, fmt.Errorf("error while iterating through rows: %v", err)
 	}
 

@@ -49,7 +49,6 @@ export async function PostView(_, messengerVisible) {
     const deleteButton = postContainer.querySelector(".delete-button");
     deleteButton.addEventListener("click", async () => {
       await deletePostFromDatabase(post.id);
-      console.log("post deleted");
 
       postContainer.remove();
 
@@ -71,5 +70,5 @@ export async function PostView(_, messengerVisible) {
     contentContainer.append(errorMessage);
   }
 
-  contentContainer.style.width = messengerVisible ? "60%" : "80%";
+  contentContainer.style.width = messengerVisible ? "53%" : "73%";
 }

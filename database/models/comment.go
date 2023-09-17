@@ -2,9 +2,12 @@ package models
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
+	"log"
 	"time"
+
+	"github.com/real-time-forum/backend/logger"
+	"github.com/real-time-forum/database/sqlite"
 )
 
 type Comment struct {
@@ -17,27 +20,40 @@ type Comment struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func CreateComment(db *sql.DB, comment Comment, user User) (string, error) {
+func CreateComment(comment Comment, user User) (string, error) {
+	database := sqlite.GetDatabaseInstance()
+	if database == nil || database.DB == nil {
+		logger.ErrorLogger.Printf("Database connection error")
+		log.Fatal("Database connection error")
+		return comment.ID, fmt.Errorf("database connection error")
+	}
+
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	query := "INSERT INTO comments (id, user_id, post_id, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
-	statement, err := db.PrepareContext(context, query)
+	statement, err := database.DB.PrepareContext(context, query)
 	if err != nil {
-		fmt.Printf("failed to prepare create comment statement: %v", err)
+		logger.ErrorLogger.Printf("Failed to prepare create comment statement: %v", err)
 		return comment.ID, fmt.Errorf("failed to prepare create comment statement: %v", err)
 	}
 
 	_, err = statement.ExecContext(context, comment.ID, user.ID, comment.PostID, comment.Content, time.Now().UTC(), time.Now().UTC())
 	if err != nil {
-		fmt.Printf("failed to create comment: %v", err)
+		logger.ErrorLogger.Printf("Failed to create comment: %v", err)
 		return comment.ID, fmt.Errorf("failed to create comment: %v", err)
 	}
 
 	return comment.ID, nil
 }
 
-func GetCommentsByPostID(db *sql.DB, postID string) ([]Comment, error) {
+func GetCommentsByPostID(postID string) ([]Comment, error) {
+	database := sqlite.GetDatabaseInstance()
+	if database == nil || database.DB == nil {
+		logger.ErrorLogger.Printf("Database connection error")
+		log.Fatal("Database connection error")
+		return nil, fmt.Errorf("database connection error")
+	}
 	context, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -46,9 +62,9 @@ func GetCommentsByPostID(db *sql.DB, postID string) ([]Comment, error) {
 		"JOIN users ON comments.user_id = users.id " +
 		"WHERE comments.post_id = ?"
 
-	rows, err := db.QueryContext(context, query, postID)
+	rows, err := database.DB.QueryContext(context, query, postID)
 	if err != nil {
-		fmt.Printf("failed to execute query: %v", err)
+		logger.ErrorLogger.Printf("Failed to execute query: %v", err)
 		return nil, fmt.Errorf("failed to execute query: %v", err)
 	}
 	defer rows.Close()
@@ -58,14 +74,14 @@ func GetCommentsByPostID(db *sql.DB, postID string) ([]Comment, error) {
 		var comment Comment
 		err := rows.Scan(&comment.ID, &comment.UserID, &comment.Author, &comment.PostID, &comment.Content, &comment.CreatedAt, &comment.UpdatedAt)
 		if err != nil {
-			fmt.Printf("failed to scan row: %v", err)
+			logger.ErrorLogger.Printf("Failed to scan row: %v", err)
 			return nil, fmt.Errorf("failed to scan row: %v", err)
 		}
 		comments = append(comments, comment)
 	}
 
 	if err := rows.Err(); err != nil {
-		fmt.Printf("failed to retrieve rows: %v", err)
+		logger.ErrorLogger.Printf("Failed to retrieve rows: %v", err)
 		return nil, fmt.Errorf("failed to retrieve rows: %v", err)
 	}
 

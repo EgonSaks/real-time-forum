@@ -1,19 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
+	"github.com/real-time-forum/backend/logger"
 	"github.com/real-time-forum/backend/routes"
+	"github.com/real-time-forum/backend/utils"
 	"github.com/real-time-forum/database/sqlite"
 )
 
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set the necessary CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		w.Header().Set("Access-Control-Allow-Origin", "https://localhost:8080")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -27,21 +28,57 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func init() {
+	logger.InitLogger()
+	logger.InfoLogger.Println("Logger initialized.")
+
+	env := utils.GetEnvironment()
+	logger.InfoLogger.Printf("Running in environment: %s", strings.ToUpper(env))
+	log.Println("Running in environment:", strings.ToUpper(env))
+
+	configFile := "configs/config/" + env + ".env"
+	file, err := utils.LoadConfigFile(configFile)
+	if err != nil {
+		logger.FatalLogger.Printf("Error opening config file: %v", err)
+		os.Exit(1)
+	}
+	defer file.Close()
+	logger.InfoLogger.Println("Config file loaded successfully.")
+
+	err = utils.SetEnvironmentVariables(file)
+	if err != nil {
+		logger.FatalLogger.Printf("Error setting environment variables: %v", err)
+		os.Exit(1)
+	}
+	logger.InfoLogger.Println("Environment variables set successfully.")
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8081"
 	}
-	database, err := sqlite.OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
+	logger.InfoLogger.Printf("Using port: %s", port)
+
+	database := sqlite.GetDatabaseInstance()
+	if database == nil || database.DB == nil {
+		logger.FatalLogger.Println("Database initialization failed.")
+		log.Fatal("Database initialization failed.")
+		return
 	}
 	defer database.DB.Close()
 
+	// configs.InsertDummyData()
+
 	mux := routes.Routes()
+	logger.InfoLogger.Println("Routes configured.")
+
 	handler := corsMiddleware(mux)
+	logger.InfoLogger.Println("CORS Middleware applied.")
 
 	addr := ":" + port
-	fmt.Println("Backend server running on http://localhost" + addr)
-	log.Fatal(http.ListenAndServe(addr, handler))
+	logger.InfoLogger.Printf("Backend server running on https://localhost%s", addr)
+	log.Println("Backend server running on https://localhost" + addr)
+
+	log.Fatal(http.ListenAndServeTLS(addr, "../tls/server.crt", "../tls/server.key", handler))
 }

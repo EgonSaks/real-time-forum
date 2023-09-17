@@ -18,7 +18,7 @@ export async function HomeView(_, messengerVisible) {
 
   contentContainer.append(formAndPostContainer);
 
-  contentContainer.style.width = messengerVisible ? "60%" : "80%";
+  contentContainer.style.width = messengerVisible ? "53%" : "73%";
 
   root.append(contentContainer);
 }

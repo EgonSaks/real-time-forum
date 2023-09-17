@@ -7,18 +7,22 @@ import {
   messagesCount,
   updateUserStatus,
 } from "../components/chat.js";
+import { isLoggedIn } from "../utils/auth.js";
 
 import { config } from "../config/config.js";
 
 let ws;
+export let currentUser;
 
-export function connectWebSocket() {
+export async function connectWebSocket() {
   if (window["WebSocket"]) {
     try {
-      const url = `ws://${window.location.hostname}:${config.wsPort}/ws`;
+      const url = `wss://${window.location.hostname}:${config.wsPort}/ws`;
       ws = new WebSocket(url);
 
-      ws.onopen = function (message) {};
+      ws.onopen = async function (message) {
+        currentUser = await isLoggedIn();
+      };
 
       ws.onmessage = function (message) {
         const data = JSON.parse(message.data);
@@ -71,6 +75,7 @@ async function routeEvent(msg) {
       break;
     case "status_update":
       const usersToUpdate = msg.payload;
+      if (!usersToUpdate) return;
       usersToUpdate.forEach((user) => {
         const { username, status, last_seen } = user;
         updateUserStatus(username, status, last_seen);

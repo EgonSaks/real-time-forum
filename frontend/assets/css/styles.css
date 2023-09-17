@@ -137,7 +137,7 @@ button:focus {
 
 #app{
   height: 80vh;
-  margin: 4rem 4rem 0rem 4rem;
+  /* margin: 4rem 4rem 0rem 4rem; */
 }
 
 /* CSS for the navbar container */
@@ -145,22 +145,22 @@ button:focus {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  border-radius: 0.3rem;
-  margin-bottom: 0.625rem;
+  margin-bottom: 2rem;  
+  padding-top: 3rem;
+  padding-bottom: 1rem;
+  background-color: coral;
 }
 
 .logged-in-label {
   margin-right: 1.5rem; 
   font-weight: bolder;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  color: rgb(255, 85, 85);
+  color: white;
 }
 
 .logout-button {
-  font-size: 0.8rem;
+  font-size: 0.6rem;
   border-radius: 0.3rem;
-  margin-right: 0.625rem;
+  margin-right: 2rem;
   background-color: white;
   cursor: pointer;
 }
@@ -229,6 +229,7 @@ button:focus {
   width: 80%;
   margin: 0 auto 1rem;
   overflow: auto;
+  cursor: pointer;
 }
 
 .post-title {
@@ -250,10 +251,6 @@ button:focus {
   font-size: 0.8rem;
   margin-right: 0.5rem;
   float: right;
-  cursor: pointer;
-}
-
-.post-title {
   cursor: pointer;
 }
 
@@ -561,6 +558,7 @@ a.register-link {
   width: 20%;
   height: 80vh;
   position: relative;
+  margin-right: 2rem;
 }
 
 .chats-container {
@@ -576,7 +574,6 @@ a.register-link {
   position: absolute;
   bottom : 0rem;
   right: 0rem;
-  overflow-y: auto;
 }
 
 /* Notifications */
@@ -592,12 +589,13 @@ a.register-link {
   height: 1.5rem;
   border-radius: 50%;
   line-height: 1.5rem; 
-  background-color: red;
+  background-color: rgb(255, 85, 85);
   color: white;
   padding: 0 0.2rem;
   font-weight: lighter;
-  font-size: small;
+  font-size: 1rem;
   text-align: center;
+  z-index: 1; 
 }
 
 .messenger {
@@ -746,15 +744,6 @@ a.register-link {
   color: #65676B;
 }
 
-.date-container {
-  font-size: 0.6rem;
-  color: #cfd0d1;
-  margin-top: 0.2rem;
-  margin-bottom: 0.3rem;
-  border-radius: 0.3rem;
-  text-align: center;
-}
-
 .time-container {
   font-size: 0.6rem;
   color: #cfd0d1;
@@ -767,7 +756,11 @@ a.register-link {
   font-size: 1rem;
   font-weight: bold;
   text-align: center;
-  margin: 0.3rem 0rem 0rem 0rem;
+  padding: 0.6rem 0rem 0.3rem 0rem;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1; 
 }
 
 /* Chat list */ 

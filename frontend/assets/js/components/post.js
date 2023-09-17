@@ -35,9 +35,18 @@ export function createPostFormComponent() {
   inputContent.classList.add("input-content");
   inputContent.setAttribute("rows", "5");
   inputContent.setAttribute("placeholder", "What is happening?!");
+
   inputContent.addEventListener("input", () =>
     countCharacters(charCountSpan, inputContent, 1000)
   );
+
+  inputContent.addEventListener("focus", () => {
+    charCountSpan.style.display = "inline";
+  });
+
+  inputContent.addEventListener("blur", () => {
+    charCountSpan.style.display = "none";
+  });
 
   const charCountSpan = document.createElement("span");
   charCountSpan.classList.add("character-count");
@@ -120,14 +129,14 @@ export function createPostComponent(post) {
   const postContainer = document.createElement("div");
   postContainer.classList.add("post-container");
   postContainer.setAttribute("id", post.id);
+  postContainer.addEventListener("click", () => {
+    navigateTo("/post/" + post.id);
+  });
 
   const postTitle = document.createElement("h2");
   postTitle.classList.add("post-title");
   postTitle.textContent = post.title;
-  postTitle.addEventListener("click", () => {
-    navigateTo("/post/" + post.id);
-  });
-
+  
   const author = document.createElement("p");
   author.classList.add("author");
   author.textContent = post.author;
@@ -236,9 +245,18 @@ export function editPost(postId) {
   inputContent.classList.add("input-content");
   inputContent.setAttribute("rows", "3");
   inputContent.textContent = content;
+
   inputContent.addEventListener("input", () =>
     countCharacters(charCountSpan, inputContent, 1000)
   );
+
+  inputContent.addEventListener("focus", () => {
+    charCountSpan.style.display = "inline";
+  });
+
+  inputContent.addEventListener("blur", () => {
+    charCountSpan.style.display = "none";
+  });
 
   const categoriesForm = createCategoriesForm(existingCategories);
 

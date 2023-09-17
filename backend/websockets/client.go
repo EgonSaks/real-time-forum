@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/real-time-forum/backend/logger"
 	"github.com/real-time-forum/database/sqlite"
 )
 
@@ -46,7 +47,7 @@ func (client *Client) readMessages() {
 
 	client.connection.SetReadLimit(maxMessageSize)
 	if err := client.connection.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
-		log.Println(err)
+		logger.ErrorLogger.Println(err)
 		return
 	}
 	client.connection.SetPongHandler(client.pongHandler)
@@ -55,26 +56,26 @@ func (client *Client) readMessages() {
 		_, message, err := client.connection.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error reading message: %v", err)
+				logger.ErrorLogger.Printf("error reading message: %v", err)
 			}
 			break
 		}
 
 		var request Event
 		if err := json.Unmarshal(message, &request); err != nil {
-			log.Printf("error marshalling message: %v", err)
+			logger.ErrorLogger.Printf("error marshalling message: %v", err)
 			break
 		}
 
-		database, err := sqlite.OpenDatabase()
-		if err != nil {
-			log.Println("Failed to open database:", err)
+		database := sqlite.GetDatabaseInstance()
+		if database == nil || database.DB == nil {
+			logger.ErrorLogger.Printf("Database connection error")
+			log.Fatal("Database connection error")
 			return
 		}
-		defer database.DB.Close()
 
-		if err := client.manager.routeEvent(request, client, database); err != nil {
-			log.Println("Error handling Message: ", err)
+		if err := client.manager.routeEvent(request, client); err != nil {
+			logger.ErrorLogger.Println("Error handling Message: ", err)
 		}
 	}
 }
@@ -91,21 +92,20 @@ func (client *Client) writeMessages() {
 		case message, ok := <-client.egress:
 			if !ok {
 				if err := client.connection.WriteMessage(websocket.CloseMessage, nil); err != nil {
-					log.Println("connection closed: ", err)
+					logger.ErrorLogger.Println("connection closed: ", err)
 				}
 				return
 			}
 
 			data, err := json.Marshal(message)
 			if err != nil {
-				log.Println(err)
+				logger.ErrorLogger.Println(err)
 				return
 			}
 			if err := client.connection.WriteMessage(websocket.TextMessage, data); err != nil {
-				log.Println(err)
+				logger.ErrorLogger.Println(err)
 			}
 		case <-ticker.C:
-
 			client.manager.RLock()
 			_, clientExists := client.manager.Clients[client]
 			client.manager.RUnlock()
@@ -114,6 +114,7 @@ func (client *Client) writeMessages() {
 				return
 			}
 			if err := client.connection.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+				logger.ErrorLogger.Println(err)
 				return
 			}
 		}
@@ -121,5 +122,9 @@ func (client *Client) writeMessages() {
 }
 
 func (client *Client) pongHandler(pongMsg string) error {
-	return client.connection.SetReadDeadline(time.Now().Add(pongWait))
+	err := client.connection.SetReadDeadline(time.Now().Add(pongWait))
+	if err != nil {
+		logger.ErrorLogger.Printf("Failed to set read deadline: %v", err)
+	}
+	return err
 }
