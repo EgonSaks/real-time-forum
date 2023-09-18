@@ -41,10 +41,8 @@ export async function PostView(_, messengerVisible) {
     const commentForm = createCommentFormComponent(post.id, author);
     const postContainer = createPostComponent(post);
 
-    const postTitle = postContainer.querySelector(".post-title");
-    const postTitleClone = postTitle.cloneNode(true);
-    postTitle.replaceWith(postTitleClone);
-    postTitleClone.style.cursor = "default";
+    postContainer.style.cursor = "default";
+    postContainer.isClickable = false;
 
     const deleteButton = postContainer.querySelector(".delete-button");
     deleteButton.addEventListener("click", async () => {

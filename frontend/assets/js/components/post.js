@@ -129,8 +129,12 @@ export function createPostComponent(post) {
   const postContainer = document.createElement("div");
   postContainer.classList.add("post-container");
   postContainer.setAttribute("id", post.id);
+  postContainer.isClickable = true;
+
   postContainer.addEventListener("click", () => {
-    navigateTo("/post/" + post.id);
+    if (postContainer.isClickable) {
+      navigateTo("/post/" + post.id);
+    }
   });
 
   const postTitle = document.createElement("h2");

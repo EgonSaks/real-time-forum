@@ -94,9 +94,31 @@ This project will help you learn about:
 - SQL language
   - Manipulation of databases
 
+## How to test
+
 > run frontend: cd frontend/ -> go run frontend.go
 > run backend: cd backend/ -> go run backend.go
+
+or
 
 > GO_ENV=prod go run backend.go
 > GO_ENV=test go run backend.go
 > GO_ENV=dev go run backend.go
+
+When frontend and backend servers are runnings go to: https://localhost:8080/login
+
+Use one of pre-made users:
+
+```
+U: Jeff
+P: Password123
+
+U: Steve
+P: Password123
+
+U: Elon
+P: Password123
+
+U: Bill
+P: Password123
+```
