@@ -1,7 +1,8 @@
-import { isLoggedIn } from "../utils/auth.js";
+// import { isLoggedIn } from "../utils/auth.js";
 import { countCharacters } from "../utils/characterCounter.js";
 import { convertTime } from "../utils/timeConverter.js";
 import { validateCommentInput } from "../validators/inputValidations.js";
+import { currentUser } from "../websocket/websocket.js";
 
 export function createCommentFormComponent(postID, author) {
   const commentContainer = document.createElement("div");
@@ -51,7 +52,6 @@ export function createCommentFormComponent(postID, author) {
 }
 
 export function createCommentComponent(comment) {
-  const currentUser = isLoggedIn();
   const commentComponent = document.createElement("div");
   commentComponent.classList.add("comment-component");
 

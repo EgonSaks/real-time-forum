@@ -4,6 +4,7 @@ import { createPostToDatabase, fetchPosts } from "../api/postAPI.js";
 import { registerUser } from "../api/registerAPI.js";
 import { createCommentComponent } from "../components/comment.js";
 import { updatePostsView } from "../components/post.js";
+import { currentUser } from "../websocket/websocket.js";
 
 export async function validateRegisterFormData(
   usernameInput,
@@ -299,7 +300,7 @@ export async function validateCommentInput(
 
     const comment = {
       post_id: postID,
-      author: author,
+      author: currentUser.username || author,
       content: commentContent,
       created_at: new Date().toISOString(),
     };
