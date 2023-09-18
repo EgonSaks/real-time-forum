@@ -96,14 +96,22 @@ This project will help you learn about:
 
 ## How to test
 
-> run frontend: cd frontend/ -> go run frontend.go
-> run backend: cd backend/ -> go run backend.go
+```
+1. Open a Terminal: Launch your terminal application.
+2. Navigate to Frontend Directory: Execute cd frontend/
+3. Run Frontend: Run the command go run frontend.go.
+4. Open a New Terminal: Launch another terminal window.
+5. Navigate to Backend Directory: Execute cd backend 
+6. Run Backend: Run the command go run backend.go.
 
-or
+or 
 
-> GO_ENV=prod go run backend.go
-> GO_ENV=test go run backend.go
-> GO_ENV=dev go run backend.go
+GO_ENV=prod go run backend.go
+GO_ENV=test go run backend.go
+GO_ENV=dev go run backend.go
+```
+
+
 
 When frontend and backend servers are runnings go to: https://localhost:8080/login
 
