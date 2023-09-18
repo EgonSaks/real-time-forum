@@ -10,6 +10,7 @@ import {
   validatePostInput,
   validateUpdatedData,
 } from "../validators/inputValidations.js";
+import { currentUser } from "../websocket/websocket.js";
 
 const categories = [
   { name: "Tech", color: "rgb(25, 195, 125)" },
@@ -140,7 +141,7 @@ export function createPostComponent(post) {
   const postTitle = document.createElement("h2");
   postTitle.classList.add("post-title");
   postTitle.textContent = post.title;
-  
+
   const author = document.createElement("p");
   author.classList.add("author");
   author.textContent = post.author;
@@ -171,32 +172,37 @@ export function createPostComponent(post) {
   createdAt.classList.add("created-at");
   createdAt.textContent = convertTime(post.created_at);
 
-  const editButton = document.createElement("button");
-  editButton.classList.add("edit-button");
-  editButton.textContent = "Edit";
-  editButton.addEventListener("click", () => {
-    const postId = post.id;
-    editPost(postId);
-  });
-
-  const deleteButton = document.createElement("button");
-  deleteButton.classList.add("delete-button");
-  deleteButton.textContent = "Delete";
-  deleteButton.addEventListener("click", () => {
-    const postId = post.id;
-    deletePostFromDatabase(postId);
-    postContainer.remove();
-  });
-
   postContainer.append(
     author,
     postTitle,
     postContent,
     categoriesContainer,
-    createdAt,
-    editButton,
-    deleteButton
+    createdAt
   );
+
+  const isCurrentUserAuthor = post.author === currentUser.username;
+
+  if (isCurrentUserAuthor) {
+    const editButton = document.createElement("button");
+    editButton.classList.add("edit-button");
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", () => {
+      const postId = post.id;
+      editPost(postId);
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.classList.add("delete-button");
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => {
+      const postId = post.id;
+      deletePostFromDatabase(postId);
+      postContainer.remove();
+    });
+
+    postContainer.append(editButton, deleteButton);
+  }
+
   return postContainer;
 }
 
