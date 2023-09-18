@@ -22,9 +22,7 @@ async function populateChatContainer() {
 }
 
 function populateNavbar(currentUser) {
-  if (!navbar) {
-    navbar = createNavbar(currentUser);
-  }
+  navbar = createNavbar(currentUser);
 }
 
 export async function createBaseView(params, matchedView) {
