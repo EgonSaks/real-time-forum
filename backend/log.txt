@@ -1,0 +1,13 @@
+INFO: 2023/09/19 09:06:09 backend.go:33: Logger initialized.
+INFO: 2023/09/19 09:06:09 env.go:16: Current environment: dev
+INFO: 2023/09/19 09:06:09 backend.go:36: Running in environment: DEV
+INFO: 2023/09/19 09:06:09 env.go:26: Config file configs/config/dev.env loaded successfully
+INFO: 2023/09/19 09:06:09 backend.go:46: Config file loaded successfully.
+INFO: 2023/09/19 09:06:09 env.go:39: Environment variable DB_PATH set to ../database/sqlite/database.db
+INFO: 2023/09/19 09:06:09 env.go:39: Environment variable SCHEMA_FILE_PATH set to ../database/sqlite/schema.sql
+INFO: 2023/09/19 09:06:09 env.go:46: Environment variables set successfully
+INFO: 2023/09/19 09:06:09 backend.go:53: Environment variables set successfully.
+INFO: 2023/09/19 09:06:09 backend.go:61: Using port: 8081
+INFO: 2023/09/19 09:06:09 backend.go:74: Routes configured.
+INFO: 2023/09/19 09:06:09 backend.go:77: CORS Middleware applied.
+INFO: 2023/09/19 09:06:09 backend.go:80: Backend server running on https://localhost:8081

@@ -1,15 +1,17 @@
+const BASE_URL = "https://localhost:8081";
+
 export const config = {
   wsPort: 8081,
   api: {
-    register: "https://localhost:8081/register",
-    login: "https://localhost:8081/login",
-    logout: "https://localhost:8081/logout",
-    users: "https://localhost:8081/api/users",
-    user: "https://localhost:8081/api/user/",
-    chats: "https://localhost:8081/api/chats",
-    post: "https://localhost:8081/api/post/",
-    posts: "https://localhost:8081/api/posts",
-    comment: "https://localhost:8081/api/comment",
-    session: "https://localhost:8081/api/session/",
+    register: `${BASE_URL}/register`,
+    login: `${BASE_URL}/login`,
+    logout: `${BASE_URL}/logout`,
+    users: `${BASE_URL}/api/users`,
+    user: `${BASE_URL}/api/user/`,
+    chats: `${BASE_URL}/api/chats`,
+    post: `${BASE_URL}/api/post/`,
+    posts: `${BASE_URL}/api/posts`,
+    comment: `${BASE_URL}/api/comment`,
+    session: `${BASE_URL}/api/session/`,
   },
 };
