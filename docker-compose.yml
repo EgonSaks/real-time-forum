@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  backend:
+    build:
+      context: . 
+      dockerfile: ./backend/Dockerfile 
+    ports:
+      - "8081:8081"
+    volumes:
+      - sqlite-data:/database/sqlite
+    environment: 
+      - GO_ENV=development
+
+  frontend:
+    build:
+      context: . 
+      dockerfile: ./frontend/Dockerfile 
+    ports:
+      - "8080:8080"
+    environment: 
+      - GO_ENV=development
+
+volumes:
+  sqlite-data: 
+
