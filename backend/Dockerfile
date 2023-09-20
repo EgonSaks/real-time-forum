@@ -12,8 +12,7 @@ COPY . .
 RUN apt-get update && apt-get install -y sqlite3 libsqlite3-dev && rm -rf /var/lib/apt/lists/*
 
 # Build the Go app
-RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o backend ./backend/backend.go
-# RUN chmod +x backend
+RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -ldflags "-w -s" -o backend ./backend/backend.go
 
 # Stage 2: Copy the binary and other resources to an empty image
 # Using alpine because it's lightweight and contains essential libraries
@@ -48,4 +47,4 @@ RUN chmod +x /backend/backend
 EXPOSE 8081
 
 # Run the application
-CMD ["/backend"]
+ENTRYPOINT ["/backend"]
