@@ -10,7 +10,7 @@ services:
     volumes:
       - sqlite-data:/database/sqlite
     environment: 
-      - GO_ENV=development
+      - GO_ENV=dev
 
   frontend:
     build:
@@ -19,7 +19,7 @@ services:
     ports:
       - "8080:8080"
     environment: 
-      - GO_ENV=development
+      - GO_ENV=dev
 
 volumes:
   sqlite-data: 

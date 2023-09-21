@@ -6,15 +6,14 @@ WORKDIR /app
 COPY ./tls/server.crt /tls/server.crt
 COPY ./tls/server.key /tls/server.key
 
+COPY ./frontend/ /app/frontend/
+
 COPY go.mod go.sum ./
 RUN go mod download
-COPY . ./
+
+COPY frontend/ ./
 
 RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o /app/frontend/server ./frontend/frontend.go
-
-COPY ./frontend/templates /app/frontend/templates
-COPY ./frontend/assets/css /app/frontend/assets/css
-COPY ./frontend/assets/js /app/frontend/assets/js
 
 EXPOSE 8080
 
