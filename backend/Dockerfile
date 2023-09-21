@@ -18,12 +18,8 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -ldflags "-w -s" -o 
 # Using alpine because it's lightweight and contains essential libraries
 FROM alpine
 
-# Add SSL certificates
-RUN apk --no-cache add ca-certificates
-
-# Install zsh and bash
-RUN apk add --no-cache zsh
-RUN apk add --no-cache bash
+# Add essential libraries and tools
+RUN apk --no-cache add ca-certificates zsh bash sqlite sqlite-libs
 
 # Copy SQLite database and schema
 COPY --from=builder /app/database/sqlite/database.db /database/sqlite/database.db
@@ -37,14 +33,15 @@ COPY ./tls/server.key /tls/server.key
 # Copy environment files
 COPY ./backend/configs/config /configs/config
 
-# Copy the compiled application from builder
-COPY --from=builder /app/backend /backend
-
-# Explicitly set permissions
-RUN chmod +x /backend/backend
+# Copy the compiled application from builder and set permissions
+COPY --from=builder /app/backend /app/backend
+RUN chmod +x /app/backend
 
 # Expose port 8081 for the backend
 EXPOSE 8081
 
+COPY ./backend/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Run the application
-ENTRYPOINT ["/backend"]
+ENTRYPOINT ["/entrypoint.sh"]
