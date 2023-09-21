@@ -12,14 +12,14 @@ services:
     environment: 
       - GO_ENV=development
 
-  # frontend:
-  #   build:
-  #     context: . 
-  #     dockerfile: ./frontend/Dockerfile 
-  #   ports:
-  #     - "8080:8080"
-  #   environment: 
-  #     - GO_ENV=development
+  frontend:
+    build:
+      context: . 
+      dockerfile: ./frontend/Dockerfile 
+    ports:
+      - "8080:8080"
+    environment: 
+      - GO_ENV=development
 
 volumes:
   sqlite-data: 

@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/real-time-forum/backend/logger"
@@ -15,6 +16,22 @@ func GetEnvironment() string {
 	}
 	logger.InfoLogger.Printf("Current environment: %s", env)
 	return env
+}
+
+func GetConfigPath() string {
+	basePath := os.Getenv("CONFIG_BASE_PATH")
+	if basePath == "" {
+		basePath = "configs/config"
+	}
+	absPath, err := filepath.Abs(basePath)
+	if err != nil {
+		return absPath
+	}
+
+	if _, err := os.Stat(absPath); !os.IsNotExist(err) {
+		return absPath
+	}
+	return absPath
 }
 
 func LoadConfigFile(filePath string) (*os.File, error) {

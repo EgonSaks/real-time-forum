@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/real-time-forum/backend/logger"
@@ -36,7 +37,8 @@ func init() {
 	logger.InfoLogger.Printf("Running in environment: %s", strings.ToUpper(env))
 	log.Println("Running in environment:", strings.ToUpper(env))
 
-	configFile := "configs/config/" + env + ".env"
+	path := utils.GetConfigPath()
+	configFile := filepath.Join(path, env+".env")
 	file, err := utils.LoadConfigFile(configFile)
 	if err != nil {
 		logger.FatalLogger.Printf("Error opening config file: %v", err)

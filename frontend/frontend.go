@@ -28,11 +28,17 @@ func main() {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles(filepath.Join("templates/index.html")))
-
-	err := tmpl.Execute(w, nil)
+	tmpl, err := template.ParseFiles(filepath.Join("templates", "index.html"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Template file not found", http.StatusInternalServerError)
+		log.Printf("Error parsing template: %v", err)
+		return
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("Error rendering template: %v", err)
 		return
 	}
 }
