@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -23,7 +22,8 @@ func main() {
 	http.Handle("/robots.txt", http.FileServer(http.Dir("./")))
 
 	addr := ":" + port
-	fmt.Println("Frontend server running at https://localhost:" + port)
+	log.Println("Frontend server running at https://localhost:" + port)
+
 	log.Fatal(http.ListenAndServeTLS(addr, "../tls/server.crt", "../tls/server.key", nil))
 }
 
