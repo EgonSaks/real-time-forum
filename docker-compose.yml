@@ -10,9 +10,9 @@ services:
     volumes:
       - sqlite-data:/database/sqlite
     environment: 
-      - GO_ENV=dev
-      - DOMAIN=localhost
-      - CORS_DOMAIN=https://localhost:8080
+      - GO_ENV
+      - DOMAIN
+      - CORS_DOMAIN
 
   frontend:
     build:
@@ -21,7 +21,7 @@ services:
     ports:
       - "8080:8080"
     environment: 
-      - GO_ENV=dev
+      - GO_ENV
 
 volumes:
   sqlite-data: 
