@@ -62,6 +62,11 @@ func main() {
 	}
 	logger.InfoLogger.Printf("Using port: %s", port)
 
+	domain := os.Getenv("DOMAIN")
+	if domain == "" {
+		domain = "localhost" 
+	}
+
 	database := sqlite.GetDatabaseInstance()
 	if database == nil || database.DB == nil {
 		logger.FatalLogger.Println("Database initialization failed.")
@@ -79,8 +84,9 @@ func main() {
 	logger.InfoLogger.Println("CORS Middleware applied.")
 
 	addr := ":" + port
-	logger.InfoLogger.Printf("Backend server running on https://localhost%s", addr)
-	log.Println("Backend server running on https://localhost" + addr)
+	backendAddress := "https://" + domain + addr
+	logger.InfoLogger.Printf("Backend server running on %s", backendAddress)
+	log.Println("Backend server running on " + backendAddress)
 
 	log.Fatal(http.ListenAndServeTLS(addr, "../tls/server.crt", "../tls/server.key", handler))
 }

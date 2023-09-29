@@ -11,6 +11,7 @@ services:
       - sqlite-data:/database/sqlite
     environment: 
       - GO_ENV=dev
+      - DOMAIN=localhost
 
   frontend:
     build:

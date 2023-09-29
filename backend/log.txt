@@ -1,0 +1,15 @@
+INFO: 2023/09/29 10:55:54 backend.go:34: Logger initialized.
+INFO: 2023/09/29 10:55:54 env.go:17: Current environment: dev
+INFO: 2023/09/29 10:55:54 backend.go:37: Running in environment: DEV
+INFO: 2023/09/29 10:55:54 env.go:43: Config file /Users/egonsaks/Documents/toGitHub/javascript-rt/forum/backend/configs/config/dev.env loaded successfully
+INFO: 2023/09/29 10:55:54 backend.go:48: Config file loaded successfully.
+INFO: 2023/09/29 10:55:54 env.go:56: Environment variable DB_PATH set to ../database/sqlite/database.db
+INFO: 2023/09/29 10:55:54 env.go:56: Environment variable SCHEMA_FILE_PATH set to ../database/sqlite/schema.sql
+INFO: 2023/09/29 10:55:54 env.go:56: Environment variable DOMAIN set to localhost
+INFO: 2023/09/29 10:55:54 env.go:63: Environment variables set successfully
+INFO: 2023/09/29 10:55:54 backend.go:55: Environment variables set successfully.
+INFO: 2023/09/29 10:55:54 backend.go:63: Using port: 8081
+INFO: 2023/09/29 10:55:54 backend.go:81: Routes configured.
+INFO: 2023/09/29 10:55:54 backend.go:84: CORS Middleware applied.
+INFO: 2023/09/29 10:55:54 backend.go:88: Backend server running on https://localhost:8081
+INFO: 2023/09/29 10:56:04 routes.go:39: Number of connected clients: 0
