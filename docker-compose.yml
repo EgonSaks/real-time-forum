@@ -12,6 +12,7 @@ services:
     environment: 
       - GO_ENV=dev
       - DOMAIN=localhost
+      - CORS_DOMAIN=https://localhost:8080
 
   frontend:
     build:

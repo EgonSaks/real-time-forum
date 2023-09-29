@@ -34,6 +34,30 @@ func GetConfigPath() string {
 	return absPath
 }
 
+func GetPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8081"
+	}
+	return port
+}
+
+func GetDomain() string {
+	domain := os.Getenv("DOMAIN")
+	if domain == "" {
+		domain = "localhost"
+	}
+	return domain
+}
+
+func GetCorsDomain() string {
+	domain := os.Getenv("CORS_DOMAIN")
+	if domain == "" {
+		domain = "https://localhost:8080"
+	}
+	return domain
+}
+
 func LoadConfigFile(filePath string) (*os.File, error) {
 	file, err := os.Open(filePath)
 	if err != nil {

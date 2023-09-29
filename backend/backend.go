@@ -15,7 +15,8 @@ import (
 
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "https://localhost:8080")
+		domain := utils.GetCorsDomain()
+		w.Header().Set("Access-Control-Allow-Origin", domain)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -56,16 +57,10 @@ func init() {
 }
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8081"
-	}
+	port := utils.GetPort()
 	logger.InfoLogger.Printf("Using port: %s", port)
 
-	domain := os.Getenv("DOMAIN")
-	if domain == "" {
-		domain = "localhost" 
-	}
+	domain := utils.GetDomain()
 
 	database := sqlite.GetDatabaseInstance()
 	if database == nil || database.DB == nil {
