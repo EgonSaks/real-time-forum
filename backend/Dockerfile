@@ -5,6 +5,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . ./
 RUN apk --no-cache add gcc g++ sqlite
+# Set the CGO_CFLAGS environment variable
+ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
 RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o /app/server ./backend/backend.go
 
 # Stage 2: Production stage using Alpine

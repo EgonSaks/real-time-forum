@@ -1,4 +1,4 @@
-version: "3"
+version: "3.9"
 
 services:
   backend:
@@ -13,6 +13,8 @@ services:
       - GO_ENV
       - DOMAIN
       - CORS_DOMAIN
+    networks:
+      - realtime_forum
 
   frontend:
     build:
@@ -22,7 +24,14 @@ services:
       - "8080:8080"
     environment: 
       - GO_ENV
+    networks:
+      - realtime_forum
 
 volumes:
   sqlite-data: 
+
+networks:
+  realtime_forum:
+    name: realtime_forum
+
 
